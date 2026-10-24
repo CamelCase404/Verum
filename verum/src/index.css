@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f4f2ee; 
+  --bg-2: #edeae4;
+  --surface: #fbfaf7; 
+  --surface-2: #f6f4f0; 
+  --surface-3: #eeece5;
+  --ink: #17171a; --ink-2: #56575d; --ink-3: #8e8f95; --ink-4: #b6b5b1;
+  --line: #e4e1db; --line-2: #d5d1c9;
+  --accent: #1e4d3a; --accent-2: #2a6a4f; --accent-3: #3d8a68;
+  --accent-soft: #e6efe9; --accent-line: #c3d8cb;
+}
+
+[data-theme="dark"] {
+  --bg: #0f0f12; --bg-2: #16161a;
+  --surface: #1a1a1f; --surface-2: #1f1f25; --surface-3: #24242b;
+  --ink: #f1efea; --ink-2: #b4b3ad; --ink-3: #7f7e79; --ink-4: #565650;
+  --line: #2a2a31; --line-2: #383840;
+  --accent: #3d8a68; --accent-2: #4fa47f; --accent-3: #62b891;
+  --accent-soft: #1a2f25; --accent-line: #2a5442;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bg-bg, .bg-surface, .bg-surface-2, .bg-surface-3, 
+.text-ink, .text-ink-2, .text-ink-3, .text-ink-4,
+.border-line, .border-line-2 {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+/* Убираем огромные отступы на мобилках */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+@media (min-width: 768px) { .wrap { padding: 0 32px; } }
+
+/* Скрываем скроллбар у карусели, оставляя скролл */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
