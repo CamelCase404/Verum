@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
-import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2 } from "lucide-react";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -42,6 +42,33 @@ export function PublicProfile() {
     } catch (e) { console.error("Ошибка создания чата", e); }
   };
 
+  // Расчет зарплаты
+  const calculateSalary = () => {
+    if (!skills || skills.final_grade === "Reject") return 0;
+    const score = skills.total_score_100 || 0;
+    const grade = skills.final_grade;
+    const baseSalaries: Record<string, number> = { "Junior": 60000, "Middle": 150000, "Senior": 250000 };
+    const baseSalary = baseSalaries[grade] || 0;
+    const scoreModifier = 0.8 + (score / 100) * 0.5;
+    const testSalary = baseSalary * scoreModifier;
+    const stars = githubData?.total_stars || 0;
+    const githubBonus = Math.min(stars * 1000, 30000);
+    return Math.round(testSalary + githubBonus);
+  };
+  const estimatedSalary = calculateSalary();
+
+  const SkillBar = ({ label, score }: { label: string, score: number }) => (
+    <div>
+      <div className="flex justify-between text-[13px] mb-1.5">
+        <span className="text-ink-2">{label}</span>
+        <span className="font-bold text-ink">{score}/100</span>
+      </div>
+      <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
+        <div className="h-full bg-accent rounded-full" style={{ width: `${score}%` }} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="max-w-[1000px] mx-auto px-4 py-10">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-ink-2 hover:text-accent mb-6 transition-colors">
@@ -70,6 +97,50 @@ export function PublicProfile() {
             </a>
           )}
 
+          {isTested && (
+            <div className="space-y-3 mb-6">
+              <div className="bg-surface-2 border border-line rounded-xl p-3 flex justify-between items-center shadow-sm">
+                 <div>
+                   <div className="text-[11px] uppercase tracking-wider text-accent font-semibold mb-0.5">Уровень</div>
+                   <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
+                 </div>
+                 <ShieldCheck size={28} className="text-accent/40" />
+              </div>
+              {estimatedSalary > 0 && (
+                <div className="bg-surface-2 border border-line rounded-xl p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                    <Banknote size={12} /> Ожидаемый доход
+                  </div>
+                  <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
+                </div>
+              )}
+
+              {skills.stack_id && (
+                <div className="bg-surface-2 border border-line rounded-xl p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                    <Layers size={12} /> Стек
+                  </div>
+                  <div className="text-sm font-bold text-ink capitalize">{skills.stack_id}</div>
+                </div>
+              )}
+              {skills.language_id && (
+                <div className="bg-surface-2 border border-line rounded-xl p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-2 flex items-center gap-1">
+                    <Code2 size={12} /> Языки
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.language_id.split(',').map((lang: string) => (
+                      <span key={lang} className="px-2 py-1 bg-surface border border-line rounded-md text-[11px] font-medium text-ink-2 uppercase">
+                        {lang.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
           <button onClick={handleStartChat} className="w-full mt-2 py-2.5 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
             <MessageSquare size={16} /> Написать сообщение
           </button>
@@ -81,25 +152,24 @@ export function PublicProfile() {
           {/* НАВЫКИ И АНАЛИЗ ИИ */}
           {user.role === "developer" && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
-            <h2 className="font-semibold flex items-center gap-2 mb-4">
-              <ShieldCheck size={18} className="text-accent" /> Навыки и ИИ-Анализ
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-semibold flex items-center gap-2">
+                <ShieldCheck size={18} className="text-accent" /> Навыки и ИИ-Анализ
+              </h2>
+            </div>
             
             {isTested ? (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-sm"><span className="text-ink-3">Архитектура:</span> <b>{skills.competency_architecture}/100</b></div>
-                  <div className="text-sm"><span className="text-ink-3">Код-ревью:</span> <b>{skills.competency_code_understanding}/100</b></div>
-                  <div className="text-sm"><span className="text-ink-3">Работа с ИИ:</span> <b>{skills.competency_prompting}/100</b></div>
-                  <div className="text-sm"><span className="text-ink-3">Адаптация:</span> <b>{skills.competency_adaptability}/100</b></div>
-                </div>
-                <div className="mt-2 pt-4 border-t border-line flex justify-between items-center">
-                  <span className="text-sm text-ink-3">Итоговый уровень:</span>
-                  <span className="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm font-semibold">{skills.final_grade}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                  <SkillBar label="Архитектурное мышление" score={skills.competency_architecture || 0} />
+                  <SkillBar label="Ревью кода ИИ" score={skills.competency_code_understanding || 0} />
+                  <SkillBar label="Работа с ИИ" score={skills.competency_prompting || 0} />
+                  <SkillBar label="Адаптация" score={skills.competency_adaptability || 0} />
+                  <SkillBar label="Soft Skills" score={skills.competency_soft_skills || 0} />
                 </div>
 
                 {skills.summary && (
-                  <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4">
+                  <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4 mt-6">
                     <div>
                       <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2"><Brain size={16}/> Вердикт ИИ</h4>
                       <p className="text-[14px] leading-relaxed text-ink-2">{skills.summary}</p>
@@ -217,24 +287,6 @@ export function PublicProfile() {
                       <h3 className="font-medium text-sm mb-1">{proj.title}</h3>
                       <p className="text-xs text-ink-3 line-clamp-2">{proj.description}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Вакансии (если компания) */}
-          {user.role === "company" && user.job_postings && user.job_postings.length > 0 && (
-            <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
-              <h2 className="font-semibold flex items-center gap-2 mb-4"><Briefcase size={18} className="text-accent" /> Открытые вакансии</h2>
-              <div className="space-y-3">
-                {user.job_postings.map((job: any) => (
-                  <div key={job.id} className="p-4 border border-line rounded-xl bg-surface-2">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-sm">{job.title}</h3>
-                      <span className="text-xs font-semibold text-accent">{job.salary}</span>
-                    </div>
-                    <p className="text-xs text-ink-3 mb-2">{job.description}</p>
                   </div>
                 ))}
               </div>

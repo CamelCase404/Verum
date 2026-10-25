@@ -41,6 +41,7 @@ class UserDB(Base):
     avatar_url = Column(String, nullable=True)
     projects = Column(JSON, nullable=True)
     job_postings = Column(JSON, nullable=True)
+    last_test_at = Column(DateTime, nullable=True)
 
 
 

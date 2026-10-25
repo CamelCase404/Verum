@@ -1,12 +1,10 @@
 from __future__ import annotations
-
+from datetime import datetime
 from enum import Enum
 from typing import Literal, Optional
-
 from pydantic import BaseModel, Field
 
 Level = Literal["Junior", "Middle", "Senior"]
-
 
 class CatalogOption(BaseModel):
     id: str
@@ -14,27 +12,22 @@ class CatalogOption(BaseModel):
     icon: str
     description: str
 
-
 class StackOption(CatalogOption):
     languages: list[CatalogOption]
-
 
 class CatalogResponse(BaseModel):
     levels: list[CatalogOption]
     stacks: list[StackOption]
-
 
 class StartInterviewRequest(BaseModel):
     level: Level
     stack_id: str
     language_ids: list[str]
 
-
 class Turn(BaseModel):
     role: Literal["assistant", "user"]
     content: str
     seconds_spent: int = 0
-
 
 class StartInterviewResponse(BaseModel):
     interview_id: str
@@ -43,12 +36,10 @@ class StartInterviewResponse(BaseModel):
     question: str
     code_snippet: Optional[str] = None
 
-
 class AnswerRequest(BaseModel):
     interview_id: str
     answer: str
     seconds_spent: int = 0
-
 
 class AnswerResponse(BaseModel):
     stage: int
@@ -59,14 +50,12 @@ class AnswerResponse(BaseModel):
     rejected: bool = False
     reject_reason: Optional[str] = None
 
-
 class StageScore(BaseModel):
     stage: int
     stage_name: str
     score: int = Field(ge=0, le=100)
     evidence: list[str]
     gaps: list[str]
-
 
 class ReportResponse(BaseModel):
     interview_id: str
@@ -91,11 +80,9 @@ class ReportResponse(BaseModel):
     rejected: bool = False
     reject_reason: Optional[str] = None
 
-
 class UserRole(str, Enum):
     DEVELOPER = "developer"
     COMPANY = "company"
-
 
 class UserRegister(BaseModel):
     email: str
@@ -103,23 +90,20 @@ class UserRegister(BaseModel):
     role: UserRole
     full_name: str
 
-
 class UserLogin(BaseModel):
     email: str
     password: str
 
-
 class Token(BaseModel):
     access_token: str
     token_type: str
-
 
 class UserProfile(BaseModel):
     id: int
     email: str
     role: UserRole
     full_name: str
-    skills: dict | None = None  # ← было list[dict], а skills_data — это dict
+    skills: dict | None = None
     company_name: str | None = None
     website: str | None = None
     github_username: str | None = None
@@ -128,7 +112,7 @@ class UserProfile(BaseModel):
     avatar_url: str | None = None
     projects: list[dict] | None = None
     job_postings: list[dict] | None = None
-
+    last_test_at: datetime | None = None
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ScoreRow } from "@/components/ui/ScoreRow";
-import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote, Brain, CheckCircle2, XCircle } from "lucide-react";
+import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote, Brain, CheckCircle2, RefreshCw, Layers, Code2 } from "lucide-react";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { AddProjectModal } from "@/components/modals/AddProjectModal";
 import { InterviewModal } from "@/components/modals/InterviewModal";
 import { authApi } from "@/api";
+import { toast } from "@/components/layout/ToastContainer";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -20,6 +21,34 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   const isTested = !!skills && skills.final_grade && skills.final_grade !== "Reject";
   const githubData = backendUser?.github_stats;
   const projects = backendUser?.projects || [];
+
+  // Логика таймера переквалификации (6 месяцев)
+  const lastTestDate = backendUser?.last_test_at ? new Date(backendUser.last_test_at) : null;
+  const sixMonthsMs = 180 * 24 * 60 * 60 * 1000;
+  const canRetake = !lastTestDate || (new Date().getTime() - lastTestDate.getTime() > sixMonthsMs);
+  
+  const nextRetakeDate = lastTestDate ? new Date(lastTestDate.getTime() + sixMonthsMs).toLocaleDateString('ru-RU') : null;
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ⚠️ ВАЖНО ДЛЯ БУДУЩЕГО РАЗРАБОТЧИКА / ИИ ⚠️
+  // 
+  // СЕЙЧАС СТОИТ ВРЕМЕННЫЙ РЕЖИМ ТЕСТИРОВАНИЯ: 
+  // Кнопка показывает предупреждение (toast), но НЕ БЛОКИРУЕТ запуск теста.
+  // 
+  // ЧТОБЫ ВКЛЮЧИТЬ СТРОГУЮ БЛОКИРОВКУ (перепрохождение строго раз в 6 месяцев):
+  // 1. Найди функцию handleRetakeClick ниже.
+  // 2. Раскомментируй строку `return;` внутри условия if (!canRetake).
+  // 3. Готово! Теперь тест не запустится, если таймер не истек.
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const handleRetakeClick = () => {
+    if (!canRetake) {
+      toast(`⏳ Перепройти тест можно будет с ${nextRetakeDate}. (Сейчас режим тестирования: блокировка не работает)`);
+      
+      // 👇 ЧТОБЫ ВКЛЮЧИТЬ БЛОКИРОВКУ, РАСКОММЕНТИРУЙ СТРОКУ НИЖЕ:
+      // return;
+    }
+    setIsInterviewOpen(true); // <-- Эта строка пускает тест (закомментируй её, если включил return выше)
+  };
 
   const getLangColor = (langName: string) => {
     if (!githubData?.languages) return "bg-accent/60";
@@ -92,18 +121,57 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                 <p className="text-[12px] md:text-sm text-ink-3">{backendUser?.github_username ? `@${backendUser.github_username}` : "@username"}</p>
               </div>
             </div>
+            
             <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed mb-4 md:mb-6">
               {backendUser?.bio || "Добавьте описание своего опыта в настройках профиля."}
             </p>
-            <div className="space-y-2 md:space-y-3">
-              {estimatedSalary > 0 && (
-                <div className="bg-accent/5 border border-accent/20 rounded-xl p-3 mb-3">
-                  <div className="text-[11px] uppercase tracking-wider text-accent font-semibold mb-1 flex items-center gap-1">
-                    <Banknote size={12} /> Рыночная стоимость
+
+            {/* ГРЕЙД И ОЖИДАЕМЫЙ ДОХОД */}
+            {isTested && (
+              <div className="space-y-3 mb-6">
+                <div className="bg-surface-2 border border-line rounded-xl p-3 flex justify-between items-center">
+                   <div>
+                     <div className="text-[11px] uppercase tracking-wider text-accent font-semibold mb-0.5">Ваш уровень</div>
+                     <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
+                   </div>
+                   <ShieldCheck size={28} className="text-accent/40" />
+                </div>
+                {estimatedSalary > 0 && (
+                  <div className="bg-surface-2 border border-line rounded-xl p-3">
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                      <Banknote size={12} /> Ожидаемый доход
+                    </div>
+                    <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
                   </div>
-                  <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
+                )}
+
+              {skills.stack_id && (
+                <div className="bg-surface-2 border border-line rounded-xl p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                    <Layers size={12} /> Стек
+                  </div>
+                  <div className="text-sm font-bold text-ink capitalize">{skills.stack_id}</div>
                 </div>
               )}
+              {skills.language_id && (
+                <div className="bg-surface-2 border border-line rounded-xl p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-2 flex items-center gap-1">
+                    <Code2 size={12} /> Языки
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.language_id.split(',').map((lang: string) => (
+                      <span key={lang} className="px-2 py-1 bg-surface border border-line rounded-md text-[11px] font-medium text-ink-2 uppercase">
+                        {lang.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              </div>
+            )}
+
+            <div className="space-y-2 md:space-y-3">
               <div className="flex justify-between text-[12px] md:text-sm items-center">
                 <span className="text-ink-3">GitHub</span>
                 {backendUser?.github_username ? (
@@ -113,6 +181,23 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                 )}
               </div>
             </div>
+
+            {/* КНОПКА ПЕРЕПРОЙТИ */}
+            {isTested && (
+              <div className="mt-6 pt-4 border-t border-line">
+                <button 
+                  onClick={handleRetakeClick} 
+                  className="w-full py-2.5 bg-surface-2 border border-line-2 hover:border-accent hover:text-accent rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <RefreshCw size={16} /> Перепройти собеседование
+                </button>
+                {!canRetake && (
+                  <p className="text-[11px] text-ink-3 text-center mt-2">
+                    По правилам платформы следующая попытка доступна с {nextRetakeDate}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

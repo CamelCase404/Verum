@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, Sparkles, ChevronDown, Check } from "lucide-react";
 import { authApi } from "@/api";
@@ -16,7 +16,6 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
   const [loading, setLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
-  // Состояния для кастомных дропдаунов
   const [openStack, setOpenStack] = useState(false);
   const [openLevel, setOpenLevel] = useState(false);
 
@@ -28,12 +27,31 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
       if (res.data.title) setTitle(res.data.title);
       if (res.data.stack) setStack(res.data.stack);
       if (res.data.level) setLevel(res.data.level);
-      if (res.data.suggested_salary) setSalary(`${res.data.suggested_salary} ₽`);
+      if (res.data.suggested_salary) {
+        // Если ИИ вернул число, форматируем его
+        const num = parseInt(res.data.suggested_salary.replace(/\D/g, ''));
+        if (!isNaN(num)) {
+           setSalary(num.toLocaleString('ru-RU'));
+        } else {
+           setSalary(res.data.suggested_salary);
+        }
+      }
       toast("✨ ИИ успешно разобрал вакансию!");
     } catch (e: any) {
       toast(e.message || "Ошибка ИИ");
     } finally {
       setIsAiLoading(false);
+    }
+  };
+
+  // Автоформатирование ввода зарплаты
+  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let rawValue = e.target.value.replace(/\D/g, ""); // Убираем всё кроме цифр
+    if (rawValue) {
+      const formatted = parseInt(rawValue).toLocaleString('ru-RU');
+      setSalary(formatted);
+    } else {
+      setSalary("");
     }
   };
 
@@ -61,7 +79,6 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
         <h2 className="text-xl font-bold mb-4">Создать вакансию</h2>
         
         <div className="space-y-4 mb-6">
-          {/* Описание с кнопкой ИИ */}
           <div className="relative">
             <label className="text-sm font-medium mb-1 flex justify-between items-end">
               <span>Описание вакансии</span>
@@ -77,7 +94,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
             <textarea 
               value={description} 
               onChange={(e) => setDescription(e.target.value)} 
-              rows={5} 
+              rows={4} 
               className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors placeholder:text-ink-4" 
               placeholder="Скопируйте сюда текст вакансии, и ИИ сам заполнит поля ниже..." 
             />
@@ -89,17 +106,16 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {/* КАСТОМНЫЙ СЕЛЕКТ: СТЕК */}
             <div className="relative">
               <label className="text-sm font-medium mb-1 block">Стек</label>
               <button onClick={() => { setOpenStack(!openStack); setOpenLevel(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
-                {stack} <ChevronDown size={16} className={`transition-transform ${openStack ? "rotate-180" : ""}`} />
+                {stack} <ChevronDown size={16} className={`transition-transform duration-200 ${openStack ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
                 {openStack && (
-                  <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-xl shadow-xl z-20 py-1 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, y: -5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
                     {STACKS.map(s => (
-                      <button key={s} onClick={() => { setStack(s); setOpenStack(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-surface-2 flex items-center justify-between transition-colors">
+                      <button key={s} onClick={() => { setStack(s); setOpenStack(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                         {s} {stack === s && <Check size={14} className="text-accent" />}
                       </button>
                     ))}
@@ -108,17 +124,16 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
               </AnimatePresence>
             </div>
 
-            {/* КАСТОМНЫЙ СЕЛЕКТ: УРОВЕНЬ */}
             <div className="relative">
               <label className="text-sm font-medium mb-1 block">Уровень</label>
               <button onClick={() => { setOpenLevel(!openLevel); setOpenStack(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
-                {level} <ChevronDown size={16} className={`transition-transform ${openLevel ? "rotate-180" : ""}`} />
+                {level} <ChevronDown size={16} className={`transition-transform duration-200 ${openLevel ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
                 {openLevel && (
-                  <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-xl shadow-xl z-20 py-1 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, y: -5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
                     {LEVELS.map(l => (
-                      <button key={l} onClick={() => { setLevel(l); setOpenLevel(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-surface-2 flex items-center justify-between transition-colors">
+                      <button key={l} onClick={() => { setLevel(l); setOpenLevel(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                         {l} {level === l && <Check size={14} className="text-accent" />}
                       </button>
                     ))}
@@ -130,7 +145,15 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
 
           <div>
             <label className="text-sm font-medium mb-1 block">Зарплата (опционально)</label>
-            <input value={salary} onChange={(e) => setSalary(e.target.value)} className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors" placeholder="от 150 000 ₽" />
+            <div className="relative">
+              <input 
+                value={salary} 
+                onChange={handleSalaryChange} 
+                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors pr-10" 
+                placeholder="Например: 150 000" 
+              />
+              {salary && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-3 font-medium">₽</span>}
+            </div>
           </div>
         </div>
 
