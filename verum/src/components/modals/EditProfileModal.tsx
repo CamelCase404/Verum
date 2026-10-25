@@ -1,115 +1,87 @@
 import { useState, useRef } from "react";
-import { Modal } from "@/components/ui/Modal";
-import { useAppStore } from "@/store/useAppStore";
-import { Button } from "@/components/ui/Button";
-import { UploadCloud, X, Camera } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Loader2, UploadCloud } from "lucide-react";
+import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
-const COLORS = [
-  { id: "accent", bg: "bg-[#1e4d3a]" },
-  { id: "blue", bg: "bg-[#2563eb]" },
-  { id: "violet", bg: "bg-[#7c3aed]" },
-  { id: "amber", bg: "bg-[#d97706]" },
-  { id: "rose", bg: "bg-[#e11d48]" },
-];
-
-export function EditProfileModal({ onClose }: { onClose: () => void }) {
-  const { user, profile, updateProfile } = useAppStore();
-  const [bio, setBio] = useState(profile.bio);
-  const [color, setColor] = useState(profile.avatarColor || "accent");
-  const [image, setImage] = useState(profile.avatarImage || "");
+export function EditProfileModal({ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
+  const [bio, setBio] = useState(backendUser?.bio || "");
+  const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = () => {
-    updateProfile({ bio, avatarColor: color, avatarImage: image });
-    onClose();
-  };
-
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast("Выберите изображение");
-      return;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setAvatarPreview(URL.createObjectURL(file)); // Показываем предпросмотр
     }
-    const reader = new FileReader();
-    reader.onload = (e) => setImage(e.target?.result as string);
-    reader.readAsDataURL(file);
   };
 
-  const initials = user?.name?.substring(0, 2).toUpperCase() || "МК";
-  const currentColor = COLORS.find(c => c.id === color)?.bg || COLORS[0].bg;
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      let finalAvatarUrl = avatarPreview;
+
+      // 1. Если выбран новый файл — загружаем его
+      if (selectedFile) {
+        const uploadRes = await authApi.uploadAvatar(selectedFile);
+        finalAvatarUrl = uploadRes.url;
+      }
+
+      // 2. Сохраняем остальные данные (био)
+      await authApi.updateProfile({ bio });
+      
+      toast("Профиль обновлен");
+      onRefresh();
+      onClose();
+    } catch (e: any) {
+      toast(e.message || "Ошибка сохранения");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Modal onClose={onClose}>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Редактировать профиль</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-md shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
+        <h2 className="text-xl font-bold mb-4">Редактировать профиль</h2>
         
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2 text-ink-2">Аватар</label>
-          <div className="flex items-center gap-6">
-            
-            {/* Аватар с кликом для загрузки */}
-            <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="relative w-20 h-20 rounded-full overflow-hidden shadow-md border-2 border-surface shrink-0 group cursor-pointer"
-            >
-              {image ? (
-                <img src={image} alt="Avatar" className="w-full h-full object-cover" />
+        <div className="space-y-4 mb-6">
+          {/* Загрузка аватара */}
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-surface-2 border border-line overflow-hidden flex-shrink-0">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className={`w-full h-full flex items-center justify-center text-white font-semibold text-2xl ${currentColor}`}>
-                  {initials}
-                </div>
+                <div className="w-full h-full flex items-center justify-center text-ink-4"><UploadCloud size={24} /></div>
               )}
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera size={24} className="text-white" />
-              </div>
             </div>
-            
-            <input 
-              type="file" 
-              accept="image/*" 
-              ref={fileInputRef} 
-              className="hidden" 
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} 
-            />
-
             <div>
-              <div className="text-sm font-medium mb-3">Или выберите цвет фона</div>
-              <div className="flex gap-2.5">
-                {COLORS.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => { setColor(c.id); setImage(""); }}
-                    className={`w-9 h-9 rounded-full ${c.bg} ${color === c.id && !image ? "ring-2 ring-offset-2 ring-ink scale-110" : "opacity-70 hover:opacity-100 hover:scale-105"} transition-all duration-200 shadow-sm`}
-                  />
-                ))}
-              </div>
-              {image && (
-                <button 
-                  onClick={() => setImage("")} 
-                  className="text-[13px] text-red-500 hover:underline mt-3 flex items-center gap-1"
-                >
-                  <X size={14} /> Сбросить фото
-                </button>
-              )}
+              <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-surface-2 border border-line rounded-lg text-sm font-medium hover:bg-surface-3 transition-colors">
+                Выбрать фото
+              </button>
+              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+              <p className="text-[11px] text-ink-3 mt-2">JPG, PNG или GIF</p>
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">О себе</label>
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-ink-4" placeholder="Расскажите о своем опыте..." />
           </div>
         </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2 text-ink-2">О себе</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Расскажите о своем опыте, стеке и достижениях..."
-            className="w-full border border-line-2 rounded-xl p-3.5 text-[15px] bg-surface outline-none focus:border-accent transition-all min-h-[120px] resize-y"
-          />
+        <div className="flex gap-3 justify-end">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg font-medium hover:bg-surface-2 transition-colors">Отмена</button>
+          <button onClick={handleSave} disabled={loading} className="px-4 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent-2 transition-colors flex items-center gap-2">
+            {loading && <Loader2 size={16} className="animate-spin" />} Сохранить
+          </button>
         </div>
-
-        <div className="flex justify-end gap-3 pt-4 border-t border-line">
-          <Button variant="ghost" onClick={onClose}>Отмена</Button>
-          <Button variant="accent" onClick={handleSave}>Сохранить</Button>
-        </div>
-      </div>
-    </Modal>
+      </motion.div>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { authApi } from "../api";
+import { authApi, setToken } from "@/api";
 import { User, Building2, ArrowLeft, ShieldCheck, Loader2, Mail, Lock, Github } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -26,6 +26,7 @@ export default function RegisterPage() {
     const [fullName, setFullName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [githubLoading, setGithubLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,12 +35,12 @@ export default function RegisterPage() {
         setLoading(true);
         try {
             const res = await authApi.register({ email, password, role, full_name: fullName });
-            localStorage.setItem("token", res.data.access_token);
+            setToken(res.data.access_token);
             const me = await authApi.getMe();
             setUser({ name: fullName || me.data.name, email: email, role: role });
             navigate("/dashboard");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Ошибка регистрации");
+            setError(err.message || "Ошибка регистрации");
         } finally {
             setLoading(false);
         }
@@ -118,18 +119,28 @@ export default function RegisterPage() {
                         </div>
                     </motion.form>
 
-                    <div className="mt-6 md:mt-8">
-                        <div className="flex items-center gap-3 mb-4 md:mb-5">
-                            <div className="flex-1 h-px bg-line" />
-                            <span className="text-[11px] text-ink-3 uppercase tracking-widest">или</span>
-                            <div className="flex-1 h-px bg-line" />
+                    {role !== "company" && (
+                        <div className="mt-6 md:mt-8">
+                            <div className="flex items-center gap-3 mb-4 md:mb-5">
+                                <div className="flex-1 h-px bg-line" />
+                                <span className="text-[11px] text-ink-3 uppercase tracking-widest">или</span>
+                                <div className="flex-1 h-px bg-line" />
+                            </div>
+                            <div className="flex justify-center">
+                                <button 
+                                    onClick={() => {
+                                        setGithubLoading(true);
+                                        window.location.href = `http://localhost:8000/api/auth/github?role=${role}`;
+                                    }}
+                                    disabled={githubLoading}
+                                    className="w-12 h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm disabled:opacity-50" 
+                                    title="Зарегистрироваться через GitHub"
+                                >
+                                    {githubLoading ? <Loader2 size={22} className="animate-spin text-accent" /> : <Github size={22} />}
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex justify-center">
-                            <a href="http://localhost:8000/api/auth/github" className="w-12 h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm" title="Зарегистрироваться через GitHub">
-                                <Github size={22} />
-                            </a>
-                        </div>
-                    </div>
+                    )}
                 </motion.div>
             </motion.div>
         </div>

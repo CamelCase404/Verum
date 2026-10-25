@@ -1,19 +1,21 @@
+/** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        page: '#eef1f5',
-        card: '#ffffff',
-        ink: '#111827',
-        muted: '#6b7280',
-        accent: '#155239',
-        accentSoft: '#e8f1ec',
-        divider: '#e5e7eb',
+        bg: "var(--bg)",
+        card: "var(--card)",
+        ink: "var(--ink)",
+        muted: "var(--muted)",
+        divider: "var(--divider)",
+        accent: "var(--accent)",
+        accentSoft: "var(--accent-soft)",
+        page: "var(--page)",
       },
-      borderRadius: { xl2: '18px' },
-      boxShadow: { card: '0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.04)' },
-      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      borderRadius: {
+        xl2: "22px", // ВОЗВРАЩАЕМ ВАШИ ЗАКРУГЛЕНИЯ
+      }
     },
   },
   plugins: [],

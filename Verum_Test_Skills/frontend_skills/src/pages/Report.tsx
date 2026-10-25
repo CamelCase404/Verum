@@ -10,6 +10,7 @@ import {
     Terminal,
     Layers,
 } from "lucide-react";
+import { useEffect } from "react";
 import type { Recommendation, ReportResponse } from "../types";
 
 const REC_LABEL: Record<Recommendation, string> = {
@@ -70,6 +71,47 @@ export default function Report({
     report: ReportResponse;
     onRestart: () => void;
 }) {
+    useEffect(() => {
+        const token = localStorage.getItem("verum_token");
+        if (!token) {
+            console.warn("Нет токена авторизации. Результаты не будут сохранены.");
+            return;
+        }
+
+        const payload = {
+            final_grade: report.final_grade || "Reject",
+            total_score_100: report.total_score_100 || 0,
+            stack_id: report.stack_id,
+            language_id: report.language_id,
+            summary: report.summary,
+            strengths: report.strengths,
+            gaps: report.gaps,
+            recommendation: report.recommendation,
+            competency_architecture: report.competency_architecture,
+            competency_code_understanding: report.competency_code_understanding,
+            competency_prompting: report.competency_prompting,
+            competency_adaptability: report.competency_adaptability,
+            competency_soft_skills: report.competency_soft_skills,
+        };
+
+        fetch("http://localhost:8000/api/auth/skills", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        })
+        .then((res) => {
+            if (res.ok) {
+                console.log("✅ Результаты успешно сохранены в профиль!");
+            } else {
+                console.error("❌ Ошибка сервера при сохранении:", res.status);
+            }
+        })
+        .catch((err) => console.error("❌ Ошибка сети при сохранении:", err));
+    }, [report]);
+
     const restartSameSettings = () => {
         const stack = report.stack_id;
         const langs = report.language_id.split(", ");
@@ -83,7 +125,7 @@ export default function Report({
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-10 animate-in fade-in duration-500">
-            <div className="bg-card rounded-xl2 shadow-card p-8 space-y-8">
+            <div className="bg-card rounded-[22px] shadow-card p-8 space-y-8">
                 {/* Заголовок */}
                 <header className="text-center border-b border-divider pb-6">
                     <h1 className="text-[28px] font-bold text-ink">
@@ -97,7 +139,7 @@ export default function Report({
 
                 {/* Итоговый уровень (Junior/Middle/Senior/Reject) */}
                 {!report.rejected && report.final_grade && (
-                    <div className="flex flex-col items-center justify-center py-8 bg-page rounded-xl2 border border-divider">
+                    <div className="flex flex-col items-center justify-center py-8 bg-page rounded-[22px] border border-divider">
                         <span className="text-[14px] text-muted uppercase tracking-widest mb-2">
                             Ваш итоговый уровень
                         </span>
@@ -143,7 +185,7 @@ export default function Report({
 
                 {/* Блок, если кандидат провалил интервью */}
                 {report.rejected && (
-                    <div className="rounded-xl2 border border-red-200 bg-red-50 px-6 py-5 flex items-start gap-4">
+                    <div className="rounded-[22px] border border-red-200 bg-red-50 px-6 py-5 flex items-start gap-4">
                         <XCircle className="text-red-600 mt-0.5" size={24} />
                         <div>
                             <div className="font-bold text-red-900 text-[16px]">
@@ -159,7 +201,7 @@ export default function Report({
                 {/* Статистика и Резюме (показываем, если не выгнали) */}
                 {!report.rejected && (
                     <>
-                        <section className="bg-white p-6 rounded-xl2 border border-divider shadow-sm">
+                        <section className="bg-white p-6 rounded-[22px] border border-divider shadow-sm">
                             <h2 className="text-[18px] font-bold mb-6 flex items-center gap-2">
                                 <BarChart3 size={20} className="text-accent" />{" "}
                                 Статистика навыков
@@ -197,13 +239,13 @@ export default function Report({
                             <h2 className="text-[16px] font-bold mb-3 text-ink">
                                 Резюме интервью
                             </h2>
-                            <p className="text-[15px] leading-relaxed whitespace-pre-line text-ink/80 bg-page p-5 rounded-xl2 border border-divider">
+                            <p className="text-[15px] leading-relaxed whitespace-pre-line text-ink/80 bg-page p-5 rounded-[22px] border border-divider">
                                 {report.summary}
                             </p>
                         </section>
 
                         <div className="grid md:grid-cols-2 gap-6 pt-2">
-                            <div className="bg-accentSoft/50 rounded-xl2 p-5 border border-accent/10">
+                            <div className="bg-accentSoft/50 rounded-[22px] p-5 border border-accent/10">
                                 <h2 className="text-[15px] font-bold text-accent mb-3 flex items-center gap-2">
                                     <CheckCircle2 size={18} /> Плюсы
                                 </h2>
@@ -217,7 +259,7 @@ export default function Report({
                                     )}
                                 </ul>
                             </div>
-                            <div className="bg-red-50 rounded-xl2 p-5 border border-red-100">
+                            <div className="bg-red-50 rounded-[22px] p-5 border border-red-100">
                                 <h2 className="text-[15px] font-bold text-red-700 mb-3 flex items-center gap-2">
                                     <AlertTriangle size={18} /> Минусы
                                 </h2>
@@ -239,13 +281,13 @@ export default function Report({
                 <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6 border-t border-divider">
                     <button
                         onClick={restartSameSettings}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl2 bg-accent text-white px-6 py-3 font-medium hover:brightness-110 transition-all duration-200"
+                        className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-6 py-3 font-medium hover:brightness-110 transition-all duration-200"
                     >
                         <RotateCcw size={18} /> Пройти заново
                     </button>
                     <button
                         onClick={onRestart}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl2 border border-divider px-6 py-3 font-medium hover:bg-gray-50 transition-all duration-200"
+                        className="inline-flex items-center justify-center gap-2 rounded-[22px] border border-divider px-6 py-3 font-medium hover:bg-gray-50 transition-all duration-200"
                     >
                         На главную
                     </button>

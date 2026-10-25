@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Routes, Route, useLocation, Outlet } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { Drawer } from "@/components/layout/Sidebar";
@@ -10,7 +10,8 @@ import { CommandPalette } from "@/components/layout/CommandPalette";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { ToastContainer } from "@/components/layout/ToastContainer";
 import { useAppStore } from "@/store/useAppStore";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+// Pages
 import { Landing } from "@/pages/Landing";
 import { About } from "@/pages/About";
 import { How } from "@/pages/How";
@@ -35,10 +36,14 @@ import RegisterPage from "@/pages/Register";
 import LoginPage from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
 import { Dashboard } from "@/pages/Dashboard";
+import { Messages } from "@/pages/Messages";
+import { PublicProfile } from "@/pages/PublicProfile";
 
 function Layout() {
   const location = useLocation();
-  useScrollReveal(location.pathname);
+  
+  // Скрываем футер на странице чатов, чтобы освободить место
+  const isMessagesPage = location.pathname === "/messages";
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -47,25 +52,32 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Nav />
-      <AnimatePresence mode="wait">
-        <motion.main
-          key={location.pathname}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
-          transition={{ duration: 0.3, ease: [0.16, 0.84, 0.44, 1] }}
-          className="flex-1"
-        >
-          <Outlet />
-        </motion.main>
-      </AnimatePresence>
-      <Footer />
+      
+      {/* Плавная анимация появления без скачков по Y */}
+      <motion.main
+        key={location.pathname}
+        initial={{ opacity: 0, y: 15, scale: 0.99 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ 
+          type: "spring",
+          stiffness: 260,
+          damping: 25,
+          mass: 0.8
+        }}
+        className="flex-1 flex flex-col relative"
+      >
+        <Outlet />
+      </motion.main>
+
+      {/* Показываем футер везде, кроме чатов */}
+      {!isMessagesPage && <Footer />}
     </div>
   );
 }
 
 export default function App() {
   const theme = useAppStore((s) => s.theme);
+  
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
@@ -74,12 +86,10 @@ export default function App() {
     <>
       <canvas id="confetti-canvas" className="fixed inset-0 pointer-events-none z-[9999] w-full h-full" />
       <Routes>
-        {/* Auth Routes (без шапки и подвала) */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Main App Routes (с шапкой и подвалом) */}
         <Route element={<Layout />}>
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<About />} />
@@ -102,9 +112,11 @@ export default function App() {
           <Route path="/changelog" element={<Changelog />} />
           <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/profile/:id" element={<PublicProfile />} />
         </Route>
       </Routes>
-      
+
       <Drawer />
       <NotificationPanel />
       <ChatPanel />

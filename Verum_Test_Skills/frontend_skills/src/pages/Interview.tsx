@@ -23,8 +23,8 @@ interface Props {
     onAbort: () => void;
 }
 
-const TOTAL_STAGES = 3;
-const QUESTIONS_PER_STAGE = 5;
+const TOTAL_STAGES = 5;
+const TOTAL_QUESTIONS = 14;
 const MAX_SECONDS_PER_ANSWER = 180;
 
 export default function Interview({
@@ -258,14 +258,23 @@ export default function Interview({
                     newMsg.text =
                         res.question + "\n\n__CODE__" + res.code_snippet;
 
-                // ОЧИСТКА ТОЛЬКО ПРИ ПЕРЕХОДЕ С 1-ГО НА 2-Й ЭТАП
-                if (res.stage === 1 && prevStage === 0) {
-                    const stageNotice: Msg = {
-                        role: "ai",
-                        text: `Переход на этап 2. Code Review`,
-                    };
-                    setMsgs([stageNotice, newMsg]);
-                    setAnsweredCount(0);
+                // Уведомления при смене этапов
+                if (res.stage !== prevStage) {
+                    let stageTitle = "";
+                    if (res.stage === 1) stageTitle = "Этап 2: Code Review";
+                    if (res.stage === 2) stageTitle = "Этап 3: Нагрузка";
+                    if (res.stage === 3) stageTitle = "Этап 4: Code Review (Повторный)";
+                    if (res.stage === 4) stageTitle = "Этап 5: Нагрузка (Повторный)";
+                    
+                    if (stageTitle) {
+                        const stageNotice: Msg = {
+                            role: "ai",
+                            text: `Переход на ${stageTitle}`,
+                        };
+                        setMsgs([stageNotice, newMsg]);
+                    } else {
+                        setMsgs((m) => [...m, newMsg]);
+                    }
                 } else {
                     setMsgs((m) => [...m, newMsg]);
                 }
@@ -290,15 +299,7 @@ export default function Interview({
         if ((e.ctrlKey || e.metaKey) && e.key === "v") e.preventDefault();
     };
 
-    const totalQuestions = TOTAL_STAGES * QUESTIONS_PER_STAGE;
-    const globalProgress = Math.min(
-        100,
-        Math.round(
-            ((currentStage * QUESTIONS_PER_STAGE + answeredCount) /
-                totalQuestions) *
-                100,
-        ),
-    );
+    const globalProgress = Math.min(100, Math.round((answeredCount / TOTAL_QUESTIONS) * 100));
 
     const totalM = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
     const totalS = String(totalSeconds % 60).padStart(2, "0");
@@ -332,7 +333,7 @@ export default function Interview({
         <div className="max-w-6xl mx-auto px-4 py-10 select-none relative">
             {showSkipModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-card rounded-xl2 shadow-xl p-6 max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+                    <div className="bg-card rounded-[22px] shadow-xl p-6 max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
                         <AlertTriangle
                             className="text-amber-500 mx-auto mb-3"
                             size={32}
@@ -350,13 +351,13 @@ export default function Interview({
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowSkipModal(false)}
-                                className="flex-1 rounded-xl2 border border-divider py-2 text-[14px] font-medium hover:bg-gray-50"
+                                className="flex-1 rounded-[22px] border border-divider py-2 text-[14px] font-medium hover:bg-gray-50"
                             >
                                 Отмена
                             </button>
                             <button
                                 onClick={() => send(true)}
-                                className="flex-1 rounded-xl2 bg-red-600 text-white py-2 text-[14px] font-medium hover:bg-red-700"
+                                className="flex-1 rounded-[22px] bg-red-600 text-white py-2 text-[14px] font-medium hover:bg-red-700"
                             >
                                 Да, пропустить
                             </button>
@@ -367,7 +368,7 @@ export default function Interview({
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
-                    <div className="bg-card rounded-xl2 shadow-card p-4 sticky top-10">
+                    <div className="bg-card rounded-[22px] shadow-card p-4 sticky top-10">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-[14px] font-bold flex items-center gap-2">
                                 <Camera size={16} /> Камера
@@ -390,7 +391,7 @@ export default function Interview({
                 </div>
 
                 <div className="lg:col-span-2">
-                    <div className="bg-card rounded-xl2 shadow-card p-6 flex flex-col h-[80vh]">
+                    <div className="bg-card rounded-[22px] shadow-card p-6 flex flex-col h-[80vh]">
                         <div className="flex items-center justify-between gap-3 shrink-0">
                             <div>
                                 <h1 className="text-[20px] font-bold">
@@ -501,12 +502,12 @@ export default function Interview({
                                         onPaste={(e) => e.preventDefault()}
                                         placeholder="Ваш ответ… (Enter — отправить, Shift+Enter — перенос)"
                                         rows={2}
-                                        className="flex-1 rounded-xl2 border border-divider px-3 py-2 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none"
+                                        className="flex-1 rounded-[22px] border border-divider px-3 py-2 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none"
                                     />
                                     <button
                                         onClick={() => send(false)}
                                         disabled={busy || !answer.trim()}
-                                        className="rounded-xl2 bg-accent text-white px-4 h-full font-medium disabled:opacity-40 flex items-center justify-center min-w-[60px]"
+                                        className="rounded-[22px] bg-accent text-white px-4 h-full font-medium disabled:opacity-40 flex items-center justify-center min-w-[60px]"
                                     >
                                         {busy ? (
                                             <RotateCcw

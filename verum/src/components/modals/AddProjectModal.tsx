@@ -1,119 +1,121 @@
 import { useState, useRef } from "react";
-import { Modal } from "@/components/ui/Modal";
-import { useAppStore } from "@/store/useAppStore";
-import { Button } from "@/components/ui/Button";
-import { UploadCloud, Image as ImageIcon, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Loader2, UploadCloud, Trash2 } from "lucide-react";
+import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
-export function AddProjectModal({ onClose }: { onClose: () => void }) {
-  const { addProject } = useAppStore();
+export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast("Пожалуйста, выберите изображение");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => setImage(e.target?.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...files]);
+      const newPreviews = files.map((f) => URL.createObjectURL(f));
+      setPreviews((prev) => [...prev, ...newPreviews]);
     }
   };
 
-  const handleSave = () => {
-    if (!title.trim() || !description.trim()) {
-      toast("Заполните название и описание");
-      return;
+  const removeImage = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    if (!title.trim()) return toast("Введите название проекта");
+    
+    setLoading(true);
+    try {
+      // 1. Загружаем все выбранные картинки
+      const uploadedUrls: string[] = [];
+      for (const file of selectedFiles) {
+        const uploadRes = await authApi.uploadImage(file);
+        uploadedUrls.push(uploadRes.url);
+      }
+
+      // 2. Формируем объект проекта
+      const newProject = { 
+        id: Date.now().toString(), 
+        title, 
+        description, 
+        cover: uploadedUrls[0] || "", // Первая картинка идет как обложка
+        images: uploadedUrls // Все картинки в массив
+      };
+      
+      const currentProjects = backendUser?.projects || [];
+      
+      await authApi.updateProfile({ projects: [...currentProjects, newProject] });
+      toast("Проект добавлен");
+      onRefresh();
+      onClose();
+    } catch (e: any) {
+      toast(e.message || "Ошибка сохранения");
+    } finally {
+      setLoading(false);
     }
-    addProject({
-      id: Date.now().toString(),
-      title,
-      description,
-      image: image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
-    });
-    toast("Проект добавлен");
-    onClose();
   };
 
   return (
-    <Modal onClose={onClose}>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Добавить проект</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
+        <h2 className="text-xl font-bold mb-4">Добавить проект</h2>
         
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-ink-2">Название</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Например: Atlas UI"
-              className="w-full border border-line-2 rounded-xl px-4 py-3 bg-surface outline-none focus:border-accent transition-all"
-            />
+            <label className="text-sm font-medium mb-1 block">Название</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="Мой проект" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-ink-2">Описание</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Что это за проект и какие задачи решает?"
-              className="w-full border border-line-2 rounded-xl px-4 py-3 bg-surface outline-none focus:border-accent transition-all min-h-[80px] resize-y"
-            />
+            <label className="text-sm font-medium mb-1 block">Описание</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="О чем этот проект?" />
           </div>
           
+          {/* Загрузка картинок проекта */}
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-ink-2">Обложка проекта</label>
-            {image ? (
-              <div className="relative rounded-xl overflow-hidden border border-line aspect-video">
-                <img src={image} alt="Preview" className="w-full h-full object-cover" />
-                <button
-                  onClick={() => setImage("")}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 backdrop-blur-sm transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ) : (
-              <div
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                  isDragging ? "border-accent bg-accent/5" : "border-line-2 hover:border-accent/50 hover:bg-surface-2"
-                }`}
+            <label className="text-sm font-medium mb-1 block">Галерея проекта</label>
+            
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {previews.map((src, i) => (
+                <div key={i} className="relative aspect-video rounded-lg overflow-hidden border border-line group">
+                  <img src={src} className="w-full h-full object-cover" />
+                  <button 
+                    onClick={() => removeImage(i)} 
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                  {i === 0 && <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">Обложка</span>}
+                </div>
+              ))}
+              
+              <button 
+                onClick={() => fileInputRef.current?.click()} 
+                className="aspect-video rounded-lg border border-dashed border-line-2 flex flex-col items-center justify-center text-ink-4 hover:bg-surface-2 transition-colors"
               >
-                <UploadCloud size={32} className="mx-auto text-ink-4 mb-3" />
-                <div className="text-[14px] font-medium text-ink mb-1">Нажмите или перетащите файл</div>
-                <div className="text-[12px] text-ink-3">PNG, JPG до 5MB</div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-                />
-              </div>
-            )}
+                <UploadCloud size={20} />
+                <span className="text-[10px] mt-1">Добавить</span>
+              </button>
+            </div>
+            
+            <input type="file" accept="image/*" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+            <p className="text-[11px] text-ink-3">Первая картинка станет обложкой проекта.</p>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-line">
-          <Button variant="ghost" onClick={onClose}>Отмена</Button>
-          <Button variant="accent" onClick={handleSave}>Добавить</Button>
+        <div className="flex gap-3 justify-end pt-4 border-t border-line">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg font-medium hover:bg-surface-2 transition-colors">Отмена</button>
+          <button onClick={handleSave} disabled={loading} className="px-4 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent-2 transition-colors flex items-center gap-2">
+            {loading && <Loader2 size={16} className="animate-spin" />} Сохранить
+          </button>
         </div>
-      </div>
-    </Modal>
+      </motion.div>
+    </div>
   );
 }

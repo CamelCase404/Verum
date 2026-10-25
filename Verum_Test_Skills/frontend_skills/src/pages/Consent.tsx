@@ -13,7 +13,7 @@ export default function Consent({ payload, onConfirm, onCancel }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
-      <div className="bg-card rounded-xl2 shadow-card p-8">
+      <div className="bg-card rounded-[22px] shadow-card p-8">
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accentSoft text-accent">
             <ShieldCheck size={20} />
@@ -51,13 +51,13 @@ export default function Consent({ payload, onConfirm, onCancel }: Props) {
           <button
             disabled={!checked}
             onClick={onConfirm}
-            className="flex-1 rounded-xl2 bg-accent text-white font-semibold py-3 disabled:opacity-40"
+            className="flex-1 rounded-[22px] bg-accent text-white font-semibold py-3 disabled:opacity-40"
           >
             Подтвердить и начать
           </button>
           <button
             onClick={onCancel}
-            className="inline-flex items-center gap-2 rounded-xl2 border border-divider px-4 py-3 text-[14px]"
+            className="inline-flex items-center gap-2 rounded-[22px] border border-divider px-4 py-3 text-[14px]"
           >
             <X size={16} /> Отмена
           </button>

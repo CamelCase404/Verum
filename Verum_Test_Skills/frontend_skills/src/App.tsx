@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Landing from "./pages/Landing";
 import Consent from "./pages/Consent";
 import Interview from "./pages/Interview";
@@ -29,6 +30,14 @@ type View =
     | { kind: "interview"; payload: StartPayload; seedMessages: Msg[] }
     | { kind: "processing"; interviewId: string; level: LevelId }
     | { kind: "report"; report: ReportResponse };
+
+// Общие настройки анимации для страниц
+const pageVariants = {
+    initial: { opacity: 0, y: 15 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -15 },
+    transition: { duration: 0.3, ease: "easeOut" }
+};
 
 export default function App() {
     const { session, save, clear } = useSession();
@@ -75,40 +84,56 @@ export default function App() {
     };
 
     return (
-        <main className="min-h-screen bg-page">
-            {view.kind === "landing" && (
-                <Landing
-                    activeSession={session}
-                    onStarted={handleStarted}
-                    onAbandon={clear}
-                />
-            )}
-            {view.kind === "consent" && (
-                <Consent
-                    payload={view.payload}
-                    onConfirm={handleConsented}
-                    onCancel={handleRestart}
-                />
-            )}
-            {view.kind === "interview" && (
-                <Interview
-                    payload={view.payload}
-                    seedMessages={view.seedMessages}
-                    onFinished={handleFinished}
-                    onAbort={handleRestart}
-                />
-            )}
-            {view.kind === "processing" && (
-                <Processing
-                    interviewId={view.interviewId}
-                    level={view.level}
-                    onReady={handleReportReady}
-                    onAbort={handleRestart}
-                />
-            )}
-            {view.kind === "report" && (
-                <Report report={view.report} onRestart={handleRestart} />
-            )}
+        <main className="min-h-screen bg-page flex flex-col relative overflow-hidden">
+            <AnimatePresence mode="wait">
+                {view.kind === "landing" && (
+                    <motion.div key="landing" {...pageVariants} className="flex-1 flex flex-col">
+                        <Landing
+                            activeSession={session}
+                            onStarted={handleStarted}
+                            onAbandon={clear}
+                        />
+                    </motion.div>
+                )}
+                
+                {view.kind === "consent" && (
+                    <motion.div key="consent" {...pageVariants} className="flex-1 flex flex-col">
+                        <Consent
+                            payload={view.payload}
+                            onConfirm={handleConsented}
+                            onCancel={handleRestart}
+                        />
+                    </motion.div>
+                )}
+                
+                {view.kind === "interview" && (
+                    <motion.div key="interview" {...pageVariants} className="flex-1 flex flex-col">
+                        <Interview
+                            payload={view.payload}
+                            seedMessages={view.seedMessages}
+                            onFinished={handleFinished}
+                            onAbort={handleRestart}
+                        />
+                    </motion.div>
+                )}
+                
+                {view.kind === "processing" && (
+                    <motion.div key="processing" {...pageVariants} className="flex-1 flex flex-col">
+                        <Processing
+                            interviewId={view.interviewId}
+                            level={view.level}
+                            onReady={handleReportReady}
+                            onAbort={handleRestart}
+                        />
+                    </motion.div>
+                )}
+                
+                {view.kind === "report" && (
+                    <motion.div key="report" {...pageVariants} className="flex-1 flex flex-col">
+                        <Report report={view.report} onRestart={handleRestart} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </main>
     );
 }

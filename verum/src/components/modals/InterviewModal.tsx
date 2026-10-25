@@ -10,17 +10,14 @@ export function InterviewModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<"start" | "loading">("start");
 
   const startTest = () => {
-    setStep("loading");
-    // Имитация прохождения собеседования (в будущем здесь будет запрос к API)
-    setTimeout(() => {
-      updateProfile({
-        tested: true,
-        scores: { arch: 85, code: 92, ai: 88, adapt: 80 }
-      });
-      toast("Собеседование успешно пройдено!");
-      onClose();
-    }, 2500);
-  };
+        const token = localStorage.getItem("verum_token");
+        if (!token) {
+            alert("Сначала войдите в аккаунт через GitHub или Email!");
+            return;
+        }
+        // Перекидываем на порт 5174 (Verum_Test_Skills) и передаем токен
+        window.location.href = `http://localhost:5174/?token=${token}`;
+    };
 
   return (
     <Modal onClose={onClose}>

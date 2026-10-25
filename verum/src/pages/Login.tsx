@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { authApi } from "../api";
+import { authApi, setToken } from "@/api";
 import { ArrowLeft, ShieldCheck, Loader2, Mail, Lock, Github } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -17,6 +17,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [githubLoading, setGithubLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,12 +26,12 @@ export default function LoginPage() {
         setLoading(true);
         try {
             const res = await authApi.login(email, password);
-            localStorage.setItem("token", res.data.access_token);
+            setToken(res.data.access_token);
             const me = await authApi.getMe();
             setUser(me.data);
             navigate("/dashboard");
         } catch (err: any) {
-            setError(err.response?.data?.detail || "Ошибка входа");
+            setError(err.message || "Ошибка входа");
         } finally {
             setLoading(false);
         }
@@ -96,9 +97,17 @@ export default function LoginPage() {
                             <div className="flex-1 h-px bg-line" />
                         </div>
                         <div className="flex justify-center">
-                            <a href="http://localhost:8000/api/auth/github" className="w-12 h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm" title="Войти через GitHub">
-                                <Github size={22} />
-                            </a>
+                            <button 
+                                onClick={() => {
+                                    setGithubLoading(true);
+                                    window.location.href = "http://localhost:8000/api/auth/github";
+                                }}
+                                disabled={githubLoading}
+                                className="w-12 h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm disabled:opacity-50" 
+                                title="Войти через GitHub"
+                            >
+                                {githubLoading ? <Loader2 size={22} className="animate-spin text-accent" /> : <Github size={22} />}
+                            </button>
                         </div>
                     </div>
                 </motion.div>

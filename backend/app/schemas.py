@@ -122,3 +122,16 @@ class UserProfile(BaseModel):
     skills: dict | None = None  # ← было list[dict], а skills_data — это dict
     company_name: str | None = None
     website: str | None = None
+    github_username: str | None = None
+    github_stats: dict | None = None
+    bio: str | None = None
+    avatar_url: str | None = None
+    projects: list[dict] | None = None
+    job_postings: list[dict] | None = None
+
+
+class UpdateProfileReq(BaseModel):
+    bio: str | None = None
+    avatar_url: str | None = None
+    projects: list[dict] | None = None
+    job_postings: list[dict] | None = None
