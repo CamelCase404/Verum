@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScoreRow } from "@/components/ui/ScoreRow";
-import { Chip } from "@/components/ui/Chip";
 import { Badge } from "@/components/ui/Badge";
-import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, Play, AlertCircle } from "lucide-react";
+import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, Play, AlertCircle } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { AddProjectModal } from "@/components/modals/AddProjectModal";
@@ -12,6 +11,20 @@ import { InterviewModal } from "@/components/modals/InterviewModal";
 const COLORS: Record<string, string> = {
   accent: "bg-accent", blue: "bg-blue-500", violet: "bg-violet-500", amber: "bg-amber-500", rose: "bg-rose-500"
 };
+
+// Палитра для языков
+const LANG_COLORS = [
+  "bg-[#3178c6]", // TypeScript (синий)
+  "bg-[#e34c26]", // HTML (оранжевый)
+  "bg-[#178600]", // C# (зеленый)
+  "bg-[#3572A5]", // Python (синий)
+  "bg-[#f1e05a]", // JavaScript (желтый)
+  "bg-[#89e051]", // Shell (салатовый)
+  "bg-[#563d7c]", // CSS (фиолетовый)
+  "bg-[#b07219]", // Java (коричневый)
+  "bg-[#dea584]", // Rust (розовый)
+  "bg-[#a97bff]", // Kotlin (сиреневый)
+];
 
 export function DeveloperDashboard() {
   const { user, profile, removeProject } = useAppStore();
@@ -51,6 +64,7 @@ export function DeveloperDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
+        {/* ЛЕВАЯ КОЛОНКА */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 md:space-y-6">
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group">
             <button onClick={() => setIsEditOpen(true)} className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-2 border border-line flex items-center justify-center text-ink-3 hover:text-accent transition-all z-10">
@@ -71,7 +85,7 @@ export function DeveloperDashboard() {
               {profile.bio || "Добавьте описание своего опыта в настройках профиля."}
             </p>
             
-            <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+            <div className="space-y-2 md:space-y-3">
               <div className="flex justify-between text-[12px] md:text-sm">
                 <span className="text-ink-3">Специализация</span>
                 <span className="font-medium">Frontend</span>
@@ -88,7 +102,10 @@ export function DeveloperDashboard() {
           </div>
         </motion.div>
 
+        {/* ПРАВАЯ КОЛОНКА */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4 md:space-y-6">
+          
+          {/* НАВЫКИ */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2">
@@ -115,16 +132,21 @@ export function DeveloperDashboard() {
             )}
           </div>
 
+          {/* GITHUB */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2">
                 <Github size={16} className="md:w-4.5 md:h-4.5 text-accent" /> GitHub
               </h3>
+              {profile.githubData && (
+                <span className="text-[11px] md:text-xs text-ink-3">@{profile.githubData.username}</span>
+              )}
             </div>
 
             {profile.githubData ? (
               <>
-                <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
+                {/* Метрики */}
+                <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5">
                   <div className="bg-surface-2 rounded-xl p-2 md:p-3 text-center border border-line">
                     <div className="text-lg md:text-xl font-semibold">{profile.githubData.public_repos}</div>
                     <div className="text-[10px] md:text-[11px] text-ink-3">репозиториев</div>
@@ -139,24 +161,80 @@ export function DeveloperDashboard() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-1 md:gap-1.5 mb-4">
-                  {profile.githubData.languages.slice(0, 4).map(([lang, count]) => (
-                    <Chip key={lang} variant="accent">{lang}</Chip>
-                  ))}
+                {/* Языки */}
+                <div className="mb-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3">Языки</div>
+                    <div className="text-[11px] text-ink-3">{profile.githubData.languages.length} языков</div>
+                  </div>
+                  
+                  {/* Полоска прогресса - используем flex-grow вместо width, чтобы точно заполнить 100% */}
+                  <div className="flex h-2.5 rounded-full overflow-hidden mb-3 bg-surface-2">
+                    {profile.githubData.languages.map((lang, i) => (
+                      <div
+                        key={lang.name}
+                        className={LANG_COLORS[i % LANG_COLORS.length]}
+                        style={{ flexGrow: lang.percent, flexBasis: 0 }}
+                        title={`${lang.name}: ${lang.percent}%`}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Легенда */}
+                  <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+                    {profile.githubData.languages.map((lang, i) => (
+                      <span key={lang.name} className="inline-flex items-center gap-1.5 text-[11px] md:text-[12px] text-ink-2">
+                        <span className={`w-2 h-2 rounded-full ${LANG_COLORS[i % LANG_COLORS.length]}`} />
+                        <span className="font-medium">{lang.name}</span>
+                        <span className="text-ink-3">{lang.percent}%</span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  {profile.githubData.projects.slice(0, 2).map(p => (
-                    <a key={p.name} href={p.url} target="_blank" rel="noreferrer" className="block p-2.5 md:p-3 border border-line rounded-xl hover:border-accent/40 hover:bg-surface-2 transition-colors">
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="font-medium text-[13px] md:text-[14px] text-accent truncate pr-2">{p.name}</div>
-                        <div className="flex items-center gap-1 text-[11px] md:text-[12px] text-ink-3 shrink-0">
-                          <Star size={10} className="md:w-3 md:h-3" /> {p.stars}
+                {/* Репозитории */}
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-2">
+                    Репозитории
+                  </div>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                    {profile.githubData.projects.map((p) => (
+                      <a
+                        key={p.name}
+                        href={p.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block p-3 border border-line rounded-xl hover:border-accent/40 hover:bg-surface-2 transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-1 gap-2">
+                          <div className="font-medium text-[13px] md:text-[14px] text-accent truncate">
+                            {p.name}
+                          </div>
+                          <div className="flex items-center gap-2 text-[11px] md:text-[12px] text-ink-3 shrink-0">
+                            <span className="flex items-center gap-0.5"><Star size={11} /> {p.stars}</span>
+                            <span className="flex items-center gap-0.5"><GitFork size={11} /> {p.forks}</span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-[11px] md:text-[12px] text-ink-3 truncate">{p.description || "Без описания"}</div>
-                    </a>
-                  ))}
+                        
+                        <div className="text-[11px] md:text-[12px] text-ink-3 truncate mb-1.5">
+                          {p.description || "Без описания"}
+                        </div>
+                        
+                        <div className="flex items-center gap-3 text-[10px] md:text-[11px] text-ink-3">
+                          {p.language && (
+                            <span className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-accent/60" />
+                              {p.language}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5h-3.32ZM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
+                            {p.commits} {p.commits === 1 ? "коммит" : p.commits < 5 ? "коммита" : "коммитов"}
+                          </span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </>
             ) : (
@@ -171,6 +249,7 @@ export function DeveloperDashboard() {
             )}
           </div>
 
+          {/* РУЧНОЕ ПОРТФОЛИО */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2">

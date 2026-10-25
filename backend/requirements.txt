@@ -1,0 +1,27 @@
+# Core
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-dotenv
+
+# HTTP-клиенты
+httpx
+requests
+
+# OAuth и сессии
+authlib
+itsdangerous
+python-multipart
+
+# JWT
+python-jose[cryptography]
+
+# Пароли (современная замена passlib)
+pwdlib[argon2]
+
+# База данных
+sqlalchemy
+
+# GigaChat
+gigachat

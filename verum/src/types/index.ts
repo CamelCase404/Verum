@@ -14,20 +14,31 @@ export interface Project {
   image: string;
 }
 
+export interface GithubLanguage {
+  name: string;
+  percent: number;
+  bytes: number;
+}
+
+export interface GithubProject {
+  name: string;
+  description: string | null;
+  url: string;
+  stars: number;
+  forks: number;
+  language: string | null;
+  languages: Record<string, number>;
+  commits: number;
+}
+
 export interface GithubData {
   username: string;
   avatar_url: string;
   public_repos: number;
   followers: number;
   total_stars: number;
-  languages: [string, number][];
-  projects: {
-    name: string;
-    description: string | null;
-    url: string;
-    language: string | null;
-    stars: number;
-  }[];
+  languages: GithubLanguage[];
+  projects: GithubProject[];
 }
 
 export interface Profile {
