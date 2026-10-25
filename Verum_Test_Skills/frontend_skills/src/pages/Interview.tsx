@@ -187,7 +187,7 @@ export default function Interview({
             } else {
                 blurStartedAt = null;
             }
-        }, 300);
+        }, 250);
 
         return () => window.clearInterval(checkInterval);
     }, [finished, failed, isCameraReady, showSkipModal]);

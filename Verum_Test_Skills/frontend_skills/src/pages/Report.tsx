@@ -67,9 +67,11 @@ export default function Report({
     onRestart: () => void;
 }) {
     useEffect(() => {
-        const token = localStorage.getItem("verum_token");
+        const token = localStorage.getItem("token");
         if (!token) {
-            console.warn("Нет токена авторизации. Результаты не будут сохранены.");
+            console.warn(
+                "Нет токена авторизации. Результаты не будут сохранены.",
+            );
             return;
         }
 
@@ -97,14 +99,19 @@ export default function Report({
             },
             body: JSON.stringify(payload),
         })
-        .then((res) => {
-            if (res.ok) {
-                console.log("✅ Результаты успешно сохранены в профиль!");
-            } else {
-                console.error("❌ Ошибка сервера при сохранении:", res.status);
-            }
-        })
-        .catch((err) => console.error("❌ Ошибка сети при сохранении:", err));
+            .then((res) => {
+                if (res.ok) {
+                    console.log("✅ Результаты успешно сохранены в профиль!");
+                } else {
+                    console.error(
+                        "❌ Ошибка сервера при сохранении:",
+                        res.status,
+                    );
+                }
+            })
+            .catch((err) =>
+                console.error("❌ Ошибка сети при сохранении:", err),
+            );
     }, [report]);
 
     const restartSameSettings = () => {
@@ -138,9 +145,7 @@ export default function Report({
                         <span className="text-[14px] text-muted uppercase tracking-widest mb-2">
                             Ваш итоговый уровень
                         </span>
-                        <span
-                            className="text-[56px] font-black leading-none text-accent"
-                        >
+                        <span className="text-[56px] font-black leading-none text-accent">
                             {report.final_grade}
                         </span>
 
