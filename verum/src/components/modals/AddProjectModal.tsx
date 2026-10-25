@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Loader2, UploadCloud, Trash2 } from "lucide-react";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
-export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
+export function AddProjectModal({ onClose, backendUser, onRefresh, projectToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, projectToEdit?: any }) {
+  const isEditing = !!projectToEdit;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -12,6 +14,17 @@ export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: 
   const [loading, setLoading] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Инициализация при редактировании
+  useEffect(() => {
+    if (isEditing) {
+      setTitle(projectToEdit.title || "");
+      setDescription(projectToEdit.description || "");
+      // Если есть старые картинки, показываем их
+      const oldImages = projectToEdit.images || (projectToEdit.cover ? [projectToEdit.cover] : []);
+      setPreviews(oldImages);
+    }
+  }, [isEditing, projectToEdit]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -23,8 +36,21 @@ export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: 
   };
 
   const removeImage = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    // Удаляем из новых файлов (если это новый файл)
+    if (index < previews.length - selectedFiles.length) {
+      // Это старое фото, удаляем из массива
+      setPreviews(prev => prev.filter((_, i) => i !== index));
+      // Обновляем projectToEdit, чтобы при сохранении знать, какие фото остались
+      if (projectToEdit) {
+        projectToEdit.images = previews.filter((_, i) => i !== index);
+        projectToEdit.cover = projectToEdit.images[0] || "";
+      }
+    } else {
+      // Это новое фото
+      const fileIndex = index - (previews.length - selectedFiles.length);
+      setSelectedFiles((prev) => prev.filter((_, i) => i !== fileIndex));
+      setPreviews((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleSave = async () => {
@@ -32,26 +58,45 @@ export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: 
     
     setLoading(true);
     try {
-      // 1. Загружаем все выбранные картинки
-      const uploadedUrls: string[] = [];
-      for (const file of selectedFiles) {
-        const uploadRes = await authApi.uploadImage(file);
-        uploadedUrls.push(uploadRes.url);
+      let uploadedUrls: string[] = [];
+      
+      // 1. Загружаем новые картинки (если есть)
+      if (selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
+          const uploadRes = await authApi.uploadImage(file);
+          uploadedUrls.push(uploadRes.url);
+        }
       }
 
-      // 2. Формируем объект проекта
-      const newProject = { 
-        id: Date.now().toString(), 
-        title, 
-        description, 
-        cover: uploadedUrls[0] || "", // Первая картинка идет как обложка
-        images: uploadedUrls // Все картинки в массив
-      };
-      
+      // Собираем все картинки: старые (которые не удалили) + новые
+      // В projectToEdit.images лежат оставшиеся старые картинки, если мы их удаляли
+      const existingImages = isEditing ? (projectToEdit.images || []) : [];
+      const finalImages = [...existingImages, ...uploadedUrls];
+
       const currentProjects = backendUser?.projects || [];
       
-      await authApi.updateProfile({ projects: [...currentProjects, newProject] });
-      toast("Проект добавлен");
+      if (isEditing) {
+        // Редактирование
+        const updatedProjects = currentProjects.map((p: any) => 
+          p.id === projectToEdit.id 
+            ? { ...p, title, description, cover: finalImages[0] || "", images: finalImages } 
+            : p
+        );
+        await authApi.updateProfile({ projects: updatedProjects });
+        toast("Проект обновлен");
+      } else {
+        // Создание
+        const newProject = { 
+          id: Date.now().toString(), 
+          title, 
+          description, 
+          cover: finalImages[0] || "",
+          images: finalImages
+        };
+        await authApi.updateProfile({ projects: [...currentProjects, newProject] });
+        toast("Проект добавлен");
+      }
+
       onRefresh();
       onClose();
     } catch (e: any) {
@@ -65,7 +110,7 @@ export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
-        <h2 className="text-xl font-bold mb-4">Добавить проект</h2>
+        <h2 className="text-xl font-bold mb-4">{isEditing ? "Редактировать проект" : "Добавить проект"}</h2>
         
         <div className="space-y-4 mb-6">
           <div>
@@ -77,7 +122,6 @@ export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: 
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="О чем этот проект?" />
           </div>
           
-          {/* Загрузка картинок проекта */}
           <div>
             <label className="text-sm font-medium mb-1 block">Галерея проекта</label>
             
@@ -112,7 +156,7 @@ export function AddProjectModal({ onClose, backendUser, onRefresh }: { onClose: 
         <div className="flex gap-3 justify-end pt-4 border-t border-line">
           <button onClick={onClose} className="px-4 py-2 rounded-lg font-medium hover:bg-surface-2 transition-colors">Отмена</button>
           <button onClick={handleSave} disabled={loading} className="px-4 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent-2 transition-colors flex items-center gap-2">
-            {loading && <Loader2 size={16} className="animate-spin" />} Сохранить
+            {loading && <Loader2 size={16} className="animate-spin" />} {isEditing ? "Сохранить" : "Создать"}
           </button>
         </div>
       </motion.div>

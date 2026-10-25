@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ScoreRow } from "@/components/ui/ScoreRow";
-import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote, Brain, CheckCircle2, RefreshCw, Layers, Code2 } from "lucide-react";
+import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote, Brain, CheckCircle2, RefreshCw, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { AddProjectModal } from "@/components/modals/AddProjectModal";
 import { InterviewModal } from "@/components/modals/InterviewModal";
@@ -12,8 +12,9 @@ const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A
 
 export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: any, onRefresh: () => void }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isProjectOpen, setIsProjectOpen] = useState(false);
-  const [isInterviewOpen, setIsInterviewOpen] = useState(false);
+    const [isInterviewOpen, setIsInterviewOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [showAllRepos, setShowAllRepos] = useState(false);
   
   const initials = backendUser?.full_name?.substring(0, 2).toUpperCase() || "??";
@@ -22,32 +23,17 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   const githubData = backendUser?.github_stats;
   const projects = backendUser?.projects || [];
 
-  // Логика таймера переквалификации (6 месяцев)
   const lastTestDate = backendUser?.last_test_at ? new Date(backendUser.last_test_at) : null;
   const sixMonthsMs = 180 * 24 * 60 * 60 * 1000;
   const canRetake = !lastTestDate || (new Date().getTime() - lastTestDate.getTime() > sixMonthsMs);
-  
   const nextRetakeDate = lastTestDate ? new Date(lastTestDate.getTime() + sixMonthsMs).toLocaleDateString('ru-RU') : null;
 
-  // ═══════════════════════════════════════════════════════════════════════════════
-  // ⚠️ ВАЖНО ДЛЯ БУДУЩЕГО РАЗРАБОТЧИКА / ИИ ⚠️
-  // 
-  // СЕЙЧАС СТОИТ ВРЕМЕННЫЙ РЕЖИМ ТЕСТИРОВАНИЯ: 
-  // Кнопка показывает предупреждение (toast), но НЕ БЛОКИРУЕТ запуск теста.
-  // 
-  // ЧТОБЫ ВКЛЮЧИТЬ СТРОГУЮ БЛОКИРОВКУ (перепрохождение строго раз в 6 месяцев):
-  // 1. Найди функцию handleRetakeClick ниже.
-  // 2. Раскомментируй строку `return;` внутри условия if (!canRetake).
-  // 3. Готово! Теперь тест не запустится, если таймер не истек.
-  // ═══════════════════════════════════════════════════════════════════════════════
   const handleRetakeClick = () => {
     if (!canRetake) {
       toast(`⏳ Перепройти тест можно будет с ${nextRetakeDate}. (Сейчас режим тестирования: блокировка не работает)`);
-      
-      // 👇 ЧТОБЫ ВКЛЮЧИТЬ БЛОКИРОВКУ, РАСКОММЕНТИРУЙ СТРОКУ НИЖЕ:
-      // return;
+      // return;  // <-- Раскомментируй эту строку, чтобы включить блокировку
     }
-    setIsInterviewOpen(true); // <-- Эта строка пускает тест (закомментируй её, если включил return выше)
+    setIsInterviewOpen(true); 
   };
 
   const getLangColor = (langName: string) => {
@@ -78,6 +64,31 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
     return Math.round(testSalary + githubBonus);
   };
   const estimatedSalary = calculateSalary();
+
+
+  const STACK_ICONS: Record<string, any> = {
+    "frontend": Monitor,
+    "backend": Server,
+    "fullstack": Layers,
+    "mobile": Smartphone,
+    "devops": Cloud,
+    "data / ml": Database,
+  };
+
+  const LANG_ICONS: Record<string, any> = {
+    "html": FileCode2,
+    "css": Palette,
+    "js": Braces,
+    "ts": FileCode2,
+    "react": Atom,
+    "vue": Hexagon,
+    "python": Terminal,
+    "go": Rabbit,
+    "java": Coffee,
+    "csharp": Hash,
+    "kotlin": Code2,
+    "swift": Code2,
+  };
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 relative">
@@ -122,69 +133,68 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               </div>
             </div>
             
-            <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed mb-4 md:mb-6">
-              {backendUser?.bio || "Добавьте описание своего опыта в настройках профиля."}
-            </p>
+            <div className="mb-6">
+              <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
+                <AlignLeft size={12} /> О себе
+              </div>
+              <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed">
+                {backendUser?.bio || "Добавьте описание своего опыта в настройках профиля."}
+              </p>
+            </div>
 
-            {/* ГРЕЙД И ОЖИДАЕМЫЙ ДОХОД */}
+            {/* ЕДИНАЯ КРАСИВАЯ КАРТОЧКА НАВЫКОВ */}
             {isTested && (
-              <div className="space-y-3 mb-6">
-                <div className="bg-surface-2 border border-line rounded-xl p-3 flex justify-between items-center">
-                   <div>
-                     <div className="text-[11px] uppercase tracking-wider text-accent font-semibold mb-0.5">Ваш уровень</div>
-                     <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
-                   </div>
-                   <ShieldCheck size={28} className="text-accent/40" />
-                </div>
-                {estimatedSalary > 0 && (
-                  <div className="bg-surface-2 border border-line rounded-xl p-3">
-                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                      <Banknote size={12} /> Ожидаемый доход
+              <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
+                <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
+                  <div className="p-4 flex flex-col justify-center">
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-accent" /> Уровень
                     </div>
-                    <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
+                    <div className="text-2xl font-bold text-accent">{skills.final_grade}</div>
                   </div>
-                )}
-
-              {skills.stack_id && (
-                <div className="bg-surface-2 border border-line rounded-xl p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                    <Layers size={12} /> Стек
-                  </div>
-                  <div className="text-sm font-bold text-ink capitalize">{skills.stack_id}</div>
-                </div>
-              )}
-              {skills.language_id && (
-                <div className="bg-surface-2 border border-line rounded-xl p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-2 flex items-center gap-1">
-                    <Code2 size={12} /> Языки
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {skills.language_id.split(',').map((lang: string) => (
-                      <span key={lang} className="px-2 py-1 bg-surface border border-line rounded-md text-[11px] font-medium text-ink-2 uppercase">
-                        {lang.trim()}
-                      </span>
-                    ))}
+                  <div className="p-4 flex flex-col justify-center">
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1.5">
+                      <Banknote size={14} className="text-accent" /> Доход
+                    </div>
+                    <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} <span className="text-[13px] text-ink-3 font-normal">₽</span></div>
                   </div>
                 </div>
-              )}
-
+                <div className="p-4 space-y-4">
+                  {skills.stack_id && (
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
+                        <Layers size={14} /> Стек
+                      </div>
+                      <div className="inline-flex px-2.5 py-1 bg-surface border border-line rounded-md text-[13px] font-medium text-ink capitalize">
+                        {skills.stack_id}
+                      </div>
+                    </div>
+                  )}
+                  {skills.language_id && (
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
+                        <Code2 size={14} /> Языки
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {skills.language_id.split(',').map((lang: string) => (
+                          <span key={lang} className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface border border-line rounded text-[11px] font-medium text-ink-2 uppercase">
+                            {(() => {
+                              const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2;
+                              return <LIcon size={12} className="text-ink-3" />;
+                            })()}
+                            {lang.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            <div className="space-y-2 md:space-y-3">
-              <div className="flex justify-between text-[12px] md:text-sm items-center">
-                <span className="text-ink-3">GitHub</span>
-                {backendUser?.github_username ? (
-                  <span className="font-medium flex items-center gap-1 text-accent"><Github size={12} /> {backendUser.github_username}</span>
-                ) : (
-                  <a href="http://localhost:8000/api/auth/github" className="text-[11px] md:text-[13px] bg-accent text-white px-2 md:px-3 py-1 rounded-lg">Подключить</a>
-                )}
-              </div>
-            </div>
-
             {/* КНОПКА ПЕРЕПРОЙТИ */}
             {isTested && (
-              <div className="mt-6 pt-4 border-t border-line">
+              <div className="pt-4 border-t border-line">
                 <button 
                   onClick={handleRetakeClick} 
                   className="w-full py-2.5 bg-surface-2 border border-line-2 hover:border-accent hover:text-accent rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
@@ -255,7 +265,39 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
             )}
           </div>
 
-          {/* GITHUB */}
+          {/* МОИ ПРОЕКТЫ (ПЕРЕМЕЩЕНО ВЫШЕ GITHUB) */}
+          <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ImageIcon size={16} className="text-accent" /> Мои проекты</h3>
+              <button onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }} className="h-7 md:h-8 px-2 md:px-3 rounded-lg bg-surface-2 border border-line text-[11px] md:text-[13px] font-medium flex items-center gap-1 hover:bg-surface-3 transition-colors"><Plus size={12} /> Добавить</button>
+            </div>
+            {projects.length > 0 ? (
+              <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
+                {projects.map((project: any) => (
+                  <div key={project.id} className="group relative border border-line rounded-xl overflow-hidden bg-surface flex flex-col">
+                    <div className="aspect-video bg-surface-2 relative overflow-hidden">
+                      {(project.cover || project.image) ? <img src={project.cover || project.image} alt={project.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-ink-4"><ImageIcon size={24} /></div>}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={(e) => { e.preventDefault(); setEditingProject(project); setIsProjectModalOpen(true); }} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 text-ink-2 hover:text-accent flex items-center justify-center transition-colors"><Pencil size={12} /></button>
+                        <button onClick={(e) => { e.preventDefault(); handleDeleteProject(project.id); }} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 text-red-600 hover:text-red-700 flex items-center justify-center transition-colors"><Trash2 size={12} /></button>
+                      </div>
+                    </div>
+                    <div className="p-3 md:p-4 flex-1 flex flex-col">
+                      <h4 className="font-medium text-[13px] md:text-[14px] mb-1">{project.title}</h4>
+                      <p className="text-[11px] md:text-[12.5px] text-ink-3 line-clamp-2 mb-2">{project.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 md:py-8 border border-dashed border-line-2 rounded-xl bg-surface-2">
+                <div className="text-[13px] md:text-[14px] font-medium mb-1">Пока нет проектов</div>
+                <button onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }} className="text-[12px] md:text-[13px] text-accent font-medium hover:underline">Создать первый проект</button>
+              </div>
+            )}
+          </div>
+
+          {/* GITHUB (ПЕРЕМЕЩЕНО НИЖЕ ПРОЕКТОВ) */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><Github size={16} className="text-accent" /> GitHub</h3>
@@ -327,41 +369,12 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               </div>
             )}
           </div>
-
-          {/* РУЧНОЕ ПОРТФОЛИО */}
-          <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4 md:mb-6">
-              <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ImageIcon size={16} className="text-accent" /> Мои проекты</h3>
-              <button onClick={() => setIsProjectOpen(true)} className="h-7 md:h-8 px-2 md:px-3 rounded-lg bg-surface-2 border border-line text-[11px] md:text-[13px] font-medium flex items-center gap-1 hover:bg-surface-3 transition-colors"><Plus size={12} /> Добавить</button>
-            </div>
-            {projects.length > 0 ? (
-              <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
-                {projects.map((project: any) => (
-                  <div key={project.id} className="group relative border border-line rounded-xl overflow-hidden bg-surface flex flex-col">
-                    <div className="aspect-video bg-surface-2 relative overflow-hidden">
-                      {(project.cover || project.image) ? <img src={project.cover || project.image} alt={project.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-ink-4"><ImageIcon size={24} /></div>}
-                      <button onClick={(e) => { e.preventDefault(); handleDeleteProject(project.id); }} className="absolute top-2 right-2 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 text-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button>
-                    </div>
-                    <div className="p-3 md:p-4 flex-1 flex flex-col">
-                      <h4 className="font-medium text-[13px] md:text-[14px] mb-1">{project.title}</h4>
-                      <p className="text-[11px] md:text-[12.5px] text-ink-3 line-clamp-2 mb-2">{project.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 md:py-8 border border-dashed border-line-2 rounded-xl bg-surface-2">
-                <div className="text-[13px] md:text-[14px] font-medium mb-1">Пока нет проектов</div>
-                <button onClick={() => setIsProjectOpen(true)} className="text-[12px] md:text-[13px] text-accent font-medium hover:underline">Создать первый проект</button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
       <AnimatePresence>
         {isEditOpen && <EditProfileModal onClose={() => setIsEditOpen(false)} backendUser={backendUser} onRefresh={onRefresh} />}
-        {isProjectOpen && <AddProjectModal onClose={() => setIsProjectOpen(false)} backendUser={backendUser} onRefresh={onRefresh} />}
+        {isProjectModalOpen && <AddProjectModal onClose={() => setIsProjectModalOpen(false)} backendUser={backendUser} onRefresh={onRefresh} projectToEdit={editingProject} />}
         {isInterviewOpen && <InterviewModal onClose={() => setIsInterviewOpen(false)} />}
       </AnimatePresence>
     </div>

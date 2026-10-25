@@ -5,8 +5,8 @@ export default {
     extend: {
       colors: {
         bg: "var(--bg)",
-        page: "var(--surface-2)", // Часто используется как bg-page
-        card: "var(--surface)",   // bg-card
+        page: "var(--bg)", // ИСПРАВЛЕНО: теперь фон страницы совпадает с главным сайтом
+        card: "var(--surface)", // ИСПРАВЛЕНО: блоки теперь светлее фона
         surface: "var(--surface)",
         "surface-2": "var(--surface-2)",
         "surface-3": "var(--surface-3)",
@@ -14,7 +14,7 @@ export default {
         "ink-2": "var(--ink-2)",
         "ink-3": "var(--ink-3)",
         "ink-4": "var(--ink-4)",
-        divider: "var(--line)",   // border-divider
+        divider: "var(--line)",
         line: "var(--line)",
         "line-2": "var(--line-2)",
         accent: "var(--accent)",

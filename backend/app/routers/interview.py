@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ..gigachat_client import ask_chat, ask_text
+from ..gigachat_client import ask_chat
 from ..interview_store import create, get, save
 from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_INTERVIEWER, SYSTEM_REPORT
 from ..schemas import (
@@ -17,16 +17,7 @@ from ..schemas import (
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
 STAGE_NAMES = {0: "Общие знания", 1: "Code Review", 2: "Нагрузка", 3: "Code Review (Повторный)", 4: "Нагрузка (Повторный)"}
-MIN_ANSWER_LENGTH = 10
-MAX_SECONDS_PER_ANSWER = 180
-STAGE0_QUESTIONS = 8  # Сократил до 5, чтобы не утомлять (было 10)
-
-def _is_trash_answer(text: str, seconds_spent: int) -> tuple[bool, str | None]:
-    if seconds_spent > MAX_SECONDS_PER_ANSWER:
-        return True, "Превышено время на ответ."
-    if len(text.strip()) < MIN_ANSWER_LENGTH:
-        return True, "Слишком короткий ответ."
-    return False, None
+STAGE0_QUESTIONS = 8  # Вернули 8 вопросов
 
 def _clean_text(raw: str) -> str:
     raw = raw.strip().replace("{{", "{").replace("}}", "}")
@@ -62,30 +53,25 @@ def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code
 def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
     if is_skip: return 0
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id)
-    max_score_instruction = ""
-    if stage == 1:
-        if it.level.lower() == "junior": max_score_instruction = "Максимум 60 баллов."
-        elif it.level.lower() == "middle": max_score_instruction = "Максимум 80 баллов."
-
-    prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. {max_score_instruction} Верни ТОЛЬКО число."
+    
+    prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ короткий или поверхностный, ставь мало баллов. Верни ТОЛЬКО число."
     history = _get_history(it)
     raw = ask_chat(sys_prompt, history, prompt).strip()
     match = re.search(r"\d+", raw)
     if match:
         score = int(match.group())
-        if stage == 1:
-            if it.level.lower() == "junior" and score > 60: score = 60
-            elif it.level.lower() == "middle" and score > 80: score = 80
         return max(0, min(100, score))
     return 40
 
 def _generate_code_review_task(it) -> tuple[str, str]:
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id)
-    difficulty = "Добавь ошибки среднего уровня (N+1, неправильная обработка исключений, проблемы с многопоточностью, отсутствие индексов)."
+    
     if it.level.lower() == "junior": difficulty = "Добавь простые ошибки (отсутствие проверки на null, неэффективный цикл)."
-    elif it.level.lower() == "senior": difficulty = "Добавь СЛОЖНЫЕ ошибки (race conditions, утечки памяти, проблемы с ACID)."
+    elif it.level.lower() == "middle": difficulty = "Добавь ошибки среднего уровня (N+1, неправильная обработка исключений, проблемы с многопоточностью, отсутствие индексов)."
+    else: difficulty = "Добавь СЛОЖНЫЕ ошибки (race conditions, утечки памяти, проблемы с ACID)."
 
     prompt = f"Сгенерируй код СТРОГО на одном из этих языков: {it.language_id}.\n{difficulty}\nКРИТИЧЕСКОЕ ПРАВИЛО: В коде НЕ ДОЛЖНО БЫТЬ КОММЕНТАРИЕВ. ВЕРНИ СТРОГО: 'Найдите ошибки...', затем символ '|', затем код."
+    
     history = _get_history(it)
     raw = ask_chat(sys_prompt, history, prompt).strip()
 
@@ -118,24 +104,15 @@ def answer(req: AnswerRequest) -> AnswerResponse:
         return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     is_skip = req.answer == "___SKIP___"
-    if is_skip: req.answer = "Кандидат пропустил вопрос."
-    else:
-        is_trash, reason = _is_trash_answer(req.answer, req.seconds_spent)
-        if is_trash:
-            it.finished, it.rejected, it.reject_reason = True, True, reason
-            save(it)
-            return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=reason)
+    if is_skip: 
+        req.answer = "Кандидат пропустил вопрос."
 
     past_questions = [t.content for t in it.turns if t.role == "assistant"]
     last_question = past_questions[-1] if past_questions else ""
+    
     it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent))
     
     score = _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
-
-    if not is_skip and score <= 15:
-        it.finished, it.rejected, it.reject_reason = True, True, f"Ответ не по теме (Оценка: {score}/100)."
-        save(it)
-        return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
 

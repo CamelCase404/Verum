@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
-import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2 } from "lucide-react";
+import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -42,7 +42,6 @@ export function PublicProfile() {
     } catch (e) { console.error("Ошибка создания чата", e); }
   };
 
-  // Расчет зарплаты
   const calculateSalary = () => {
     if (!skills || skills.final_grade === "Reject") return 0;
     const score = skills.total_score_100 || 0;
@@ -69,6 +68,31 @@ export function PublicProfile() {
     </div>
   );
 
+
+  const STACK_ICONS: Record<string, any> = {
+    "frontend": Monitor,
+    "backend": Server,
+    "fullstack": Layers,
+    "mobile": Smartphone,
+    "devops": Cloud,
+    "data / ml": Database,
+  };
+
+  const LANG_ICONS: Record<string, any> = {
+    "html": FileCode2,
+    "css": Palette,
+    "js": Braces,
+    "ts": FileCode2,
+    "react": Atom,
+    "vue": Hexagon,
+    "python": Terminal,
+    "go": Rabbit,
+    "java": Coffee,
+    "csharp": Hash,
+    "kotlin": Code2,
+    "swift": Code2,
+  };
+
   return (
     <div className="max-w-[1000px] mx-auto px-4 py-10">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-ink-2 hover:text-accent mb-6 transition-colors">
@@ -76,7 +100,7 @@ export function PublicProfile() {
       </button>
 
       <div className="grid md:grid-cols-[300px_1fr] gap-6">
-        {/* ЛЕВАЯ КОЛОНКА: Карточка пользователя */}
+        {/* ЛЕВАЯ КОЛОНКА */}
         <div className="bg-surface border border-line rounded-2xl p-6 h-fit shadow-sm">
           <div className="w-24 h-24 rounded-full bg-accent text-white flex items-center justify-center text-3xl font-bold overflow-hidden mx-auto mb-4 shadow-lg">
             {user.avatar_url ? <img src={user.avatar_url} className="w-full h-full object-cover" /> : initials}
@@ -84,7 +108,14 @@ export function PublicProfile() {
           <h1 className="text-xl font-bold text-center mb-1">{user.full_name}</h1>
           <p className="text-sm text-center text-ink-3 mb-4">{user.role === "company" ? "Компания" : "Разработчик"}</p>
           
-          {user.bio && <p className="text-sm text-ink-2 text-center mb-6">{user.bio}</p>}
+          {user.bio && (
+            <div className="mb-6 text-center">
+              <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center justify-center gap-1.5">
+                <AlignLeft size={12} /> О себе
+              </div>
+              <p className="text-sm text-ink-2 leading-relaxed">{user.bio}</p>
+            </div>
+          )}
 
           {user.website && (
             <a href={user.website} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 text-sm text-accent hover:underline mb-2">
@@ -97,47 +128,57 @@ export function PublicProfile() {
             </a>
           )}
 
+          {/* ЕДИНАЯ КРАСИВАЯ КАРТОЧКА */}
           {isTested && (
-            <div className="space-y-3 mb-6">
-              <div className="bg-surface-2 border border-line rounded-xl p-3 flex justify-between items-center shadow-sm">
-                 <div>
-                   <div className="text-[11px] uppercase tracking-wider text-accent font-semibold mb-0.5">Уровень</div>
-                   <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
-                 </div>
-                 <ShieldCheck size={28} className="text-accent/40" />
+            <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
+              <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
+                <div className="p-3 flex flex-col justify-center">
+                  <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                    <ShieldCheck size={12} className="text-accent" /> Уровень
+                  </div>
+                  <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
+                </div>
+                <div className="p-3 flex flex-col justify-center">
+                  <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                    <Banknote size={12} className="text-accent" /> Доход
+                  </div>
+                  <div className="text-lg font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} <span className="text-[11px] text-ink-3 font-normal">₽</span></div>
+                </div>
               </div>
-              {estimatedSalary > 0 && (
-                <div className="bg-surface-2 border border-line rounded-xl p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                    <Banknote size={12} /> Ожидаемый доход
+              <div className="p-3 space-y-3">
+                {skills.stack_id && (
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                      <Layers size={12} /> Стек
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-surface border border-line rounded text-[12px] font-medium text-ink capitalize">
+                      {(() => {
+                        const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers;
+                        return <Icon size={12} className="text-accent" />;
+                      })()}
+                      {skills.stack_id}
+                    </div>
                   </div>
-                  <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
-                </div>
-              )}
-
-              {skills.stack_id && (
-                <div className="bg-surface-2 border border-line rounded-xl p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                    <Layers size={12} /> Стек
+                )}
+                {skills.language_id && (
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                      <Code2 size={12} /> Языки
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {skills.language_id.split(',').map((lang: string) => (
+                        <span key={lang} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-surface border border-line rounded text-[10px] font-medium text-ink-2 uppercase">
+                          {(() => {
+                            const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2;
+                            return <LIcon size={10} className="text-ink-3" />;
+                          })()}
+                          {lang.trim()}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-sm font-bold text-ink capitalize">{skills.stack_id}</div>
-                </div>
-              )}
-              {skills.language_id && (
-                <div className="bg-surface-2 border border-line rounded-xl p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-2 flex items-center gap-1">
-                    <Code2 size={12} /> Языки
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {skills.language_id.split(',').map((lang: string) => (
-                      <span key={lang} className="px-2 py-1 bg-surface border border-line rounded-md text-[11px] font-medium text-ink-2 uppercase">
-                        {lang.trim()}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+                )}
+              </div>
             </div>
           )}
 
@@ -146,7 +187,7 @@ export function PublicProfile() {
           </button>
         </div>
 
-        {/* ПРАВАЯ КОЛОНКА: Навыки и Статистика */}
+        {/* ПРАВАЯ КОЛОНКА */}
         <div className="space-y-6">
           
           {/* НАВЫКИ И АНАЛИЗ ИИ */}
@@ -202,7 +243,27 @@ export function PublicProfile() {
           </div>
           )}
 
-          {/* GITHUB СТАТИСТИКА */}
+          {/* ПОРТФОЛИО (ПЕРЕМЕЩЕНО ВЫШЕ GITHUB) */}
+          {user.projects && user.projects.length > 0 && (
+            <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
+              <h2 className="font-semibold flex items-center gap-2 mb-4"><ImageIcon size={18} className="text-accent" /> Портфолио</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {user.projects.map((proj: any) => (
+                  <div key={proj.id} onClick={() => setSelectedProject(proj)} className="border border-line rounded-xl overflow-hidden bg-surface-2 flex flex-col cursor-pointer hover:border-accent/50 transition-colors group">
+                    <div className="h-32 bg-surface-3">
+                      {proj.cover ? <img src={proj.cover} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-ink-4"><ImageIcon size={24}/></div>}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-medium text-sm mb-1">{proj.title}</h3>
+                      <p className="text-xs text-ink-3 line-clamp-2">{proj.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* GITHUB СТАТИСТИКА (ПЕРЕМЕЩЕНО НИЖЕ) */}
           {githubData && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -269,26 +330,6 @@ export function PublicProfile() {
                     {showAllRepos ? "Скрыть" : `Показать все (${githubData.projects.length})`}
                   </button>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* Портфолио */}
-          {user.projects && user.projects.length > 0 && (
-            <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
-              <h2 className="font-semibold flex items-center gap-2 mb-4"><ImageIcon size={18} className="text-accent" /> Портфолио</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {user.projects.map((proj: any) => (
-                  <div key={proj.id} onClick={() => setSelectedProject(proj)} className="border border-line rounded-xl overflow-hidden bg-surface-2 flex flex-col cursor-pointer hover:border-accent/50 transition-colors group">
-                    <div className="h-32 bg-surface-3">
-                      {proj.cover ? <img src={proj.cover} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-ink-4"><ImageIcon size={24}/></div>}
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm mb-1">{proj.title}</h3>
-                      <p className="text-xs text-ink-3 line-clamp-2">{proj.description}</p>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           )}
