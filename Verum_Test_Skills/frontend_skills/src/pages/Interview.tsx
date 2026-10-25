@@ -25,7 +25,6 @@ interface Props {
 
 const TOTAL_STAGES = 5;
 const TOTAL_QUESTIONS = 14;
-const MAX_SECONDS_PER_ANSWER = 180;
 
 export default function Interview({
     payload,
@@ -67,6 +66,7 @@ export default function Interview({
     const [isCameraReady, setIsCameraReady] = useState(false);
     const chunksRef = useRef<Blob[]>([]);
 
+    // ---------- Камера ----------
     useEffect(() => {
         const startCamera = async () => {
             try {
@@ -94,6 +94,7 @@ export default function Interview({
         return () => mediaStream?.getTracks().forEach((t) => t.stop());
     }, []);
 
+    // ---------- Загрузка видео на сервер ----------
     useEffect(() => {
         if (
             (finished || failed) &&
@@ -116,6 +117,7 @@ export default function Interview({
         }
     }, [finished, failed, mediaRecorder]);
 
+    // ---------- Таймеры ----------
     useEffect(() => {
         if (finished || failed || !isCameraReady) return;
         const timer = window.setInterval(() => {
@@ -139,6 +141,7 @@ export default function Interview({
         return () => window.clearInterval(timer);
     }, [msgs.length, finished, failed, isCameraReady, showSkipModal]);
 
+    // ---------- Провал интервью ----------
     const failInterview = async (reason: string) => {
         if (isFailingRef.current || finished || failed) return;
         isFailingRef.current = true;
@@ -159,27 +162,94 @@ export default function Interview({
         }
     };
 
+    // ---------- ЗАЩИТА: Надежная проверка фокуса ----------
     useEffect(() => {
         if (finished || failed || !isCameraReady) return;
-        const handleVisibilityChange = () => {
-            if (document.hidden && !showSkipModal)
-                failInterview("Переключение на другую вкладку.");
-        };
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        return () =>
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange,
-            );
+
+        let blurStartedAt: number | null = null;
+
+        const checkInterval = window.setInterval(() => {
+            if (showSkipModal) {
+                blurStartedAt = null;
+                return;
+            }
+
+            if (!document.hasFocus()) {
+                if (blurStartedAt === null) {
+                    blurStartedAt = Date.now();
+                } else if (Date.now() - blurStartedAt > 500) {
+                    blurStartedAt = null;
+                    window.clearInterval(checkInterval);
+                    failInterview(
+                        "Окно браузера потеряло фокус. Не переключайтесь на другие приложения.",
+                    );
+                }
+            } else {
+                blurStartedAt = null;
+            }
+        }, 300);
+
+        return () => window.clearInterval(checkInterval);
     }, [finished, failed, isCameraReady, showSkipModal]);
+
+    // ---------- Блокировка выхода и клавиш ----------
+    useEffect(() => {
+        if (finished || failed || !isCameraReady) return;
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+            e.returnValue =
+                "Интервью будет прервано, если вы закроете страницу.";
+            return e.returnValue;
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () =>
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [finished, failed, isCameraReady]);
+
+    useEffect(() => {
+        const blockKeys = (e: KeyboardEvent) => {
+            if (e.key === "F12") {
+                e.preventDefault();
+                return false;
+            }
+            if (
+                e.ctrlKey &&
+                e.shiftKey &&
+                ["I", "J", "C"].includes(e.key.toUpperCase())
+            ) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.key.toUpperCase() === "U") {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.key.toUpperCase() === "S") {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.key.toUpperCase() === "P") {
+                e.preventDefault();
+                return false;
+            }
+            if (e.shiftKey && e.key === "Insert") {
+                e.preventDefault();
+                return false;
+            }
+        };
+        document.addEventListener("keydown", blockKeys);
+        return () => document.removeEventListener("keydown", blockKeys);
+    }, []);
 
     useEffect(() => {
         const block = (e: Event) => e.preventDefault();
         document.addEventListener("copy", block);
         document.addEventListener("contextmenu", block);
+        document.addEventListener("cut", block);
         return () => {
             document.removeEventListener("copy", block);
             document.removeEventListener("contextmenu", block);
+            document.removeEventListener("cut", block);
         };
     }, []);
 
@@ -258,14 +328,15 @@ export default function Interview({
                     newMsg.text =
                         res.question + "\n\n__CODE__" + res.code_snippet;
 
-                // Уведомления при смене этапов
                 if (res.stage !== prevStage) {
                     let stageTitle = "";
                     if (res.stage === 1) stageTitle = "Этап 2: Code Review";
                     if (res.stage === 2) stageTitle = "Этап 3: Нагрузка";
-                    if (res.stage === 3) stageTitle = "Этап 4: Code Review (Повторный)";
-                    if (res.stage === 4) stageTitle = "Этап 5: Нагрузка (Повторный)";
-                    
+                    if (res.stage === 3)
+                        stageTitle = "Этап 4: Code Review (Повторный)";
+                    if (res.stage === 4)
+                        stageTitle = "Этап 5: Нагрузка (Повторный)";
+
                     if (stageTitle) {
                         const stageNotice: Msg = {
                             role: "ai",
@@ -297,10 +368,13 @@ export default function Interview({
             void send(false);
         }
         if ((e.ctrlKey || e.metaKey) && e.key === "v") e.preventDefault();
+        if (e.shiftKey && e.key === "Insert") e.preventDefault();
     };
 
-    const globalProgress = Math.min(100, Math.round((answeredCount / TOTAL_QUESTIONS) * 100));
-
+    const globalProgress = Math.min(
+        100,
+        Math.round((answeredCount / TOTAL_QUESTIONS) * 100),
+    );
     const totalM = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
     const totalS = String(totalSeconds % 60).padStart(2, "0");
 
@@ -326,6 +400,9 @@ export default function Interview({
             <div className="text-center py-20">
                 <ShieldX size={48} className="text-red-600 mx-auto" />
                 <h1 className="text-xl font-bold mt-4">Интервью прервано</h1>
+                <p className="text-muted mt-2 text-[14px]">
+                    Обнаружено нарушение правил прохождения интервью.
+                </p>
             </div>
         );
 
@@ -502,7 +579,7 @@ export default function Interview({
                                         onPaste={(e) => e.preventDefault()}
                                         placeholder="Ваш ответ… (Enter — отправить, Shift+Enter — перенос)"
                                         rows={2}
-                                        className="flex-1 rounded-[22px] border border-divider px-3 py-2 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none"
+                                        className="flex-1 bg-page text-ink rounded-[22px] border border-divider px-3 py-2 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none placeholder:text-muted/50"
                                     />
                                     <button
                                         onClick={() => send(false)}

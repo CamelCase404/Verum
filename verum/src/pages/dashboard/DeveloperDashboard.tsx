@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ScoreRow } from "@/components/ui/ScoreRow";
-import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle } from "lucide-react";
+import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote } from "lucide-react";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { AddProjectModal } from "@/components/modals/AddProjectModal";
 import { InterviewModal } from "@/components/modals/InterviewModal";
@@ -38,6 +38,26 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
       console.error("Ошибка удаления", e);
     }
   };
+
+
+  // Расчет рыночной стоимости на основе теста и GitHub
+  const calculateSalary = () => {
+    if (!skills || skills.final_grade === "Reject") return 0;
+    const score = skills.total_score_100 || 0;
+    const grade = skills.final_grade;
+    
+    const baseSalaries: Record<string, number> = { "Junior": 60000, "Middle": 150000, "Senior": 250000 };
+    const baseSalary = baseSalaries[grade] || 0;
+    
+    const scoreModifier = 0.8 + (score / 100) * 0.5;
+    const testSalary = baseSalary * scoreModifier;
+    
+    const stars = githubData?.total_stars || 0;
+    const githubBonus = Math.min(stars * 1000, 30000);
+    
+    return Math.round(testSalary + githubBonus);
+  };
+  const estimatedSalary = calculateSalary();
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 relative">
@@ -86,6 +106,14 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               {backendUser?.bio || "Добавьте описание своего опыта в настройках профиля."}
             </p>
             <div className="space-y-2 md:space-y-3">
+              {estimatedSalary > 0 && (
+                <div className="bg-accent/5 border border-accent/20 rounded-xl p-3 mb-3">
+                  <div className="text-[11px] uppercase tracking-wider text-accent font-semibold mb-1 flex items-center gap-1">
+                    <Banknote size={12} /> Рыночная стоимость
+                  </div>
+                  <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
+                </div>
+              )}
               <div className="flex justify-between text-[12px] md:text-sm">
                 <span className="text-ink-3">Специализация</span>
                 <span className="font-medium">Frontend</span>
@@ -116,6 +144,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                 <ScoreRow label="Ревью кода ИИ" value={skills.competency_code_understanding || 0} delay={1} />
                 <ScoreRow label="Работа с ИИ" value={skills.competency_prompting || 0} delay={2} />
                 <ScoreRow label="Адаптация" value={skills.competency_adaptability || 0} warn={(skills.competency_adaptability || 0) < 80} delay={3} />
+                <ScoreRow label="Soft Skills" value={skills.competency_soft_skills || 0} delay={4} />
               </div>
             ) : (
               <div className="text-center py-4 md:py-6">

@@ -7,7 +7,8 @@ import {
     Check,
     ShieldAlert,
     Sun,
-    Moon
+    Moon,
+    ArrowLeft
 } from "lucide-react";
 import { api, ApiError } from "../api";
 import { getIcon } from "../icons";
@@ -113,6 +114,13 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 sm:p-8 relative">
             {/* Кнопка переключения темы (Тумблер) */}
+            <a 
+                href="http://localhost:5173/dashboard" 
+                className="absolute top-6 left-6 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-divider text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors shadow-sm"
+            >
+                <ArrowLeft size={16} /> <span className="hidden sm:inline">Вернуться на сайт</span>
+            </a>
+
             <button 
                 onClick={toggleTheme} 
                 className={`fixed top-6 right-6 z-50 inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none shadow-md border ${

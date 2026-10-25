@@ -39,12 +39,7 @@ function StatBar({
 }) {
     if (score === undefined || score === null) return null;
 
-    let color = "bg-red-500";
-    if (score >= 80)
-        color = "bg-accent"; // Только от 80 зеленый
-    else if (score >= 50)
-        color = "bg-amber-500"; // 50-79 желтый
-    else color = "bg-red-500"; // < 50 красный
+    const color = "bg-accent"; // Всегда зеленый
 
     return (
         <div className="mb-5">
@@ -144,14 +139,7 @@ export default function Report({
                             Ваш итоговый уровень
                         </span>
                         <span
-                            className={`text-[56px] font-black leading-none ${
-                                report.final_grade === "Reject" ||
-                                report.final_grade === "Junior"
-                                    ? "text-red-600"
-                                    : report.final_grade === "Middle"
-                                      ? "text-amber-500"
-                                      : "text-accent"
-                            }`}
+                            className="text-[56px] font-black leading-none text-accent"
                         >
                             {report.final_grade}
                         </span>
@@ -165,14 +153,7 @@ export default function Report({
                                     </span>
                                     <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full ${
-                                                report.total_score_100 >= 80
-                                                    ? "bg-accent"
-                                                    : report.total_score_100 >=
-                                                        50
-                                                      ? "bg-amber-500"
-                                                      : "bg-red-600"
-                                            }`}
+                                            className="h-full bg-accent"
                                             style={{
                                                 width: `${report.total_score_100}%`,
                                             }}
