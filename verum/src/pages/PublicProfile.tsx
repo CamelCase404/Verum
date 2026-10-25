@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
-import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare } from "lucide-react";
+import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2 } from "lucide-react";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -35,14 +35,11 @@ export function PublicProfile() {
     return index !== -1 ? LANG_COLORS[index % LANG_COLORS.length] : "bg-accent/60";
   };
 
-
   const handleStartChat = async () => {
     try {
       const res = await chatApi.startChat(user.id);
       window.location.href = `/messages?chat=${res.data.conversation_id}`;
-    } catch (e) {
-      console.error("Ошибка создания чата", e);
-    }
+    } catch (e) { console.error("Ошибка создания чата", e); }
   };
 
   return (
@@ -73,11 +70,7 @@ export function PublicProfile() {
             </a>
           )}
 
-          {/* Кнопка "Написать" (видна всем, кроме владельца профиля) */}
-          <button 
-            onClick={handleStartChat}
-            className="w-full mt-2 py-2.5 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent-2 transition-colors flex items-center justify-center gap-2"
-          >
+          <button onClick={handleStartChat} className="w-full mt-2 py-2.5 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
             <MessageSquare size={16} /> Написать сообщение
           </button>
         </div>
@@ -85,35 +78,61 @@ export function PublicProfile() {
         {/* ПРАВАЯ КОЛОНКА: Навыки и Статистика */}
         <div className="space-y-6">
           
-          {/* НАВЫКИ (только для разработчиков) */}
+          {/* НАВЫКИ И АНАЛИЗ ИИ */}
           {user.role === "developer" && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
             <h2 className="font-semibold flex items-center gap-2 mb-4">
-              <ShieldCheck size={18} className="text-accent" /> Навыки
+              <ShieldCheck size={18} className="text-accent" /> Навыки и ИИ-Анализ
             </h2>
             
             {isTested ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-sm"><span className="text-ink-3">Архитектура:</span> <b>{skills.competency_architecture}/100</b></div>
-                <div className="text-sm"><span className="text-ink-3">Код-ревью:</span> <b>{skills.competency_code_understanding}/100</b></div>
-                <div className="text-sm"><span className="text-ink-3">Работа с ИИ:</span> <b>{skills.competency_prompting}/100</b></div>
-                <div className="text-sm"><span className="text-ink-3">Адаптация:</span> <b>{skills.competency_adaptability}/100</b></div>
-                <div className="col-span-2 mt-2 pt-4 border-t border-line flex justify-between items-center">
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-sm"><span className="text-ink-3">Архитектура:</span> <b>{skills.competency_architecture}/100</b></div>
+                  <div className="text-sm"><span className="text-ink-3">Код-ревью:</span> <b>{skills.competency_code_understanding}/100</b></div>
+                  <div className="text-sm"><span className="text-ink-3">Работа с ИИ:</span> <b>{skills.competency_prompting}/100</b></div>
+                  <div className="text-sm"><span className="text-ink-3">Адаптация:</span> <b>{skills.competency_adaptability}/100</b></div>
+                </div>
+                <div className="mt-2 pt-4 border-t border-line flex justify-between items-center">
                   <span className="text-sm text-ink-3">Итоговый уровень:</span>
                   <span className="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm font-semibold">{skills.final_grade}</span>
                 </div>
+
+                {skills.summary && (
+                  <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4">
+                    <div>
+                      <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2"><Brain size={16}/> Вердикт ИИ</h4>
+                      <p className="text-[14px] leading-relaxed text-ink-2">{skills.summary}</p>
+                    </div>
+                    
+                    <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-line">
+                      <div>
+                        <h4 className="text-[12px] font-bold text-accent mb-2 flex items-center gap-1"><CheckCircle2 size={14}/> Сильные стороны</h4>
+                        <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
+                          {skills.strengths?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="text-[12px] font-bold text-warn mb-2 flex items-center gap-1"><AlertCircle size={14}/> Зоны роста</h4>
+                        <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
+                          {skills.gaps?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
                 <AlertCircle size={32} className="mx-auto text-amber-500 mb-2 opacity-80" />
                 <div className="text-[15px] font-medium text-ink mb-1">Навыки не проверены</div>
-                <p className="text-[13px] text-ink-3">Пользователь еще не проходил собеседование на платформе.</p>
+                <p className="text-[13px] text-ink-3">Пользователь еще не проходил собеседование.</p>
               </div>
             )}
           </div>
           )}
 
-          {/* GITHUB СТАТИСТИКА (Подробная) */}
+          {/* GITHUB СТАТИСТИКА */}
           {githubData && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -136,12 +155,10 @@ export function PublicProfile() {
                 </div>
               </div>
 
-              {/* Языки */}
               {githubData.languages && githubData.languages.length > 0 && (
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3">Языки</div>
-                    <div className="text-[11px] text-ink-3">{githubData.languages.length} языков</div>
                   </div>
                   <div className="flex h-2.5 rounded-full overflow-hidden mb-3 bg-surface-2">
                     {githubData.languages.map((lang: any, i: number) => (
@@ -160,7 +177,6 @@ export function PublicProfile() {
                 </div>
               )}
 
-              {/* Репозитории */}
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-2">Репозитории</div>
                 <div className="space-y-2">
@@ -175,21 +191,11 @@ export function PublicProfile() {
                         </div>
                       </div>
                       <div className="text-[12px] text-ink-3 truncate mb-1.5">{p.description || "Без описания"}</div>
-                      {p.language && (
-                        <div className="flex items-center gap-1.5 text-[11px] text-ink-3 mt-1">
-                          <span className={`w-2 h-2 rounded-full ${getLangColor(p.language)}`} />
-                          {p.language}
-                        </div>
-                      )}
                     </a>
                   ))}
                 </div>
-                {/* Кнопка Показать все */}
                 {githubData.projects.length > 4 && (
-                  <button 
-                    onClick={() => setShowAllRepos(!showAllRepos)} 
-                    className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors"
-                  >
+                  <button onClick={() => setShowAllRepos(!showAllRepos)} className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors">
                     {showAllRepos ? "Скрыть" : `Показать все (${githubData.projects.length})`}
                   </button>
                 )}
@@ -229,10 +235,6 @@ export function PublicProfile() {
                       <span className="text-xs font-semibold text-accent">{job.salary}</span>
                     </div>
                     <p className="text-xs text-ink-3 mb-2">{job.description}</p>
-                    <div className="flex gap-2 text-[10px]">
-                      <span className="px-2 py-1 bg-surface border border-line rounded">{job.stack}</span>
-                      <span className="px-2 py-1 bg-surface border border-line rounded">{job.level}</span>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -246,24 +248,20 @@ export function PublicProfile() {
       {selectedProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-surface border border-line rounded-2xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
-            {/* Шапка модалки */}
             <div className="p-4 border-b border-line flex justify-between items-center bg-surface-2">
               <h2 className="font-bold text-lg">{selectedProject.title}</h2>
               <button onClick={() => setSelectedProject(null)} className="text-ink-3 hover:text-ink p-1"><X size={20} /></button>
             </div>
             
-            {/* Контент */}
             <div className="p-6 overflow-y-auto space-y-6">
               <p className="text-ink-2 text-sm whitespace-pre-line">{selectedProject.description}</p>
               
-              {/* Обложка */}
               {selectedProject.cover && (
                 <div className="rounded-xl overflow-hidden border border-line bg-bg-2">
                   <img src={selectedProject.cover} alt="Cover" className="w-full h-auto max-h-[400px] object-contain" />
                 </div>
               )}
               
-              {/* Дополнительные фото */}
               {selectedProject.images && selectedProject.images.length > 1 && (
                 <div>
                   <h3 className="text-sm font-semibold mb-3">Дополнительные фото</h3>

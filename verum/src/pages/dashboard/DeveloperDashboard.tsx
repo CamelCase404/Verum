@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ScoreRow } from "@/components/ui/ScoreRow";
-import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote } from "lucide-react";
+import { ShieldCheck, Github, Plus, Pencil, Trash2, Image as ImageIcon, Star, GitFork, GitCommit, AlertCircle, Banknote, Brain, CheckCircle2, XCircle } from "lucide-react";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { AddProjectModal } from "@/components/modals/AddProjectModal";
 import { InterviewModal } from "@/components/modals/InterviewModal";
@@ -16,7 +16,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   const [showAllRepos, setShowAllRepos] = useState(false);
   
   const initials = backendUser?.full_name?.substring(0, 2).toUpperCase() || "??";
-  
   const skills = backendUser?.skills;
   const isTested = !!skills && skills.final_grade && skills.final_grade !== "Reject";
   const githubData = backendUser?.github_stats;
@@ -34,27 +33,19 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
       const updatedProjects = projects.filter((p: any) => p.id !== projectId);
       await authApi.updateProfile({ projects: updatedProjects });
       onRefresh();
-    } catch (e) {
-      console.error("Ошибка удаления", e);
-    }
+    } catch (e) { console.error("Ошибка удаления", e); }
   };
 
-
-  // Расчет рыночной стоимости на основе теста и GitHub
   const calculateSalary = () => {
     if (!skills || skills.final_grade === "Reject") return 0;
     const score = skills.total_score_100 || 0;
     const grade = skills.final_grade;
-    
     const baseSalaries: Record<string, number> = { "Junior": 60000, "Middle": 150000, "Senior": 250000 };
     const baseSalary = baseSalaries[grade] || 0;
-    
     const scoreModifier = 0.8 + (score / 100) * 0.5;
     const testSalary = baseSalary * scoreModifier;
-    
     const stars = githubData?.total_stars || 0;
     const githubBonus = Math.min(stars * 1000, 30000);
-    
     return Math.round(testSalary + githubBonus);
   };
   const estimatedSalary = calculateSalary();
@@ -66,7 +57,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
           <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Личный кабинет</h1>
           <p className="text-ink-2 text-[13px] md:text-[15px]">Добро пожаловать, <span className="font-medium text-ink">{backendUser?.full_name || "Разработчик"}</span></p>
         </div>
-
         {isTested ? (
           <div className="flex items-center gap-2 md:gap-3 bg-surface border border-line rounded-xl px-3 md:px-4 py-2">
             <ShieldCheck className="text-accent" size={18} />
@@ -114,10 +104,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                   <div className="text-xl font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} ₽ <span className="text-sm text-ink-3 font-normal">/ мес</span></div>
                 </div>
               )}
-              <div className="flex justify-between text-[12px] md:text-sm">
-                <span className="text-ink-3">Специализация</span>
-                <span className="font-medium">Frontend</span>
-              </div>
               <div className="flex justify-between text-[12px] md:text-sm items-center">
                 <span className="text-ink-3">GitHub</span>
                 {backendUser?.github_username ? (
@@ -132,25 +118,51 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
 
         {/* ПРАВАЯ КОЛОНКА */}
         <div className="space-y-4 md:space-y-6">
-          {/* НАВЫКИ */}
+          {/* НАВЫКИ И АНАЛИЗ ИИ */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4 md:mb-6">
-              <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ShieldCheck size={16} className="text-accent" /> Навыки</h3>
+              <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ShieldCheck size={16} className="text-accent" /> Навыки и ИИ-Анализ</h3>
             </div>
 
             {isTested ? (
-              <div className="grid sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-2">
-                <ScoreRow label="Архитектурное мышление" value={skills.competency_architecture || 0} delay={0} />
-                <ScoreRow label="Ревью кода ИИ" value={skills.competency_code_understanding || 0} delay={1} />
-                <ScoreRow label="Работа с ИИ" value={skills.competency_prompting || 0} delay={2} />
-                <ScoreRow label="Адаптация" value={skills.competency_adaptability || 0} warn={(skills.competency_adaptability || 0) < 80} delay={3} />
-                <ScoreRow label="Soft Skills" value={skills.competency_soft_skills || 0} delay={4} />
+              <div className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-2">
+                  <ScoreRow label="Архитектурное мышление" value={skills.competency_architecture || 0} delay={0} />
+                  <ScoreRow label="Ревью кода ИИ" value={skills.competency_code_understanding || 0} delay={1} />
+                  <ScoreRow label="Работа с ИИ" value={skills.competency_prompting || 0} delay={2} />
+                  <ScoreRow label="Адаптация" value={skills.competency_adaptability || 0} warn={(skills.competency_adaptability || 0) < 80} delay={3} />
+                  <ScoreRow label="Soft Skills" value={skills.competency_soft_skills || 0} delay={4} />
+                </div>
+
+                {skills.summary && (
+                  <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4">
+                    <div>
+                      <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2"><Brain size={16}/> Вердикт ИИ</h4>
+                      <p className="text-[14px] leading-relaxed text-ink-2">{skills.summary}</p>
+                    </div>
+                    
+                    <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-line">
+                      <div>
+                        <h4 className="text-[12px] font-bold text-accent mb-2 flex items-center gap-1"><CheckCircle2 size={14}/> Сильные стороны</h4>
+                        <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
+                          {skills.strengths?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="text-[12px] font-bold text-warn mb-2 flex items-center gap-1"><AlertCircle size={14}/> Зоны роста</h4>
+                        <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
+                          {skills.gaps?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-4 md:py-6">
                 <ShieldCheck size={32} className="mx-auto text-ink-4 mb-2 md:mb-3 opacity-30 md:w-10 md:h-10" />
                 <div className="text-[14px] md:text-[15px] font-medium mb-1">Навыки не проверены</div>
-                <p className="text-[12px] md:text-[13px] text-ink-3 mb-3 md:mb-4">Пройдите собеседование, чтобы подтвердить уровень</p>
+                <p className="text-[12px] md:text-[13px] text-ink-3 mb-3 md:mb-4">Пройдите собеседование, чтобы подтвердить уровень и получить ИИ-анализ</p>
                 <button onClick={() => setIsInterviewOpen(true)} className="px-4 md:px-5 py-2 bg-accent text-white rounded-lg text-[13px] md:text-sm font-medium hover:bg-accent-2 transition-colors">
                   Начать собеседование
                 </button>
@@ -164,7 +176,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><Github size={16} className="text-accent" /> GitHub</h3>
               {githubData && <span className="text-[11px] md:text-xs text-ink-3">@{githubData.username}</span>}
             </div>
-
             {githubData ? (
               <>
                 <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5">
@@ -181,11 +192,9 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                     <div className="text-[10px] md:text-[11px] text-ink-3">подписчиков</div>
                   </div>
                 </div>
-
                 <div className="mb-5">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3">Языки</div>
-                    <div className="text-[11px] text-ink-3">{githubData.languages?.length || 0} языков</div>
                   </div>
                   <div className="flex w-full h-2.5 rounded-full overflow-hidden mb-3 bg-surface-2">
                     {githubData.languages?.map((lang: any, i: number) => (
@@ -202,7 +211,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                     ))}
                   </div>
                 </div>
-
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3 mb-2">Репозитории</div>
                   <div className="space-y-2 pr-1">
@@ -217,20 +225,10 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                           </div>
                         </div>
                         <div className="text-[11px] md:text-[12px] text-ink-3 truncate mb-1.5">{p.description || "Без описания"}</div>
-                        {p.language && (
-                          <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] text-ink-3 mt-1">
-                            <span className={`w-2 h-2 rounded-full ${getLangColor(p.language)}`} />
-                            {p.language}
-                          </div>
-                        )}
                       </a>
                     ))}
-
                     {githubData.projects?.length > 3 && (
-                      <button 
-                        onClick={() => setShowAllRepos(!showAllRepos)} 
-                        className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors"
-                      >
+                      <button onClick={() => setShowAllRepos(!showAllRepos)} className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors">
                         {showAllRepos ? "Скрыть" : `Показать все (${githubData.projects.length})`}
                       </button>
                     )}
@@ -239,12 +237,8 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               </>
             ) : (
               <div className="text-center py-4 md:py-6">
-                <Github size={32} className="mx-auto text-ink-4 mb-2 md:mb-3 opacity-30 md:w-10 md:h-10" />
                 <div className="text-[14px] md:text-[15px] font-medium mb-1">GitHub не подключён</div>
-                <p className="text-[12px] md:text-[13px] text-ink-3 mb-3 md:mb-4">Авторизуйтесь, чтобы загрузить проекты</p>
-                <a href="http://localhost:8000/api/auth/github" className="px-4 md:px-5 py-2 bg-surface-2 border border-line-2 text-ink rounded-lg text-[13px] md:text-sm font-medium hover:bg-surface-3 transition-colors inline-block">
-                  Подключить GitHub
-                </a>
+                <a href="http://localhost:8000/api/auth/github" className="mt-3 px-4 md:px-5 py-2 bg-surface-2 border border-line-2 text-ink rounded-lg text-[13px] md:text-sm font-medium hover:bg-surface-3 transition-colors inline-block">Подключить</a>
               </div>
             )}
           </div>
@@ -266,13 +260,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                     <div className="p-3 md:p-4 flex-1 flex flex-col">
                       <h4 className="font-medium text-[13px] md:text-[14px] mb-1">{project.title}</h4>
                       <p className="text-[11px] md:text-[12.5px] text-ink-3 line-clamp-2 mb-2">{project.description}</p>
-                      {project.images && project.images.length > 1 && (
-                        <div className="flex gap-1.5 mt-auto pt-2 overflow-x-auto">
-                          {project.images.slice(1).map((img: string, idx: number) => (
-                            <img key={idx} src={img} className="w-8 h-8 md:w-10 md:h-10 rounded object-cover border border-line flex-shrink-0" />
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
