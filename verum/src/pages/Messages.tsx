@@ -100,9 +100,9 @@ export function Messages() {
     <div className="flex-1 w-full flex overflow-hidden bg-bg">
       
       {/* ЛЕВАЯ КОЛОНКА */}
-      <div className={`w-full md:w-[320px] lg:w-[380px] border-r border-line flex-col bg-surface-2 ${activeConv ? "hidden md:flex" : "flex"}`}>
+      <div className={`w-full md:w-[320px] lg:w-[380px] border-r border-line-2 flex-col bg-surface shadow-[2px_0_12px_rgba(0,0,0,0.04)] dark:shadow-[2px_0_12px_rgba(0,0,0,0.4)] z-10 ${activeConv ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-line bg-surface">
-          <h1 className="text-xl font-bold">Сообщения</h1>
+          <h1 className="text-xl font-bold tracking-tight">Сообщения</h1>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {loading ? (
@@ -111,7 +111,7 @@ export function Messages() {
             <button 
               key={c.id} 
               onClick={() => { setActiveConv(c); clearImage(); setText(""); }}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeConv?.id === c.id ? "bg-accent/10 border border-accent/20" : "hover:bg-surface-3 border border-transparent"}`}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${activeConv?.id === c.id ? "bg-accent/10 border border-accent/30 shadow-sm" : "hover:bg-surface-2 border border-transparent"}`}
             >
               <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center overflow-hidden flex-shrink-0">
                 {c.other_avatar ? <img src={c.other_avatar} className="w-full h-full object-cover" /> : c.other_name.substring(0, 2).toUpperCase()}
@@ -128,10 +128,10 @@ export function Messages() {
       </div>
 
       {/* ПРАВАЯ КОЛОНКА */}
-      <div className={`flex-1 flex-col bg-bg ${activeConv ? "flex" : "hidden md:flex"}`}>
+      <div className={`flex-1 flex-col bg-bg relative ${activeConv ? "flex" : "hidden md:flex"}`}>
         {activeConv ? (
           <>
-            <div className="p-3 border-b border-line bg-surface flex items-center gap-3">
+            <div className="p-3 border-b border-line bg-surface flex items-center gap-3 shadow-sm z-10">
               <button onClick={() => setActiveConv(null)} className="md:hidden text-ink-3 hover:text-ink"><ArrowLeft size={20} /></button>
               <button onClick={() => navigate(`/profile/${activeConv.other_id}`)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center overflow-hidden">

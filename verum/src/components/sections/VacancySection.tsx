@@ -9,14 +9,28 @@ import { toast } from "@/components/layout/ToastContainer";
 
 export function VacancySection() {
   const navigate = useNavigate();
-  const { user } = useAppStore();
+  const user = useAppStore((s) => s.user);
+
+  const handlePostJob = () => {
+    if (!user) {
+      toast("Пожалуйста, войдите или зарегистрируйтесь как компания");
+      navigate("/register?role=company");
+    } else if (user.role === "company") {
+      navigate("/dashboard");
+    } else {
+      toast("❌ Размещать вакансии могут только компании");
+    }
+  };
+
 
   const handleCreateVacancy = () => {
     if (!user) {
-      toast("Для размещения вакансии необходимо зарегистрироваться");
-      navigate("/register");
-    } else {
+      toast("Пожалуйста, войдите или зарегистрируйтесь как компания");
+      navigate("/register?role=company");
+    } else if (user.role === "company") {
       navigate("/dashboard");
+    } else {
+      toast("❌ Размещать вакансии могут только компании");
     }
   };
 

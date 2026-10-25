@@ -38,8 +38,8 @@ export function Nav() {
           {/* Плавный переключатель темы (Тумблер) */}
           <button 
             onClick={toggleTheme} 
-            className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-              theme === "dark" ? "bg-accent/20 border border-accent/30" : "bg-surface-3 border border-line"
+            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none border ${
+              theme === "dark" ? "bg-surface-2 border-line-2" : "bg-surface-3 border-line"
             }`}
             title="Переключить тему"
           >
@@ -47,16 +47,16 @@ export function Nav() {
             
             {/* Иконки внутри тумблера */}
             <span className={`absolute left-1.5 transition-opacity duration-300 ${theme === "dark" ? "opacity-100" : "opacity-0"}`}>
-              <Moon size={14} className="text-accent" />
+              <Moon size={12} className="text-ink-4" />
             </span>
             <span className={`absolute right-1.5 transition-opacity duration-300 ${theme === "dark" ? "opacity-0" : "opacity-100"}`}>
-              <Sun size={14} className="text-ink-3" />
+              <Sun size={12} className="text-ink-4" />
             </span>
 
             {/* Сам ползунок */}
             <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition-transform duration-300 ease-in-out ${
-                theme === "dark" ? "translate-x-8 bg-accent" : "translate-x-1 bg-white"
+              className={`inline-block h-5 w-5 transform rounded-full shadow-sm ring-0 transition-transform duration-300 ease-in-out ${
+                theme === "dark" ? "translate-x-6 bg-accent" : "translate-x-1 bg-white"
               }`}
             />
           </button>
