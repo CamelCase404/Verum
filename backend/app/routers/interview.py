@@ -23,10 +23,16 @@ from ..schemas import (
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
-STAGE_NAMES = {0: "Общие знания", 1: "Code Review", 2: "Нагрузка"}
+STAGE_NAMES = {
+    0: "Общие знания",
+    1: "Code Review",
+    2: "Нагрузка",
+    3: "Code Review (Повторный)",
+    4: "Нагрузка (Повторный)"
+}
 MIN_ANSWER_LENGTH = 10
 MAX_SECONDS_PER_ANSWER = 180
-QUESTIONS_PER_STAGE = 5
+STAGE0_QUESTIONS = 10
 
 
 def _is_trash_answer(text: str, seconds_spent: int) -> tuple[bool, str | None]:
@@ -254,58 +260,47 @@ def answer(req: AnswerRequest) -> AnswerResponse:
 
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
 
-    if it.stage == 0 and answers_on_stage >= QUESTIONS_PER_STAGE:
+    # Переход на 1-й этап (Code Review 1)
+    if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
-        question, code = _generate_code_review_task(
-            it.level, it.stack_id, it.language_id
-        )
-        it.turns.append(
-            Turn(
-                role="assistant",
-                content=question + "\n\nКод:\n" + code,
-                seconds_spent=0,
-            )
-        )
+        question, code = _generate_code_review_task(it.level, it.stack_id, it.language_id)
+        it.turns.append(Turn(role="assistant", content=question + "\n\nКод:\n" + code, seconds_spent=0))
         save(it)
-        return AnswerResponse(
-            stage=1, stage_name=STAGE_NAMES[1], question=question, code_snippet=code
-        )
+        return AnswerResponse(stage=1, stage_name=STAGE_NAMES[1], question=question, code_snippet=code)
 
-    elif it.stage == 1 and answers_on_stage >= QUESTIONS_PER_STAGE + 1:
+    # Переход на 2-й этап (Нагрузка 1)
+    elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:
         it.stage = 2
-        prev_prompt = next(
-            (
-                t.content
-                for t in reversed(it.turns)
-                if t.role == "user" and len(t.content) > 10
-            ),
-            "",
-        )
-        prev_code = next(
-            (
-                t.content
-                for t in reversed(it.turns)
-                if t.role == "assistant" and "Код:" in t.content
-            ),
-            "",
-        )
-        q = _generate_pure_question(
-            2,
-            it.level,
-            it.stack_id,
-            it.language_id,
-            past_questions,
-            prev_code,
-            prev_prompt,
-        )
+        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10), "")
+        prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
+        q = _generate_pure_question(2, it.level, it.stack_id, it.language_id, past_questions, prev_code, prev_prompt)
         it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
         save(it)
         return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], question=q)
 
-    elif it.stage == 2 and answers_on_stage >= QUESTIONS_PER_STAGE + 2:
+    # Переход на 3-й этап (Code Review 2)
+    elif it.stage == 2 and answers_on_stage >= STAGE0_QUESTIONS + 2:
+        it.stage = 3
+        question, code = _generate_code_review_task(it.level, it.stack_id, it.language_id)
+        it.turns.append(Turn(role="assistant", content=question + "\n\nКод:\n" + code, seconds_spent=0))
+        save(it)
+        return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], question=question, code_snippet=code)
+
+    # Переход на 4-й этап (Нагрузка 2)
+    elif it.stage == 3 and answers_on_stage >= STAGE0_QUESTIONS + 3:
+        it.stage = 4
+        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10), "")
+        prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
+        q = _generate_pure_question(4, it.level, it.stack_id, it.language_id, past_questions, prev_code, prev_prompt)
+        it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
+        save(it)
+        return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], question=q)
+
+    # Завершение интервью
+    elif it.stage == 4 and answers_on_stage >= STAGE0_QUESTIONS + 4:
         it.finished = True
         save(it)
-        return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], finished=True)
+        return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], finished=True)
 
     q = _generate_pure_question(
         it.stage, it.level, it.stack_id, it.language_id, past_questions
