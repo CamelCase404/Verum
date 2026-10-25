@@ -1,21 +1,33 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
         bg: "var(--bg)",
-        card: "var(--card)",
+        page: "var(--surface-2)", // Часто используется как bg-page
+        card: "var(--surface)",   // bg-card
+        surface: "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        "surface-3": "var(--surface-3)",
         ink: "var(--ink)",
-        muted: "var(--muted)",
-        divider: "var(--divider)",
+        "ink-2": "var(--ink-2)",
+        "ink-3": "var(--ink-3)",
+        "ink-4": "var(--ink-4)",
+        divider: "var(--line)",   // border-divider
+        line: "var(--line)",
+        "line-2": "var(--line-2)",
         accent: "var(--accent)",
-        accentSoft: "var(--accent-soft)",
-        page: "var(--page)",
+        "accent-2": "var(--accent-2)",
+        "accent-3": "var(--accent-3)",
+        "accent-soft": "var(--accent-soft)",
+        "accent-soft/50": "var(--accent-soft)",
+        "accent-line": "var(--accent-line)",
+        warn: "var(--warn)",
+        "warn-soft": "var(--warn-soft)",
+        amber: "var(--amber)",
+        "amber-soft": "var(--amber-soft)",
       },
-      borderRadius: {
-        xl2: "22px", // ВОЗВРАЩАЕМ ВАШИ ЗАКРУГЛЕНИЯ
-      }
     },
   },
   plugins: [],

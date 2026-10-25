@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Landing from "./pages/Landing";
 import Consent from "./pages/Consent";
@@ -36,10 +36,14 @@ const pageVariants = {
     initial: { opacity: 0, y: 15 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -15 },
-    transition: { duration: 0.3, ease: "easeOut" }
+    transition: { duration: 0.3, ease: "easeOut" },
 };
 
 export default function App() {
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    }, []);
     const { session, save, clear } = useSession();
     const [view, setView] = useState<View>({ kind: "landing" });
 
@@ -87,7 +91,11 @@ export default function App() {
         <main className="min-h-screen bg-page flex flex-col relative overflow-hidden">
             <AnimatePresence mode="wait">
                 {view.kind === "landing" && (
-                    <motion.div key="landing" {...pageVariants} className="flex-1 flex flex-col">
+                    <motion.div
+                        key="landing"
+                        {...pageVariants}
+                        className="flex-1 flex flex-col"
+                    >
                         <Landing
                             activeSession={session}
                             onStarted={handleStarted}
@@ -95,9 +103,13 @@ export default function App() {
                         />
                     </motion.div>
                 )}
-                
+
                 {view.kind === "consent" && (
-                    <motion.div key="consent" {...pageVariants} className="flex-1 flex flex-col">
+                    <motion.div
+                        key="consent"
+                        {...pageVariants}
+                        className="flex-1 flex flex-col"
+                    >
                         <Consent
                             payload={view.payload}
                             onConfirm={handleConsented}
@@ -105,9 +117,13 @@ export default function App() {
                         />
                     </motion.div>
                 )}
-                
+
                 {view.kind === "interview" && (
-                    <motion.div key="interview" {...pageVariants} className="flex-1 flex flex-col">
+                    <motion.div
+                        key="interview"
+                        {...pageVariants}
+                        className="flex-1 flex flex-col"
+                    >
                         <Interview
                             payload={view.payload}
                             seedMessages={view.seedMessages}
@@ -116,9 +132,13 @@ export default function App() {
                         />
                     </motion.div>
                 )}
-                
+
                 {view.kind === "processing" && (
-                    <motion.div key="processing" {...pageVariants} className="flex-1 flex flex-col">
+                    <motion.div
+                        key="processing"
+                        {...pageVariants}
+                        className="flex-1 flex flex-col"
+                    >
                         <Processing
                             interviewId={view.interviewId}
                             level={view.level}
@@ -127,10 +147,17 @@ export default function App() {
                         />
                     </motion.div>
                 )}
-                
+
                 {view.kind === "report" && (
-                    <motion.div key="report" {...pageVariants} className="flex-1 flex flex-col">
-                        <Report report={view.report} onRestart={handleRestart} />
+                    <motion.div
+                        key="report"
+                        {...pageVariants}
+                        className="flex-1 flex flex-col"
+                    >
+                        <Report
+                            report={view.report}
+                            onRestart={handleRestart}
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>

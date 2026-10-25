@@ -34,7 +34,7 @@ export default function Processing({
                 if (cancelled) return;
 
                 // Сохраняем отчёт в профиль пользователя (если залогинен)
-                if (localStorage.getItem("token")) {
+                if (localStorage.getItem("verum_token")) {
                     try {
                         await api.saveSkills(report);
                     } catch (e) {

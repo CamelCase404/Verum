@@ -133,7 +133,7 @@ def search_candidates(req: SearchRequest, user: UserDB = Depends(get_current_use
             test_salary = base_salary * score_modifier
             
             # Бонус за GitHub (по 1000 руб за звезду, но не более 30к)
-            gh_stats = data.get("github_stats") or {}
+            gh_stats = u.github_stats or {}
             stars = gh_stats.get("total_stars", 0)
             github_bonus = min(stars * 1000, 30000)
             

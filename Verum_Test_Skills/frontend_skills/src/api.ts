@@ -22,7 +22,7 @@ export class ApiError extends Error {
 }
 
 function authHeaders(): Record<string, string> {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("verum_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
