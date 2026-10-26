@@ -190,6 +190,7 @@ async def upload_avatar(file: UploadFile = File(...), user: UserDB = Depends(get
     if not file.content_type.startswith("image/"): raise HTTPException(400, "Только изображения")
     ext = file.filename.split(".")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
+    os.makedirs("uploads/avatars", exist_ok=True)
     filepath = f"uploads/avatars/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
     url = f"http://localhost:8000/uploads/avatars/{filename}"
@@ -202,6 +203,7 @@ async def upload_image(file: UploadFile = File(...), user: UserDB = Depends(get_
     if not file.content_type.startswith("image/"): raise HTTPException(400, "Только изображения")
     ext = file.filename.split(".")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
+    os.makedirs("uploads/images", exist_ok=True)
     os.makedirs("uploads/images", exist_ok=True)
     filepath = f"uploads/images/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)

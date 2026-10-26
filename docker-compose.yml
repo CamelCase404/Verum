@@ -1,0 +1,50 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: verum_db
+    environment:
+      POSTGRES_USER: verum_user
+      POSTGRES_PASSWORD: verum_password_secure
+      POSTGRES_DB: verum_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: verum_backend
+    environment:
+      - DATABASE_URL=postgresql://verum_user:verum_password_secure@db:5432/verum_db
+      - SECRET_KEY=super_secret_key_change_me_in_production
+      - FRONTEND_URL=http://localhost:5173
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    restart: always
+
+  frontend_main:
+    build:
+      context: ./verum
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: verum_frontend_main
+    ports:
+      - "5173:80"
+    restart: always
+
+  frontend_test:
+    build:
+      context: ./Verum_Test_Skills/frontend_skills
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: verum_frontend_test
+    ports:
+      - "5174:80"
+    restart: always
+
+volumes:
+  postgres_data:

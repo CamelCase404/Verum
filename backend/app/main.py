@@ -32,6 +32,8 @@ app.include_router(chat.router)
 app.include_router(company.router)
 
 
+import os
+os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/api/health")
