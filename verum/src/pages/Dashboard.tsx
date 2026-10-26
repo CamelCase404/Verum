@@ -21,7 +21,7 @@ export function Dashboard() {
     }
     authApi.getMe().then((res) => {
       setBackendUser(res.data);
-      if (setStoreUser) setStoreUser({ name: res.data.full_name, email: res.data.email });
+      if (setStoreUser) setStoreUser({ name: res.data.full_name, email: res.data.email, role: res.data.role });
       if (setStoreRole) setStoreRole(res.data.role);
       setLoading(false);
     }).catch(() => navigate("/login"));

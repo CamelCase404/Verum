@@ -83,6 +83,7 @@ class ReportResponse(BaseModel):
 class UserRole(str, Enum):
     DEVELOPER = "developer"
     COMPANY = "company"
+    ADMIN = "admin"
 
 class UserRegister(BaseModel):
     email: str
@@ -113,6 +114,8 @@ class UserProfile(BaseModel):
     projects: list[dict] | None = None
     job_postings: list[dict] | None = None
     last_test_at: datetime | None = None
+    test_status: str | None = None
+    interview_video_url: str | None = None
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None

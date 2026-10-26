@@ -79,7 +79,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
         load();
     }, []);
 
-    const level: Option | undefined = useMemo(() => catalog?.levels.find((l) => l.id === levelId), [catalog, levelId]);
+    const _level: Option | undefined = useMemo(() => catalog?.levels.find((l) => l.id === levelId), [catalog, levelId]);
     const stack: StackOption | undefined = useMemo(() => catalog?.stacks.find((s) => s.id === stackId), [catalog, stackId]);
 
     const canStart = Boolean(stackId && languageIds.length > 0) && !loading;
@@ -183,22 +183,19 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                 const active = l.id === levelId;
                                 const Icon = getIcon(l.icon);
                                 return (
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                    <button
                                         key={l.id}
                                         onClick={() => setLevelId(l.id as LevelId)}
-                                        className={`text-left rounded-[22px] border p-4 transition-colors duration-300 ${active ? "border-accent bg-accentSoft shadow-md" : "border-divider bg-page hover:border-muted hover:shadow-md"}`}
+                                        className={`text-left rounded-[22px] border p-4 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
                                     >
                                         <div className="flex items-center gap-2 justify-center">
-                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-accent text-white shadow-sm" : "bg-card text-ink"}`}>
+                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
                                                 <Icon size={16} />
                                             </span>
                                             <span className="font-semibold text-[15px]">{l.name}</span>
                                         </div>
-                                        <p className="text-muted text-[12px] mt-3 text-center leading-snug">{l.description}</p>
-                                    </motion.button>
+                                        <p className={`text-[12px] mt-3 text-center leading-snug ${active ? "text-white/80" : "text-muted"}`}>{l.description}</p>
+                                    </button>
                                 );
                             })}
                         </div>
@@ -211,22 +208,19 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                 const active = s.id === stackId;
                                 const Icon = getIcon(s.icon);
                                 return (
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                    <button
                                         key={s.id}
                                         onClick={() => {
                                             setStackId(s.id);
                                             setLanguageIds([]);
                                         }}
-                                        className={`flex items-center gap-3 rounded-[22px] border px-5 py-3 transition-colors duration-300 ${active ? "border-accent bg-accentSoft shadow-md" : "border-divider bg-page hover:border-muted hover:shadow-md"}`}
+                                        className={`flex items-center gap-3 rounded-[22px] border px-5 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
                                     >
-                                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${active ? "bg-accent text-white shadow-sm" : "bg-card text-ink"}`}>
+                                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
                                             <Icon size={18} />
                                         </span>
                                         <span className="font-semibold text-[14px]">{s.name}</span>
-                                    </motion.button>
+                                    </button>
                                 );
                             })}
                         </div>
@@ -241,28 +235,25 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                         >
                             <div className="flex items-center justify-center gap-3">
                                 <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted">Языки (макс. 4)</h2>
-                                <span className="text-[12px] font-medium bg-page px-2 py-0.5 rounded text-muted">{languageIds.length} / 4</span>
+                                <span className="text-[12px] font-medium bg-surface-3 px-2 py-0.5 rounded text-muted">{languageIds.length} / 4</span>
                             </div>
                             <div className="mt-4 flex flex-wrap justify-center gap-3">
                                 {stack.languages.map((lang) => {
                                     const active = languageIds.includes(lang.id);
                                     const Icon = getIcon(lang.icon);
                                     return (
-                                        <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                        <button
                                             key={lang.id}
                                             onClick={() => toggleLanguage(lang.id)}
                                             disabled={!active && languageIds.length >= 4}
-                                            className={`flex items-center gap-2 rounded-[22px] border px-4 py-3 transition-colors duration-300 ${active ? "border-accent bg-accentSoft shadow-md" : "border-divider bg-page hover:border-muted hover:shadow-md"} ${!active && languageIds.length >= 4 ? "opacity-40 cursor-not-allowed" : ""}`}
+                                            className={`flex items-center gap-2 rounded-[22px] border px-4 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-md shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"} ${!active && languageIds.length >= 4 ? "opacity-40 cursor-not-allowed" : ""}`}
                                         >
-                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-accent text-white" : "bg-card text-ink"}`}>
+                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white" : "bg-card text-ink"}`}>
                                                 <Icon size={16} />
                                             </span>
                                             <span className="font-medium text-[13px]">{lang.name}</span>
-                                            {active && <Check size={14} className="ml-1 text-accent" />}
-                                        </motion.button>
+                                            {active && <Check size={14} className="ml-1 text-white" />}
+                                        </button>
                                     );
                                 })}
                             </div>
@@ -270,12 +261,9 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                     )}
 
                     <div className="mt-12 pt-8 border-t border-divider flex flex-col items-center transition-colors duration-300">
-                        <motion.button
+                        <button
                             disabled={!canStart}
                             onClick={start}
-                            whileHover={{ scale: canStart ? 1.02 : 1 }}
-                            whileTap={{ scale: canStart ? 0.98 : 1 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
                             className="w-full max-w-sm inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white font-semibold py-4 disabled:opacity-40 transition-colors duration-200 shadow-lg"
                         >
                             {loading ? (
@@ -283,7 +271,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                             ) : (
                                 "Начать интервью"
                             )}
-                        </motion.button>
+                        </button>
                         {error && <p className="mt-3 text-red-500 text-[13px] text-center">{error}</p>}
                     </div>
                 </div>

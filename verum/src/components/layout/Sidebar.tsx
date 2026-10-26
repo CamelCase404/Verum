@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageSquare, User, LogOut } from "lucide-react";
+import { X, MessageSquare, User, LogOut, ShieldCheck } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Drawer() {
@@ -16,6 +16,7 @@ export function Drawer() {
   const navItems = [
     { title: "ПЛАТФОРМА", links: [
       { name: "Главная", path: "/" },
+      ...(user?.role === "admin" ? [{ name: "🛡️ Модерация", path: "/admin" }] : []),
       { name: "О проекте", path: "/about" },
       { name: "Как работает", path: "/how" },
       { name: "Уровни проверки", path: "/levels" },

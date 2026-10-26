@@ -38,6 +38,7 @@ import AuthCallback from "@/pages/AuthCallback";
 import { Dashboard } from "@/pages/Dashboard";
 import { Messages } from "@/pages/Messages";
 import { PublicProfile } from "@/pages/PublicProfile";
+import { AdminDashboard } from "@/pages/AdminDashboard";
 
 function Layout() {
   const location = useLocation();
@@ -114,6 +115,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Route>
       </Routes>
 

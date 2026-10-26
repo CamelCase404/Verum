@@ -28,7 +28,7 @@ export default function LoginPage() {
             const res = await authApi.login(email, password);
             setToken(res.data.access_token);
             const me = await authApi.getMe();
-            setUser(me.data);
+            setUser({ name: me.data.full_name, email: me.data.email, role: me.data.role });
             navigate("/dashboard");
         } catch (err: any) {
             setError(err.message || "Ошибка входа");

@@ -54,12 +54,7 @@ body {
     padding: 0;
     background-color: var(--bg);
     color: var(--ink);
-    font-family:
-        "Inter",
-        -apple-system,
-        sans-serif;
-    transition:
-        background-color 0.3s ease,
-        color 0.3s ease;
+    font-family: "Inter", -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
 }

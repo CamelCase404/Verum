@@ -37,7 +37,7 @@ export default function RegisterPage() {
             const res = await authApi.register({ email, password, role, full_name: fullName });
             setToken(res.data.access_token);
             const me = await authApi.getMe();
-            setUser({ name: fullName || me.data.name, email: email, role: role });
+            setUser({ name: fullName || me.data.full_name, email: email, role: me.data.role });
             navigate("/dashboard");
         } catch (err: any) {
             setError(err.message || "Ошибка регистрации");

@@ -85,6 +85,7 @@ export const api = {
         request<{ status: string }>("/api/auth/skills", {
             method: "POST",
             body: JSON.stringify({
+                interview_id: report.interview_id,
                 final_grade: report.final_grade ?? "Reject",
                 total_score_100: report.total_score_100 ?? 0,
                 stack_id: report.stack_id,

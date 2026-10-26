@@ -36,7 +36,7 @@ export default function Processing({
                 // Сохраняем отчёт в профиль пользователя (если залогинен)
                 if (localStorage.getItem("verum_token")) {
                     try {
-                        await api.saveSkills(report);
+                        await api.saveSkills({ ...report, interview_id: interviewId });
                     } catch (e) {
                         // не блокируем показ отчёта, если сохранение упало
                         console.warn("Не удалось сохранить навыки:", e);

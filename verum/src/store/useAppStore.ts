@@ -18,6 +18,8 @@ interface AppState {
   toggleChat: () => void;
   togglePalette: () => void;
   setUser: (u: User | null) => void;
+  setRole: (r: any) => void;
+  setView: (v: any) => void;
   updateProfile: (p: Partial<Profile>) => void;
   addProject: (project: any) => void;
   removeProject: (id: string) => void;
@@ -57,6 +59,8 @@ export const useAppStore = create<AppState>()(
       toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
       togglePalette: () => set((s) => ({ paletteOpen: !s.paletteOpen })),
       setUser: (u) => set({ user: u }),
+      setRole: () => {},
+      setView: () => {},
       updateProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
       addProject: (project) => set((s) => ({ profile: { ...s.profile, projects: [project, ...s.profile.projects] } })),
       removeProject: (id) => set((s) => ({ profile: { ...s.profile, projects: s.profile.projects.filter(p => p.id !== id) } })),

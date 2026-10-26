@@ -89,14 +89,17 @@ export function StaggerItem({
 export function HoverLift({
   children,
   className = "",
+  onClick,
 }: {
   children: ReactNode;
   className?: string;
+  onClick?: () => void;
 }) {
   return (
     <motion.div
       whileHover={{ y: -4, transition: { duration: 0.25, ease: EASE } }}
       className={className}
+      onClick={onClick}
     >
       {children}
     </motion.div>

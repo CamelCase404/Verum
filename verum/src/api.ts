@@ -73,7 +73,7 @@ export const authApi = {
   saveSkills: (report: any) =>
     request("/api/auth/skills", { method: "POST", body: JSON.stringify(report) }),
 
-  searchCandidates: (filters: { grade?: string, job_id?: string }) =>
+  searchCandidates: (filters: any) =>
     request("/api/auth/search", { method: "POST", body: JSON.stringify(filters) }),
 };
 

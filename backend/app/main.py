@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from .config import settings
-from .routers import auth, auth_github, catalog, github, interview, media, chat, company
+from .routers import auth, auth_github, catalog, github, interview, media, chat, company, admin
 
 app = FastAPI(title="Verum API", version="0.1.0")
 
@@ -30,6 +30,7 @@ app.include_router(github.router)
 app.include_router(auth_github.router)
 app.include_router(chat.router)
 app.include_router(company.router)
+app.include_router(admin.router)
 
 
 import os

@@ -5,8 +5,8 @@ export default {
     extend: {
       colors: {
         bg: "var(--bg)",
-        page: "var(--bg)", // ИСПРАВЛЕНО: теперь фон страницы совпадает с главным сайтом
-        card: "var(--surface)", // ИСПРАВЛЕНО: блоки теперь светлее фона
+        page: "var(--bg)",        // Фон страницы = --bg (темный)
+        card: "var(--surface)",   // Карточки = --surface (светлее)
         surface: "var(--surface)",
         "surface-2": "var(--surface-2)",
         "surface-3": "var(--surface-3)",
@@ -21,7 +21,7 @@ export default {
         "accent-2": "var(--accent-2)",
         "accent-3": "var(--accent-3)",
         "accent-soft": "var(--accent-soft)",
-        "accent-soft/50": "var(--accent-soft)",
+        "accentSoft": "var(--accent-soft)",
         "accent-line": "var(--accent-line)",
         warn: "var(--warn)",
         "warn-soft": "var(--warn-soft)",

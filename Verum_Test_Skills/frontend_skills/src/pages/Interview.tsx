@@ -142,7 +142,7 @@ export default function Interview({
     }, [msgs.length, finished, failed, isCameraReady, showSkipModal]);
 
     // ---------- Провал интервью ----------
-    const failInterview = async (reason: string) => {
+    const failInterview = async (_reason: string) => {
         if (isFailingRef.current || finished || failed) return;
         isFailingRef.current = true;
         setFailed(true);

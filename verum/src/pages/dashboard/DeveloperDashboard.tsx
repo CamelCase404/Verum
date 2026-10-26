@@ -19,6 +19,8 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   
   const initials = backendUser?.full_name?.substring(0, 2).toUpperCase() || "??";
   const skills = backendUser?.skills;
+  const isPending = backendUser?.test_status === "pending";
+  const isRejected = backendUser?.test_status === "rejected";
   const isTested = !!skills && skills.final_grade && skills.final_grade !== "Reject";
   const githubData = backendUser?.github_stats;
   const projects = backendUser?.projects || [];
@@ -97,7 +99,19 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
           <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Личный кабинет</h1>
           <p className="text-ink-2 text-[13px] md:text-[15px]">Добро пожаловать, <span className="font-medium text-ink">{backendUser?.full_name || "Разработчик"}</span></p>
         </div>
-        {isTested ? (
+        {isPending ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
+                <ShieldCheck size={32} className="mx-auto text-accent mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Собеседование на проверке</div>
+                <p className="text-[13px] text-ink-3">Модератор проверяет ваше видео. Результаты появятся позже.</p>
+              </div>
+            ) : isRejected ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
+                <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Собеседование отклонено</div>
+                <p className="text-[13px] text-ink-3">Модератор отклонил результаты. Попробуйте еще раз позже.</p>
+              </div>
+            ) : isTested ? (
           <div className="flex items-center gap-2 md:gap-3 bg-surface border border-line rounded-xl px-3 md:px-4 py-2">
             <ShieldCheck className="text-accent" size={18} />
             <div>
@@ -219,7 +233,19 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ShieldCheck size={16} className="text-accent" /> Навыки и ИИ-Анализ</h3>
             </div>
 
-            {isTested ? (
+            {isPending ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
+                <ShieldCheck size={32} className="mx-auto text-accent mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Собеседование на проверке</div>
+                <p className="text-[13px] text-ink-3">Модератор проверяет ваше видео. Результаты появятся позже.</p>
+              </div>
+            ) : isRejected ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
+                <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Собеседование отклонено</div>
+                <p className="text-[13px] text-ink-3">Модератор отклонил результаты. Попробуйте еще раз позже.</p>
+              </div>
+            ) : isTested ? (
               <div className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-2">
                   <ScoreRow label="Архитектурное мышление" value={skills.competency_architecture || 0} delay={0} />

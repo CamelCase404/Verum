@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, MessageSquare, User, Sun, Moon } from "lucide-react";
+import { Menu, MessageSquare, User, Sun, Moon, ShieldCheck } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Nav() {
@@ -66,6 +66,19 @@ export function Nav() {
           {/* Кнопки авторизации / навигации */}
           {user ? (
             <div className="flex items-center gap-2">
+              
+              {/* КНОПКА АДМИНА */}
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 text-sm font-semibold hover:bg-red-500/20 transition-colors"
+                  title="Панель модератора"
+                >
+                  <ShieldCheck size={18} />
+                  <span className="hidden md:inline">Модерация</span>
+                </Link>
+              )}
+
               <Link 
                 to="/messages" 
                 className="flex items-center justify-center gap-2 p-2 md:px-3 md:py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors"

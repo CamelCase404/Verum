@@ -21,7 +21,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./portal.db")
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -43,6 +46,9 @@ class UserDB(Base):
     projects = Column(JSON, nullable=True)
     job_postings = Column(JSON, nullable=True)
     last_test_at = Column(DateTime, nullable=True)
+    test_status = Column(String, default="none")
+    pending_skills_data = Column(JSON, nullable=True)
+    interview_video_url = Column(String, nullable=True)
 
 
 
