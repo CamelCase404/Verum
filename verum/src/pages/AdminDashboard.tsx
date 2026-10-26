@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ShieldCheck, PlayCircle, XCircle, CheckCircle2, User } from "lucide-react";
+import { ShieldCheck, PlayCircle, XCircle, CheckCircle2 } from "lucide-react";
 import { getToken, authApi } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/layout/ToastContainer";
@@ -10,16 +10,6 @@ export function AdminDashboard() {
   const [pending, setPending] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
-
-  useEffect(() => {
-    authApi.getMe().then(res => {
-      if (res.data.role !== "admin") {
-        navigate("/dashboard");
-      } else {
-        fetchPending();
-      }
-    }).catch(() => navigate("/login"));
-  }, [navigate]);
 
   const fetchPending = async () => {
     try {
@@ -36,6 +26,15 @@ export function AdminDashboard() {
     }
   };
 
+  useEffect(() => {
+    authApi.getMe().then(res => {
+      if (res.data.role !== "admin") {
+        navigate("/dashboard");
+      } else {
+        fetchPending();
+      }
+    }).catch(() => navigate("/login"));
+  }, [navigate]);
 
   const handleAction = async (id: number, action: "approve" | "reject") => {
     try {
@@ -92,6 +91,20 @@ export function AdminDashboard() {
                 >
                   <PlayCircle size={20} /> Смотреть видео
                 </button>
+              )}
+
+              {/* ИСТОРИЯ ЧАТА */}
+              {p.chat_history && p.chat_history.length > 0 && (
+                <div className="bg-surface-2 rounded-xl p-3 max-h-[200px] overflow-y-auto space-y-2 text-[13px]">
+                  <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider sticky top-0 bg-surface-2 py-1">История диалога</div>
+                  {p.chat_history.map((msg: any, i: number) => (
+                    <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[90%] rounded-lg px-3 py-1.5 ${msg.role === "user" ? "bg-accent/20 text-ink" : "bg-surface border border-line text-ink-2"}`}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
 
               <div className="flex gap-2 mt-auto pt-4 border-t border-line">

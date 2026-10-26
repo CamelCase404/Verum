@@ -114,6 +114,20 @@ def answer(req: AnswerRequest) -> AnswerResponse:
     
     score = _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
 
+    # Если ответ - полный бред (0-5 баллов), прерываем интервью
+    if not is_skip and score <= 5:
+        it.finished = True
+        it.rejected = True
+        it.reject_reason = "Ответ не по теме вопроса (бред или спам)."
+        save(it)
+        return AnswerResponse(
+            stage=it.stage,
+            stage_name=STAGE_NAMES.get(it.stage, ""),
+            finished=True,
+            rejected=True,
+            reject_reason=it.reject_reason,
+        )
+
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
 
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:

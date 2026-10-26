@@ -99,19 +99,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
           <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Личный кабинет</h1>
           <p className="text-ink-2 text-[13px] md:text-[15px]">Добро пожаловать, <span className="font-medium text-ink">{backendUser?.full_name || "Разработчик"}</span></p>
         </div>
-        {isPending ? (
-              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
-                <ShieldCheck size={32} className="mx-auto text-accent mb-2 opacity-80" />
-                <div className="text-[15px] font-medium text-ink mb-1">Собеседование на проверке</div>
-                <p className="text-[13px] text-ink-3">Модератор проверяет ваше видео. Результаты появятся позже.</p>
-              </div>
-            ) : isRejected ? (
-              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
-                <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
-                <div className="text-[15px] font-medium text-ink mb-1">Собеседование отклонено</div>
-                <p className="text-[13px] text-ink-3">Модератор отклонил результаты. Попробуйте еще раз позже.</p>
-              </div>
-            ) : isTested ? (
+        {isTested ? (
           <div className="flex items-center gap-2 md:gap-3 bg-surface border border-line rounded-xl px-3 md:px-4 py-2">
             <ShieldCheck className="text-accent" size={18} />
             <div>
@@ -243,7 +231,10 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
                 <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
                 <div className="text-[15px] font-medium text-ink mb-1">Собеседование отклонено</div>
-                <p className="text-[13px] text-ink-3">Модератор отклонил результаты. Попробуйте еще раз позже.</p>
+                <p className="text-[13px] text-ink-3 mb-4">Модератор отклонил результаты.</p>
+                <button onClick={() => setIsInterviewOpen(true)} className="px-5 py-2.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-2 transition-colors">
+                  Пройти заново (Тестовый режим)
+                </button>
               </div>
             ) : isTested ? (
               <div className="space-y-6">

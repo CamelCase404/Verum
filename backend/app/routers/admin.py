@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..auth import get_db, get_current_user, UserDB
+from ..interview_store import get as get_interview
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -12,13 +13,25 @@ def require_admin(user: UserDB = Depends(get_current_user)):
 @router.get("/pending")
 def get_pending(admin: UserDB = Depends(require_admin), db: Session = Depends(get_db)):
     users = db.query(UserDB).filter(UserDB.test_status == "pending").all()
-    return [{
-        "id": u.id,
-        "full_name": u.full_name,
-        "email": u.email,
-        "video_url": u.interview_video_url,
-        "skills": u.pending_skills_data
-    } for u in users]
+    result = []
+    for u in users:
+        chat_history = []
+        if u.pending_skills_data:
+            it_id = u.pending_skills_data.get("interview_id")
+            if it_id:
+                it = get_interview(it_id)
+                if it:
+                    chat_history = [{"role": t.role, "content": t.content} for t in it.turns]
+        
+        result.append({
+            "id": u.id,
+            "full_name": u.full_name,
+            "email": u.email,
+            "video_url": u.interview_video_url,
+            "skills": u.pending_skills_data,
+            "chat_history": chat_history
+        })
+    return result
 
 @router.post("/approve/{user_id}")
 def approve(user_id: int, admin: UserDB = Depends(require_admin), db: Session = Depends(get_db)):
