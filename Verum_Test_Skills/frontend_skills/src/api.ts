@@ -10,6 +10,8 @@ const BASE =
     (import.meta.env.VITE_API_URL as string | undefined) ??
     "http://localhost:8000";
 
+const TOKEN_KEY = "verum_token";
+
 export class ApiError extends Error {
     constructor(
         public status: number,
@@ -22,7 +24,7 @@ export class ApiError extends Error {
 }
 
 function authHeaders(): Record<string, string> {
-    const token = localStorage.getItem("verum_token");
+    const token = localStorage.getItem(TOKEN_KEY);
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -43,9 +45,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
     if (!res.ok) {
         let body: unknown = undefined;
-        try {
-            body = await res.json();
-        } catch {}
+        try { body = await res.json(); } catch {}
         const message =
             typeof body === "object" && body && "detail" in body
                 ? String((body as { detail: unknown }).detail)
@@ -59,11 +59,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
     catalog: () => request<CatalogResponse>("/api/catalog"),
 
-    startInterview: (
-        level: LevelApi,
-        stack_id: string,
-        language_ids: string[],
-    ) =>
+    startInterview: (level: LevelApi, stack_id: string, language_ids: string[]) =>
         request<StartInterviewResponse>("/api/interview/start", {
             method: "POST",
             body: JSON.stringify({ level, stack_id, language_ids }),
@@ -80,12 +76,12 @@ export const api = {
             `/api/interview/${encodeURIComponent(interview_id)}/report`,
         ),
 
-    // НОВОЕ: сохраняем отчёт в skills_data пользователя
-    saveSkills: (report: ReportResponse) =>
-        request<{ status: string }>("/api/auth/skills", {
+    saveSkills: (report: ReportResponse & { interview_id?: string }) => {
+        
+        return request<{ status: string }>("/api/auth/skills", {
             method: "POST",
             body: JSON.stringify({
-                interview_id: report.interview_id,
+                interview_id: report.interview_id, // <--- ВОТ ОНА, ПЕРЕДАЧА ID
                 final_grade: report.final_grade ?? "Reject",
                 total_score_100: report.total_score_100 ?? 0,
                 stack_id: report.stack_id,
@@ -96,11 +92,11 @@ export const api = {
                 gaps: report.gaps,
                 recommendation: report.recommendation,
                 competency_architecture: report.competency_architecture,
-                competency_code_understanding:
-                    report.competency_code_understanding,
+                competency_code_understanding: report.competency_code_understanding,
                 competency_prompting: report.competency_prompting,
                 competency_adaptability: report.competency_adaptability,
                 competency_soft_skills: report.competency_soft_skills,
             }),
-        }),
+        });
+    },
 };

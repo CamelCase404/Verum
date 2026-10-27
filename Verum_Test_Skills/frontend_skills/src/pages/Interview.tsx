@@ -63,31 +63,26 @@ export default function Interview({
         null,
     );
     const [cameraError, setCameraError] = useState<string | null>(null);
-    const [debugInfo, setDebugInfo] = useState<string>("Ожидание доступа к камере...");
     const [isCameraReady, setIsCameraReady] = useState(false);
     const chunksRef = useRef<Blob[]>([]);
 
     // ---------- Камера ----------
     useEffect(() => {
+        let active = true;
+        let stream: MediaStream | null = null;
+
         const startCamera = async () => {
             try {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    setDebugInfo("ОШИБКА: Браузер не поддерживает доступ к камере (или сайт открыт не по HTTPS/localhost).");
-                    return;
-                }
-                setDebugInfo("Запрос доступа к камере...");
-                const stream = await navigator.mediaDevices.getUserMedia({
+                stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true,
                 });
                 
-                const videoTrack = stream.getVideoTracks()[0];
-                setDebugInfo(`Камера найдена: ${videoTrack ? videoTrack.label : "НЕТ ВИДЕОТРЕКА"}`);
-                
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    videoRef.current.play().catch(e => console.error("Play error:", e));
+                if (!active) {
+                    stream.getTracks().forEach(t => t.stop());
+                    return;
                 }
+
                 setMediaStream(stream);
 
                 const recorder = new MediaRecorder(stream, {
@@ -99,14 +94,21 @@ export default function Interview({
                 recorder.start();
                 setMediaRecorder(recorder);
                 setIsCameraReady(true);
-            } catch (err) {
+            } catch (err: any) {
+                if (!active) return;
                 console.error("Camera error:", err);
-                setDebugInfo(`ОШИБКА ДОСТУПА: ${err instanceof Error ? err.message : String(err)}`);
-                setCameraError("Нет доступа к камере или микрофону.");
+                setCameraError(err.message || "Нет доступа к камере или микрофону.");
             }
         };
+        
         startCamera();
-        return () => mediaStream?.getTracks().forEach((t) => t.stop());
+        
+        return () => {
+            active = false;
+            if (stream) {
+                stream.getTracks().forEach((t) => t.stop());
+            }
+        };
     }, []);
 
     // ---------- Загрузка видео на сервер ----------
@@ -131,6 +133,18 @@ export default function Interview({
             }, 1000);
         }
     }, [finished, failed, mediaRecorder]);
+
+
+    // Эффект для привязки видеопотока к тегу <video>
+    useEffect(() => {
+        if (videoRef.current && mediaStream) {
+            videoRef.current.srcObject = mediaStream;
+            // Принудительный запуск видео (иногда требуется в некоторых браузерах)
+            videoRef.current.play().catch((err) => {
+                console.warn("Autoplay prevented:", err);
+            });
+        }
+    }, [mediaStream]);
 
     // ---------- Таймеры ----------
     useEffect(() => {
@@ -157,7 +171,7 @@ export default function Interview({
     }, [msgs.length, finished, failed, isCameraReady, showSkipModal]);
 
     // ---------- Провал интервью ----------
-    const failInterview = async (_reason: string) => {
+    const failInterview = async (reason: string) => {
         if (isFailingRef.current || finished || failed) return;
         isFailingRef.current = true;
         setFailed(true);
@@ -177,7 +191,7 @@ export default function Interview({
         }
     };
 
-    // ---------- ЗАЩИТА: Надежная проверка фокуса ----------
+    // ---------- Защита: Надежная проверка фокуса ----------
     useEffect(() => {
         if (finished || failed || !isCameraReady) return;
 
@@ -382,7 +396,7 @@ export default function Interview({
             e.preventDefault();
             void send(false);
         }
-        if ((e.ctrlKey || e.metaKey) && e.key === "v") e.preventDefault();
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") e.preventDefault();
         if (e.shiftKey && e.key === "Insert") e.preventDefault();
     };
 
@@ -392,14 +406,6 @@ export default function Interview({
     );
     const totalM = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
     const totalS = String(totalSeconds % 60).padStart(2, "0");
-
-    useEffect(() => {
-        const video = videoRef.current;
-        if (video && mediaStream) {
-            video.srcObject = mediaStream;
-            video.play().catch((e) => console.warn("Autoplay prevented:", e));
-        }
-    }, [mediaStream]);
 
     if (!isCameraReady && !cameraError)
         return (
@@ -487,22 +493,7 @@ export default function Interview({
                                 className="w-full h-full object-cover"
                                 style={{ transform: "rotateY(180deg)" }}
                             />
-                            {!isCameraReady && !cameraError && (
-                                <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-xs text-green-500 bg-black/80">
-                                    {debugInfo}
-                                </div>
-                            )}
-                            {cameraError && (
-                                <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-xs text-red-500 bg-black/80">
-                                    {debugInfo}
-                                </div>
-                            )}
                         </div>
-                        {isCameraReady && (
-                            <div className="text-[10px] text-green-500 mt-2 text-center break-words">
-                                {debugInfo}
-                            </div>
-                        )}
                     </div>
                 </div>
 

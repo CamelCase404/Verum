@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import re
-import uuid
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from ..gigachat_client import ask_chat
+from ..gigachat_client import ask_chat, ask_text
 from ..interview_store import create, get, save
 from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_INTERVIEWER, SYSTEM_REPORT
+from ..auth import get_current_user, UserDB
 from ..schemas import (
     AnswerRequest, AnswerResponse, ReportResponse, StageScore,
     StartInterviewRequest, StartInterviewResponse, Turn,
@@ -17,7 +17,7 @@ from ..schemas import (
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
 STAGE_NAMES = {0: "Общие знания", 1: "Code Review", 2: "Нагрузка", 3: "Code Review (Повторный)", 4: "Нагрузка (Повторный)"}
-STAGE0_QUESTIONS = 8  # Вернули 8 вопросов
+STAGE0_QUESTIONS = 8
 
 def _clean_text(raw: str) -> str:
     raw = raw.strip().replace("{{", "{").replace("}}", "}")
@@ -37,8 +37,10 @@ def _get_history(it) -> list[dict]:
 
 def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code_context: str = "", prev_answer: str = "") -> str:
     prev_q_str = "\n".join(f"- {q[:50]}..." for q in past_questions[-5:]) if past_questions else "Нет"
-    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level)
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id)
+    
+    # Передаем stack везде
+    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id)
+    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
 
     prompt = f"Стадия: {stage}. {stage_desc}\nУже заданные вопросы:\n{prev_q_str}\n\n"
     if stage == 2 and prev_code_context:
@@ -52,9 +54,9 @@ def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code
 
 def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
     if is_skip: return 0
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id)
+    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
     
-    prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ короткий или поверхностный, ставь мало баллов. Верни ТОЛЬКО число."
+    prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Верни ТОЛЬКО число. Не додумывай за кандидата!"
     history = _get_history(it)
     raw = ask_chat(sys_prompt, history, prompt).strip()
     match = re.search(r"\d+", raw)
@@ -64,28 +66,53 @@ def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) 
     return 40
 
 def _generate_code_review_task(it) -> tuple[str, str]:
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id)
+    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
     
     if it.level.lower() == "junior": difficulty = "Добавь простые ошибки (отсутствие проверки на null, неэффективный цикл)."
-    elif it.level.lower() == "middle": difficulty = "Добавь ошибки среднего уровня (N+1, неправильная обработка исключений, проблемы с многопоточностью, отсутствие индексов)."
+    elif it.level.lower() == "middle": difficulty = "Добавь ошибки среднего уровня (N+1, неправильная обработка исключений, проблемы с многопоточностью)."
     else: difficulty = "Добавь СЛОЖНЫЕ ошибки (race conditions, утечки памяти, проблемы с ACID)."
 
-    prompt = f"Сгенерируй код СТРОГО на одном из этих языков: {it.language_id}.\n{difficulty}\nКРИТИЧЕСКОЕ ПРАВИЛО: В коде НЕ ДОЛЖНО БЫТЬ КОММЕНТАРИЕВ. ВЕРНИ СТРОГО: 'Найдите ошибки...', затем символ '|', затем код."
+    prompt = (
+        f"Сгенерируй код СТРОГО на одном из этих языков: {it.language_id}.\\n"
+        f"ОБЯЗАТЕЛЬНО используй самые современные и актуальные библиотеки/фреймворки для этого стека.\\n"
+        f"{difficulty}\\n"
+        f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ КОММЕНТАРИЕВ И ПОДСКАЗОК.\\n"
+        f"КРИТИЧЕСКОЕ ПРАВИЛО 2: Ты должен выдать только код и сухое задание.\\n"
+        f"ВЕРНИ СТРОГО: 'Найдите ошибки в коде и напишите промпт для их исправления', затем символ '|', затем код."
+    )
     
     history = _get_history(it)
     raw = ask_chat(sys_prompt, history, prompt).strip()
 
     if "|" in raw:
         parts = raw.split("|", 1)
-        code = re.sub(r"#.*", "", parts[1].strip())
-        code = re.sub(r"//.*", "", code)
-        code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
+        code = parts[1].strip()
+        
+        # Жесткая очистка от любых комментариев
+        code = re.sub(r"#.*", "", code)          # Python, Bash
+        code = re.sub(r"//.*", "", code)         # JS, C#, Java, Go
+        code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL) # C-style block
+        code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)  # HTML
+        code = re.sub(r"--.*", "", code)         # SQL, Lua
+        code = re.sub(r"\n\s*\n", "\n", code)  # Убираем пустые строки
+        
+        # Убираем фразы-подсказки, если ИИ их все-таки вставил
+        code = code.replace("Потенциальная ошибка:", "")
+        code = code.replace("Ошибка:", "")
+        code = code.replace("Баг:", "")
         if "\n" not in code: code = code.replace("{", "{\n").replace("}", "\n}").replace(";", ";\n")
         return parts[0].strip(), code.strip()
     return "Найдите ошибки в коде и напишите промпт.", raw
 
 @router.post("/start", response_model=StartInterviewResponse)
-def start(req: StartInterviewRequest) -> StartInterviewResponse:
+def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
+    from datetime import datetime
+    if user.blocked_until and user.blocked_until > datetime.utcnow():
+        raise HTTPException(
+            403,
+            f"Доступ к собеседованию заблокирован до {user.blocked_until.strftime('%d.%m.%Y')}. "
+            f"Вы исчерпали все попытки."
+        )
     langs_str = ", ".join(req.language_ids)
     it = create(req.level, req.stack_id, langs_str)
     q = _generate_pure_question(0, it, [])
@@ -114,19 +141,10 @@ def answer(req: AnswerRequest) -> AnswerResponse:
     
     score = _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
 
-    # Если ответ - полный бред (0-5 баллов), прерываем интервью
     if not is_skip and score <= 5:
-        it.finished = True
-        it.rejected = True
-        it.reject_reason = "Ответ не по теме вопроса (бред или спам)."
+        it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме (бред или спам)."
         save(it)
-        return AnswerResponse(
-            stage=it.stage,
-            stage_name=STAGE_NAMES.get(it.stage, ""),
-            finished=True,
-            rejected=True,
-            reject_reason=it.reject_reason,
-        )
+        return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
 
@@ -220,16 +238,35 @@ def report(interview_id: str) -> ReportResponse:
     try:
         raw = ask_chat(SYSTEM_REPORT, history, user)
         parsed = _Report.model_validate(_parse_report_json(raw))
-        total = parsed.total_score_100 or 0
+        
+        # Считаем средний балл СТРОГО по оценкам навыков, а не берем из ИИ
+        comps = [
+            parsed.competency_architecture, 
+            parsed.competency_code_understanding, 
+            parsed.competency_prompting, 
+            parsed.competency_adaptability, 
+            parsed.competency_soft_skills
+        ]
+        valid_comps = [c for c in comps if c is not None]
+        total = int(sum(valid_comps) / len(valid_comps)) if valid_comps else 0
+
         initial_level = it.level.lower()
 
-        if total < 30: grade = "Reject"
-        elif total <= 55: grade = "Junior"
-        elif total <= 80: grade = "Middle"
-        else: grade = "Senior"
+        # Если ИИ поставил мало баллов, это Reject, независимо от выбранного уровня
+        if total < 40: 
+            grade = "Reject"
+        elif total <= 60: 
+            grade = "Junior"
+        elif total <= 80: 
+            grade = "Middle"
+        else: 
+            grade = "Senior"
 
-        if initial_level == "junior" and grade in ("Middle", "Senior"): grade = "Junior"
-        elif initial_level == "middle" and grade == "Senior": grade = "Middle"
+        # Ограничение сверху (нельзя прыгнуть выше выбранного уровня)
+        if initial_level == "junior" and grade in ("Middle", "Senior"): 
+            grade = "Junior"
+        elif initial_level == "middle" and grade == "Senior": 
+            grade = "Middle"
 
         return ReportResponse(
             interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,

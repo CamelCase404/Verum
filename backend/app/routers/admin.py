@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..auth import get_db, get_current_user, UserDB
@@ -29,7 +30,7 @@ def get_pending(admin: UserDB = Depends(require_admin), db: Session = Depends(ge
             "email": u.email,
             "video_url": u.interview_video_url,
             "skills": u.pending_skills_data,
-            "chat_history": chat_history
+            "chat_history": chat_history,
         })
     return result
 
@@ -41,6 +42,8 @@ def approve(user_id: int, admin: UserDB = Depends(require_admin), db: Session = 
     user.skills_data = user.pending_skills_data
     user.test_status = "approved"
     user.pending_skills_data = None
+    user.blocked_until = datetime.utcnow() + timedelta(days=180)
+    user.attempts_used = 0
     db.commit()
     return {"status": "ok"}
 
@@ -49,7 +52,12 @@ def reject(user_id: int, admin: UserDB = Depends(require_admin), db: Session = D
     user = db.query(UserDB).filter(UserDB.id == user_id).first()
     if not user:
         raise HTTPException(404, "Not found")
-    user.test_status = "rejected"
     user.pending_skills_data = None
+    # Если это была 3-я попытка - блокируем на 6 месяцев
+    if (user.attempts_used or 0) >= 3:
+        user.blocked_until = datetime.utcnow() + timedelta(days=180)
+        user.attempts_used = 0
+    # Если у юзера был предыдущий одобренный грейд - оставляем approved
+    user.test_status = "approved" if user.skills_data else "rejected"
     db.commit()
     return {"status": "ok"}

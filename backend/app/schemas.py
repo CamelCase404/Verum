@@ -116,6 +116,8 @@ class UserProfile(BaseModel):
     last_test_at: datetime | None = None
     test_status: str | None = None
     interview_video_url: str | None = None
+    attempts_used: int = 0
+    blocked_until: datetime | None = None
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None

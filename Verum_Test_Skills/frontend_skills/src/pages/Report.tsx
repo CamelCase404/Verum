@@ -2,30 +2,25 @@ import {
     CheckCircle2,
     XCircle,
     AlertTriangle,
-    RotateCcw,
     BarChart3,
     Brain,
     Code2,
     MessageSquare,
     Terminal,
     Layers,
+    ExternalLink,
 } from "lucide-react";
-import { useEffect } from "react";
-import type { Recommendation, ReportResponse } from "../types";
+import type { ReportResponse } from "../types";
 
-const REC_LABEL: Record<Recommendation, string> = {
-    hire: "Рекомендация: нанять",
-    no_hire: "Рекомендация: не нанимать",
-    insufficient_evidence: "Недостаточно доказательств для решения",
-};
-
-function RecIcon({ rec }: { rec: Recommendation }) {
-    if (rec === "hire") return <CheckCircle2 className="text-accent" size={20} />;
-    if (rec === "no_hire") return <XCircle className="text-warn" size={20} />;
-    return <AlertTriangle className="text-amber" size={20} />;
-}
-
-function StatBar({ label, score, icon: Icon }: { label: string; score?: number | null; icon: any }) {
+function StatBar({
+    label,
+    score,
+    icon: Icon,
+}: {
+    label: string;
+    score?: number | null;
+    icon: any;
+}) {
     if (score === undefined || score === null) return null;
     return (
         <div className="mb-5">
@@ -36,57 +31,22 @@ function StatBar({ label, score, icon: Icon }: { label: string; score?: number |
                 <span className="font-bold text-ink">{score} / 100</span>
             </div>
             <div className="h-2.5 w-full bg-page rounded-full overflow-hidden">
-                <div className="h-full bg-accent transition-all duration-1000 ease-out" style={{ width: `${score}%` }} />
+                <div
+                    className="h-full bg-accent transition-all duration-1000 ease-out"
+                    style={{ width: `${score}%` }}
+                />
             </div>
         </div>
     );
 }
 
-export default function Report({ report, onRestart }: { report: ReportResponse; onRestart: () => void; }) {
-    useEffect(() => {
-        const token = localStorage.getItem("verum_token");
-        if (!token) {
-            console.warn("Нет токена авторизации. Результаты не будут сохранены.");
-            return;
-        }
-
-        const payload = {
-            final_grade: report.final_grade || "Reject",
-            total_score_100: report.total_score_100 || 0,
-            stack_id: report.stack_id,
-            language_id: report.language_id,
-            summary: report.summary,
-            strengths: report.strengths,
-            gaps: report.gaps,
-            recommendation: report.recommendation,
-            competency_architecture: report.competency_architecture,
-            competency_code_understanding: report.competency_code_understanding,
-            competency_prompting: report.competency_prompting,
-            competency_adaptability: report.competency_adaptability,
-            competency_soft_skills: report.competency_soft_skills,
-        };
-
-        fetch("http://localhost:8000/api/auth/skills", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-        })
-        .then((res) => {
-            if (res.ok) console.log("✅ Результаты сохранены в профиль!");
-            else console.error("❌ Ошибка сервера при сохранении:", res.status);
-        })
-        .catch((err) => console.error("❌ Ошибка сети при сохранении:", err));
-    }, [report]);
-
-    const restartSameSettings = () => {
-        const stack = report.stack_id;
-        const langs = report.language_id.split(", ");
-        const level = report.level;
-        localStorage.setItem("verum.lastSettings", JSON.stringify({ stack, langs, level }));
-        onRestart();
+export default function Report({
+    report,
+}: {
+    report: ReportResponse;
+}) {
+    const goToDashboard = () => {
+        window.location.href = "http://localhost:5173/dashboard";
     };
 
     return (
@@ -101,16 +61,26 @@ export default function Report({ report, onRestart }: { report: ReportResponse; 
 
                 {!report.rejected && report.final_grade && (
                     <div className="flex flex-col items-center justify-center py-8 bg-page rounded-[22px] border border-divider">
-                        <span className="text-[14px] text-ink-3 uppercase tracking-widest mb-2">Ваш итоговый уровень</span>
-                        <span className="text-[56px] font-black leading-none text-accent">{report.final_grade}</span>
-                        {report.total_score_100 !== undefined && report.total_score_100 !== null && (
-                            <div className="mt-4 flex flex-col items-center w-full max-w-xs">
-                                <span className="text-[16px] font-bold text-ink mb-2">Общий балл: {report.total_score_100} / 100</span>
-                                <div className="w-full h-2.5 bg-surface-2 rounded-full overflow-hidden">
-                                    <div className="h-full bg-accent" style={{ width: `${report.total_score_100}%` }} />
+                        <span className="text-[14px] text-ink-3 uppercase tracking-widest mb-2">
+                            Ваш итоговый уровень
+                        </span>
+                        <span className="text-[56px] font-black leading-none text-accent">
+                            {report.final_grade}
+                        </span>
+                        {report.total_score_100 !== undefined &&
+                            report.total_score_100 !== null && (
+                                <div className="mt-4 flex flex-col items-center w-full max-w-xs">
+                                    <span className="text-[16px] font-bold text-ink mb-2">
+                                        Общий балл: {report.total_score_100} / 100
+                                    </span>
+                                    <div className="w-full h-2.5 bg-surface-2 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-accent"
+                                            style={{ width: `${report.total_score_100}%` }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                     </div>
                 )}
 
@@ -152,7 +122,9 @@ export default function Report({ report, onRestart }: { report: ReportResponse; 
                                     <CheckCircle2 size={18} /> Плюсы
                                 </h2>
                                 <ul className="list-disc pl-5 text-[14px] space-y-1.5 text-ink/80">
-                                    {report.strengths.length > 0 ? report.strengths.map((s, i) => <li key={i}>{s}</li>) : <li>Не выявлены</li>}
+                                    {report.strengths.length > 0
+                                        ? report.strengths.map((s, i) => <li key={i}>{s}</li>)
+                                        : <li>Не выявлены</li>}
                                 </ul>
                             </div>
                             <div className="bg-warn-soft/20 rounded-[22px] p-5 border border-warn/20">
@@ -160,19 +132,21 @@ export default function Report({ report, onRestart }: { report: ReportResponse; 
                                     <AlertTriangle size={18} /> Минусы
                                 </h2>
                                 <ul className="list-disc pl-5 text-[14px] space-y-1.5 text-ink/80">
-                                    {report.gaps.length > 0 ? report.gaps.map((s, i) => <li key={i}>{s}</li>) : <li>Не выявлены</li>}
+                                    {report.gaps.length > 0
+                                        ? report.gaps.map((s, i) => <li key={i}>{s}</li>)
+                                        : <li>Не выявлены</li>}
                                 </ul>
                             </div>
                         </div>
                     </>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6 border-t border-divider">
-                    <button onClick={restartSameSettings} className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-6 py-3 font-medium hover:brightness-110 transition-all duration-200">
-                        <RotateCcw size={18} /> Пройти заново
-                    </button>
-                    <button onClick={onRestart} className="inline-flex items-center justify-center gap-2 rounded-[22px] border border-divider px-6 py-3 font-medium hover:bg-surface-2 transition-all duration-200 text-ink">
-                        На главную
+                <div className="flex justify-center pt-6 border-t border-divider">
+                    <button
+                        onClick={goToDashboard}
+                        className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-10 py-3.5 font-medium hover:brightness-110 transition-all duration-200 min-w-[240px]"
+                    >
+                        <ExternalLink size={18} /> Вернуться в профиль
                     </button>
                 </div>
             </div>

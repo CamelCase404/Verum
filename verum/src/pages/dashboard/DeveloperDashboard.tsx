@@ -12,7 +12,7 @@ const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A
 
 export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: any, onRefresh: () => void }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
-    const [isInterviewOpen, setIsInterviewOpen] = useState(false);
+  const [isInterviewOpen, setIsInterviewOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [showAllRepos, setShowAllRepos] = useState(false);
@@ -25,15 +25,26 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   const githubData = backendUser?.github_stats;
   const projects = backendUser?.projects || [];
 
+  const attemptsUsed = backendUser?.attempts_used || 0;
+  const attemptsLeft = Math.max(0, 3 - attemptsUsed);
+
   const lastTestDate = backendUser?.last_test_at ? new Date(backendUser.last_test_at) : null;
-  const sixMonthsMs = 180 * 24 * 60 * 60 * 1000;
-  const canRetake = !lastTestDate || (new Date().getTime() - lastTestDate.getTime() > sixMonthsMs);
-  const nextRetakeDate = lastTestDate ? new Date(lastTestDate.getTime() + sixMonthsMs).toLocaleDateString('ru-RU') : null;
+  
+  let blockedUntilDate: Date | null = null;
+  if (backendUser?.blocked_until) {
+      blockedUntilDate = new Date(backendUser.blocked_until);
+  } else if (isTested && lastTestDate) {
+      blockedUntilDate = new Date(lastTestDate.getTime() + 180 * 24 * 60 * 60 * 1000);
+  }
+
+  const isBlocked = blockedUntilDate && blockedUntilDate.getTime() > new Date().getTime();
+  const canRetake = !isBlocked;
+  const nextRetakeDate = blockedUntilDate ? blockedUntilDate.toLocaleDateString('ru-RU') : null;
 
   const handleRetakeClick = () => {
     if (!canRetake) {
-      toast(`⏳ Перепройти тест можно будет с ${nextRetakeDate}. (Сейчас режим тестирования: блокировка не работает)`);
-      // return;  // <-- Раскомментируй эту строку, чтобы включить блокировку
+      toast(`⏳ Грейд подтвержден. Перепройти тест можно будет с ${nextRetakeDate}.`);
+      return;
     }
     setIsInterviewOpen(true); 
   };
@@ -66,7 +77,6 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
     return Math.round(testSalary + githubBonus);
   };
   const estimatedSalary = calculateSalary();
-
 
   const STACK_ICONS: Record<string, any> = {
     "frontend": Monitor,
@@ -167,7 +177,11 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                       <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
                         <Layers size={14} /> Стек
                       </div>
-                      <div className="inline-flex px-2.5 py-1 bg-surface border border-line rounded-md text-[13px] font-medium text-ink capitalize">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface border border-line rounded-md text-[13px] font-medium text-ink capitalize">
+                        {(() => {
+                          const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers;
+                          return <Icon size={14} className="text-accent" />;
+                        })()}
                         {skills.stack_id}
                       </div>
                     </div>
@@ -197,16 +211,18 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
             {/* КНОПКА ПЕРЕПРОЙТИ */}
             {isTested && (
               <div className="pt-4 border-t border-line">
-                <button 
-                  onClick={handleRetakeClick} 
-                  className="w-full py-2.5 bg-surface-2 border border-line-2 hover:border-accent hover:text-accent rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <RefreshCw size={16} /> Перепройти собеседование
-                </button>
-                {!canRetake && (
-                  <p className="text-[11px] text-ink-3 text-center mt-2">
-                    По правилам платформы следующая попытка доступна с {nextRetakeDate}
-                  </p>
+                {!canRetake ? (
+                  <div className="text-center bg-surface-2 border border-line p-3 rounded-xl">
+                    <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-1">Грейд подтвержден</div>
+                    <div className="text-[12px] text-ink-2">Пересдача доступна с <span className="font-bold text-accent">{nextRetakeDate}</span></div>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleRetakeClick} 
+                    className="w-full py-2.5 bg-surface-2 border border-line-2 hover:border-accent hover:text-accent rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw size={16} /> Перепройти собеседование
+                  </button>
                 )}
               </div>
             )}
@@ -221,22 +237,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ShieldCheck size={16} className="text-accent" /> Навыки и ИИ-Анализ</h3>
             </div>
 
-            {isPending ? (
-              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
-                <ShieldCheck size={32} className="mx-auto text-accent mb-2 opacity-80" />
-                <div className="text-[15px] font-medium text-ink mb-1">Собеседование на проверке</div>
-                <p className="text-[13px] text-ink-3">Модератор проверяет ваше видео. Результаты появятся позже.</p>
-              </div>
-            ) : isRejected ? (
-              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
-                <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
-                <div className="text-[15px] font-medium text-ink mb-1">Собеседование отклонено</div>
-                <p className="text-[13px] text-ink-3 mb-4">Модератор отклонил результаты.</p>
-                <button onClick={() => setIsInterviewOpen(true)} className="px-5 py-2.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-2 transition-colors">
-                  Пройти заново (Тестовый режим)
-                </button>
-              </div>
-            ) : isTested ? (
+            {isTested ? (
               <div className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-2">
                   <ScoreRow label="Архитектурное мышление" value={skills.competency_architecture || 0} delay={0} />
@@ -270,11 +271,34 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
                   </div>
                 )}
               </div>
+            ) : isBlocked ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
+                <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Доступ заблокирован</div>
+                <p className="text-[13px] text-ink-3 mb-1">Вы исчерпали все попытки или уже прошли собеседование.</p>
+                <p className="text-[13px] text-accent font-medium">Следующая попытка: {nextRetakeDate}</p>
+              </div>
+            ) : isPending ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
+                <ShieldCheck size={32} className="mx-auto text-accent mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Собеседование на проверке</div>
+                <p className="text-[13px] text-ink-3">Модератор проверяет ваше видео. Результаты появятся позже.</p>
+              </div>
+            ) : isRejected ? (
+              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
+                <AlertCircle size={32} className="mx-auto text-warn mb-2 opacity-80" />
+                <div className="text-[15px] font-medium text-ink mb-1">Собеседование отклонено</div>
+                <p className="text-[13px] text-ink-3 mb-3">Осталось попыток: <b className="text-warn">{attemptsLeft} / 3</b></p>
+                <button onClick={() => setIsInterviewOpen(true)} className="px-5 py-2.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-2 transition-colors">
+                  Пройти заново
+                </button>
+              </div>
             ) : (
               <div className="text-center py-4 md:py-6">
                 <ShieldCheck size={32} className="mx-auto text-ink-4 mb-2 md:mb-3 opacity-30 md:w-10 md:h-10" />
                 <div className="text-[14px] md:text-[15px] font-medium mb-1">Навыки не проверены</div>
-                <p className="text-[12px] md:text-[13px] text-ink-3 mb-3 md:mb-4">Пройдите собеседование, чтобы подтвердить уровень и получить ИИ-анализ</p>
+                <p className="text-[12px] md:text-[13px] text-ink-3 mb-1">Пройдите собеседование, чтобы подтвердить уровень.</p>
+                <p className="text-[12px] md:text-[13px] text-ink-3 mb-3">Осталось попыток: <b className="text-accent">{attemptsLeft} / 3</b></p>
                 <button onClick={() => setIsInterviewOpen(true)} className="px-4 md:px-5 py-2 bg-accent text-white rounded-lg text-[13px] md:text-sm font-medium hover:bg-accent-2 transition-colors">
                   Начать собеседование
                 </button>
@@ -282,7 +306,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
             )}
           </div>
 
-          {/* МОИ ПРОЕКТЫ (ПЕРЕМЕЩЕНО ВЫШЕ GITHUB) */}
+          {/* МОИ ПРОЕКТЫ */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ImageIcon size={16} className="text-accent" /> Мои проекты</h3>
@@ -314,7 +338,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
             )}
           </div>
 
-          {/* GITHUB (ПЕРЕМЕЩЕНО НИЖЕ ПРОЕКТОВ) */}
+          {/* GITHUB */}
           <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><Github size={16} className="text-accent" /> GitHub</h3>

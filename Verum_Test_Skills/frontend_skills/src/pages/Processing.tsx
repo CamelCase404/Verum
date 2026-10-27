@@ -33,14 +33,21 @@ export default function Processing({
                 const report = await api.report(interviewId);
                 if (cancelled) return;
 
-                // Сохраняем отчёт в профиль пользователя (если залогинен)
-                if (localStorage.getItem("verum_token")) {
+                // Токен читается из "verum_token" внутри api.ts
+                const token = localStorage.getItem("verum_token");
+                if (token) {
                     try {
-                        await api.saveSkills({ ...report, interview_id: interviewId });
+                        // ВАЖНО: Передаем interview_id вместе с отчетом
+                        await api.saveSkills({ ...report, interview_id: report.interview_id || interviewId });
+                        console.log("✅ Результаты сохранены в профиль");
                     } catch (e) {
-                        // не блокируем показ отчёта, если сохранение упало
-                        console.warn("Не удалось сохранить навыки:", e);
+                        console.warn("⚠ Не удалось сохранить навыки:", e);
                     }
+                } else {
+                    console.warn(
+                        "⚠ Токен не найден в localStorage['verum_token']. " +
+                        "Результаты не сохранятся в профиль.",
+                    );
                 }
 
                 onReady(report);
@@ -86,16 +93,12 @@ export default function Processing({
                         <div className="mx-auto w-14 h-14 rounded-full bg-accentSoft text-accent flex items-center justify-center">
                             <Loader2 size={26} className="animate-spin" />
                         </div>
-                        <h1 className="mt-4 text-[20px] font-bold">
-                            Формируем отчёт…
-                        </h1>
+                        <h1 className="mt-4 text-[20px] font-bold">Формируем отчёт…</h1>
                         <p className="mt-1 text-[13px] text-muted">
-                            GigaChat оценивает ответы по рубрике. Это может
-                            занять до минуты.
+                            GigaChat оценивает ответы по рубрике. Это может занять до минуты.
                         </p>
                         <p className="mt-1 text-[12px] text-muted">
-                            {elapsed} с · interview {interviewId.slice(0, 8)} ·{" "}
-                            {level}
+                            {elapsed} с · interview {interviewId.slice(0, 8)} · {level}
                         </p>
                     </>
                 )}
@@ -105,12 +108,9 @@ export default function Processing({
                         <div className="mx-auto w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
                             <XCircle size={26} />
                         </div>
-                        <h1 className="mt-4 text-[20px] font-bold">
-                            Интервью не найдено
-                        </h1>
+                        <h1 className="mt-4 text-[20px] font-bold">Интервью не найдено</h1>
                         <p className="mt-1 text-[13px] text-muted">
-                            Возможно, сессия была удалена или истекла. Начните
-                            заново.
+                            Возможно, сессия была удалена или истекла. Начните заново.
                         </p>
                         <button
                             onClick={onAbort}
@@ -126,12 +126,8 @@ export default function Processing({
                         <div className="mx-auto w-14 h-14 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
                             <AlertTriangle size={26} />
                         </div>
-                        <h1 className="mt-4 text-[20px] font-bold">
-                            Не удалось получить отчёт
-                        </h1>
-                        <p className="mt-1 text-[13px] text-red-600">
-                            {errorMsg}
-                        </p>
+                        <h1 className="mt-4 text-[20px] font-bold">Не удалось получить отчёт</h1>
+                        <p className="mt-1 text-[13px] text-red-600">{errorMsg}</p>
                         <div className="mt-5 flex gap-2 justify-center">
                             <button
                                 onClick={() => {

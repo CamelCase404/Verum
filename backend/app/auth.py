@@ -46,6 +46,8 @@ class UserDB(Base):
     projects = Column(JSON, nullable=True)
     job_postings = Column(JSON, nullable=True)
     last_test_at = Column(DateTime, nullable=True)
+    attempts_used = Column(Integer, default=0, nullable=False)
+    blocked_until = Column(DateTime, nullable=True)
     test_status = Column(String, default="none")
     pending_skills_data = Column(JSON, nullable=True)
     interview_video_url = Column(String, nullable=True)

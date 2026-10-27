@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { ShieldCheck, PlayCircle, XCircle, CheckCircle2 } from "lucide-react";
 import { getToken, authApi } from "@/api";
 import { useNavigate } from "react-router-dom";
@@ -55,7 +54,7 @@ export function AdminDashboard() {
   if (loading) return <div className="p-10 text-center">Загрузка...</div>;
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-10">
       <h1 className="text-3xl font-semibold mb-8 flex items-center gap-2">
         <ShieldCheck className="text-accent" /> Панель модератора
       </h1>
@@ -65,9 +64,10 @@ export function AdminDashboard() {
           Нет собеседований на проверке
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        /* Используем flex-col, чтобы карточки шли друг за другом по центру */
+        <div className="flex flex-col gap-6">
           {pending.map(p => (
-            <div key={p.id} className="bg-surface border border-line rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
+            <div key={p.id} className="bg-surface border border-line rounded-2xl p-6 flex flex-col gap-4 shadow-sm w-full">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-lg">{p.full_name}</h3>
@@ -95,15 +95,22 @@ export function AdminDashboard() {
 
               {/* ИСТОРИЯ ЧАТА */}
               {p.chat_history && p.chat_history.length > 0 && (
-                <div className="bg-surface-2 rounded-xl p-3 max-h-[200px] overflow-y-auto space-y-2 text-[13px]">
-                  <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider sticky top-0 bg-surface-2 py-1">История диалога</div>
-                  {p.chat_history.map((msg: any, i: number) => (
-                    <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[90%] rounded-lg px-3 py-1.5 ${msg.role === "user" ? "bg-accent/20 text-ink" : "bg-surface border border-line text-ink-2"}`}>
-                        {msg.content}
+                <div className="bg-surface-2 border border-line rounded-xl overflow-hidden flex flex-col max-h-[400px]">
+                  {/* Заголовок ВНЕ зоны скролла */}
+                  <div className="px-4 py-3 text-[11px] font-semibold text-ink-3 uppercase tracking-wider border-b border-line bg-surface-2 shrink-0">
+                    История диалога
+                  </div>
+                  {/* Прокручиваемое содержимое */}
+                  <div className="p-4 overflow-y-auto space-y-4">
+                    {p.chat_history.map((msg: any, i: number) => (
+                      <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                        {/* whitespace-pre-wrap сохраняет переносы строк и код */}
+                        <div className={`max-w-[90%] rounded-lg px-4 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap break-words ${msg.role === "user" ? "bg-accent text-white" : "bg-surface border border-line text-ink-2"}`}>
+                          {msg.content}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
 
