@@ -107,15 +107,27 @@ def _generate_code_review_task(it) -> tuple[str, str]:
 @router.post("/start", response_model=StartInterviewResponse)
 def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
     from datetime import datetime
-    if user.blocked_until and user.blocked_until > datetime.utcnow():
-        raise HTTPException(
-            403,
-            f"Доступ к собеседованию заблокирован до {user.blocked_until.strftime('%d.%m.%Y')}. "
-            f"Вы исчерпали все попытки."
-        )
+    now = datetime.utcnow()
+    if user.blocked_until:
+        blocked = user.blocked_until
+        # Если дата с часовым поясом, убираем его для сравнения
+        if blocked.tzinfo is not None:
+            blocked = blocked.replace(tzinfo=None)
+        if blocked > now:
+            raise HTTPException(
+                403,
+                f"Доступ к собеседованию заблокирован до {blocked.strftime('%d.%m.%Y')}. "
+                f"Вы исчерпали все попытки."
+            )
     langs_str = ", ".join(req.language_ids)
     it = create(req.level, req.stack_id, langs_str)
-    q = _generate_pure_question(0, it, [])
+    try:
+        q = _generate_pure_question(0, it, [])
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Ошибка генерации вопроса: {str(e)}")
+        
     it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
     save(it)
     return StartInterviewResponse(interview_id=it.id, stage=0, stage_name=STAGE_NAMES[0], question=q)
