@@ -406,7 +406,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
             ) : (
               <div className="text-center py-4 md:py-6">
                 <div className="text-[14px] md:text-[15px] font-medium mb-1">GitHub не подключён</div>
-                <a href="http://localhost:8000/api/auth/github" className="mt-3 px-4 md:px-5 py-2 bg-surface-2 border border-line-2 text-ink rounded-lg text-[13px] md:text-sm font-medium hover:bg-surface-3 transition-colors inline-block">Подключить</a>
+                <a href={`${import.meta.env.VITE_API_URL}/api/auth/github`} className="mt-3 px-4 md:px-5 py-2 bg-surface-2 border border-line-2 text-ink rounded-lg text-[13px] md:text-sm font-medium hover:bg-surface-3 transition-colors inline-block">Подключить</a>
               </div>
             )}
           </div>

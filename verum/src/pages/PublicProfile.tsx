@@ -15,7 +15,7 @@ export function PublicProfile() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`http://localhost:8000/api/auth/user/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`)
       .then(res => res.json())
       .then(data => { setUser(data); setLoading(false); })
       .catch(() => { setLoading(false); navigate("/"); });

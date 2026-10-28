@@ -130,7 +130,7 @@ export default function RegisterPage() {
                                 <button 
                                     onClick={() => {
                                         setGithubLoading(true);
-                                        window.location.href = `http://localhost:8000/api/auth/github?role=${role}`;
+                                        window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/github?role=${role}`;
                                     }}
                                     disabled={githubLoading}
                                     className="w-12 h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm disabled:opacity-50" 
