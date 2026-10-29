@@ -123,7 +123,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
 
             <button 
                 onClick={toggleTheme} 
-                className={`fixed top-6 right-6 z-50 inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none shadow-md border ${
+                className={`fixed top-4 right-4 md:top-6 md:right-6 z-50 inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none shadow-md border ${
                     theme === "dark" ? "bg-accent/20 border-accent/30" : "bg-card border-divider"
                 }`}
             >
@@ -142,7 +142,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
             </button>
 
             <div className="w-full max-w-4xl">
-                <div className="mb-6 rounded-[22px] border border-amber-200/20 bg-amber-500/10 px-5 py-4 flex items-start gap-3 shadow-sm">
+                <div className="mb-6 mt-20 md:mt-0 rounded-[22px] border border-amber-500/30 bg-amber-500/10 px-5 py-4 flex items-start gap-3 shadow-sm">
                     <ShieldAlert className="text-amber-500 mt-0.5 shrink-0" size={20} />
                     <div>
                         <h3 className="text-[14px] font-bold text-amber-500">Внимание: запись анализируется</h3>
@@ -153,7 +153,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                 </div>
 
                 {activeSession && (
-                    <div className="mb-4 rounded-[22px] border border-amber-200/20 bg-amber-500/10 px-4 py-3 flex items-start gap-3">
+                    <div className="mb-4 rounded-[22px] border border-amber-500/30 bg-amber-500/10 px-4 py-3 flex items-start gap-3">
                         <AlertTriangle className="text-amber-500 mt-0.5" size={18} />
                         <div className="flex-1">
                             <div className="text-[14px] font-medium text-amber-500">Найдено незавершённое интервью</div>

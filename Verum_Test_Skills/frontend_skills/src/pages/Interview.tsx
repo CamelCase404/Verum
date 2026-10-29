@@ -457,7 +457,7 @@ export default function Interview({
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowSkipModal(false)}
-                                className="flex-1 rounded-[22px] border border-divider py-2 text-[14px] font-medium hover:bg-gray-50"
+                                className="flex-1 rounded-[22px] border border-line py-2 text-[14px] font-medium hover:bg-gray-50"
                             >
                                 Отмена
                             </button>
@@ -567,7 +567,7 @@ export default function Interview({
                                                     <div className="whitespace-pre-wrap mb-3">
                                                         {textPart}
                                                     </div>
-                                                    <pre className="bg-[#1e1e1e] text-[#d4d4d4] p-3 md:p-4 rounded-xl overflow-x-auto text-[10px] md:text-[12px] font-mono whitespace-pre border border-gray-700">
+                                                    <pre className="bg-[#1e1e1e] text-[#d4d4d4] p-3 md:p-4 rounded-xl overflow-x-auto text-[10px] md:text-[12px] font-mono whitespace-pre border border-line">
                                                         <code>{codePart}</code>
                                                     </pre>
                                                 </>
@@ -609,7 +609,7 @@ export default function Interview({
                                         onPaste={(e) => e.preventDefault()}
                                         placeholder="Ваш ответ… (Enter — отправить, Shift+Enter — перенос)"
                                         rows={2}
-                                        className="flex-1 bg-page text-ink rounded-[22px] border border-divider px-3 py-2 text-sm md:text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none placeholder:text-muted/50"
+                                        className="flex-1 bg-page text-ink rounded-[22px] border border-line px-3 py-2 text-sm md:text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none placeholder:text-muted/50"
                                     />
                                     <button
                                         onClick={() => send(false)}
