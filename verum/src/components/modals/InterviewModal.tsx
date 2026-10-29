@@ -15,8 +15,9 @@ export function InterviewModal({ onClose }: { onClose: () => void }) {
             alert("Сначала войдите в аккаунт через GitHub или Email!");
             return;
         }
-        // Перекидываем на порт 5174 (Verum_Test_Skills) и передаем токен
-        window.location.href = `http://localhost:5174/?token=${token}`;
+        // Перекидываем на боевой домен (или на localhost, если мы в режиме разработки)
+        const testAppUrl = import.meta.env.VITE_TEST_APP_URL || "https://test.verumskills.ru";
+        window.location.href = `${testAppUrl}/?token=${token}`;
     };
 
   return (
