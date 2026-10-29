@@ -229,7 +229,7 @@ export function CompanyDashboard({
     );
 
     return (
-        <div className="max-w-[1280px] mx-auto px-3 md:px-8 py-4 md:py-10 relative">
+        <div className="max-w-[1280px] w-full overflow-hidden mx-auto px-3 md:px-8 py-4 md:py-10 relative">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">
@@ -271,7 +271,7 @@ export function CompanyDashboard({
                                 </p>
                             </div>
                         </div>
-                        <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed mb-4 md:mb-6">
+                        <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words mb-4 md:mb-6">
                             {backendUser?.bio ||
                                 "Добавьте описание вашей компании."}
                         </p>
@@ -602,7 +602,7 @@ export function CompanyDashboard({
                                                     borderColor:
                                                         "var(--line-2)",
                                                 }}
-                                                className="flex-1 sm:flex-none px-4 py-2 bg-surface-2 text-accent rounded-lg text-sm font-medium hover:bg-surface-3 hover:border-accent transition-colors flex items-center justify-center gap-2 active:scale-95"
+                                                className="w-full sm:w-auto px-4 py-2 bg-surface-2 text-accent rounded-lg text-sm font-medium hover:bg-surface-3 hover:border-accent transition-colors flex items-center justify-center gap-2 active:scale-95"
                                             >
                                                 <Scale size={16} /> Сравнить (
                                                 {selectedCandidates.length})
@@ -645,7 +645,7 @@ export function CompanyDashboard({
                                                         )}
                                                     </button>
 
-                                                    <div className="flex-1 min-w-0">
+                                                    <div className="flex-1 min-w-0 overflow-hidden">
                                                         <div className="flex items-center justify-between mb-1">
                                                             <div
                                                                 onClick={() =>

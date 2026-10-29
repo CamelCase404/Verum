@@ -43,9 +43,9 @@ export default function LoginPage() {
                 <ArrowLeft size={16} /> <span className="hidden sm:inline">Вернуться на сайт</span>
             </motion.button>
 
-            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="w-full max-w-4xl bg-surface rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row md:min-h-[600px] relative z-10 border border-line mt-12 md:mt-0">
-                <motion.div variants={slideLeft} className="w-full md:w-[45%] bg-accent p-8 md:p-10 flex flex-col items-center justify-center text-center text-white relative overflow-hidden">
-                    <div className="relative z-10 space-y-4">
+            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="w-[calc(100vw-2rem)] max-w-4xl bg-surface rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row md:min-h-[600px] relative z-10 border border-line mt-0">
+                <motion.div variants={slideLeft} className="hidden md:flex md:w-[45%] bg-accent p-8 md:p-10 flex-col items-center justify-center text-center text-white relative overflow-hidden">
+                    <div className="relative z-10 space-y-2.5 sm:space-y-4">
                         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3, type: "spring" }} className="w-14 h-14 md:w-16 md:h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-4 md:mb-6 backdrop-blur-sm border border-white/20">
                             <ShieldCheck size={28} className="md:w-8 md:h-8" />
                         </motion.div>
@@ -56,19 +56,19 @@ export default function LoginPage() {
                     </div>
                 </motion.div>
 
-                <motion.div variants={slideRight} className="w-full md:w-[55%] p-6 sm:p-12 flex flex-col justify-center bg-surface">
-                    <div className="text-center mb-6 md:mb-8">
+                <motion.div variants={slideRight} className="w-full md:w-[55%] p-4 sm:p-8 md:p-12 flex flex-col justify-center bg-surface">
+                    <div className="text-center mb-4 md:mb-8">
                         <h1 className="text-2xl md:text-3xl font-bold mb-2">Вход в Verum</h1>
                         <p className="text-xs text-ink-3 mt-2">Используйте свой email и пароль</p>
                     </div>
 
-                    <motion.form variants={staggerContainer} initial="hidden" animate="visible" onSubmit={handleSubmit} className="space-y-4">
+                    <motion.form variants={staggerContainer} initial="hidden" animate="visible" onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full bg-bg-2 border-none rounded-lg px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
                             <Mail size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
                             <Lock size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
                         </AnimatePresence>
 
                         <div className="pt-2 flex flex-col items-center gap-4">
-                            <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="bg-accent text-white font-semibold py-3 px-10 rounded-full hover:bg-accent-2 transition-colors duration-300 shadow-lg disabled:opacity-60 flex items-center justify-center gap-2 text-sm uppercase tracking-wider w-full sm:w-auto">
+                            <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="bg-accent text-white font-semibold py-2.5 sm:py-3 px-10 rounded-full hover:bg-accent-2 transition-colors duration-300 shadow-lg disabled:opacity-60 flex items-center justify-center gap-2 text-sm uppercase tracking-wider w-full sm:w-auto">
                                 {loading ? <><Loader2 size={16} className="animate-spin" /> Загрузка...</> : "Войти"}
                             </motion.button>
                             <div className="text-sm text-ink-3 mt-2">

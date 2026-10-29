@@ -94,7 +94,7 @@ export function PublicProfile() {
   };
 
   return (
-    <div className="max-w-[1000px] mx-auto px-4 py-10">
+    <div className="max-w-[1000px] w-full overflow-hidden mx-auto px-4 py-10">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-ink-2 hover:text-accent mb-6 transition-colors">
         <ArrowLeft size={18} /> Назад
       </button>

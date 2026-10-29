@@ -20,7 +20,7 @@ export function Nav() {
   return (
     // Убрали max-w-[1280px], чтобы шапка растянулась на всю ширину, и добавили px-6
     <header className="sticky top-0 z-40 w-full border-b border-line bg-bg/80 backdrop-blur-md">
-      <div className="w-full px-3 md:px-8 h-16 flex items-center justify-between gap-2">
+      <div className="w-full px-2 sm:px-4 md:px-8 h-14 md:h-16 flex items-center justify-between gap-2">
         
         {/* ЛЕВАЯ СТОРОНА: Бургер и Лого */}
         <div className="flex items-center gap-4">
@@ -81,11 +81,11 @@ export function Nav() {
 
               <Link 
                 to="/messages" 
-                className="flex items-center justify-center gap-2 p-2 md:px-3 md:py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors"
+                className="flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors"
                 title="Сообщения"
               >
                 <MessageSquare size={20} className="md:w-[18px] md:h-[18px]" />
-                <span className="hidden md:inline">Сообщения</span>
+                <span className="hidden sm:inline">Сообщения</span>
               </Link>
               
               <Link 
@@ -93,7 +93,7 @@ export function Nav() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-2 border border-line text-ink text-sm font-medium hover:bg-surface-3 transition-colors shadow-sm"
               >
                 <User size={18} />
-                <span className="hidden sm:inline">Кабинет</span>
+                <span className="hidden xs:inline">Кабинет</span>
               </Link>
             </div>
           ) : (

@@ -25,7 +25,9 @@ oauth.register(
 async def github_login(request: Request):
     role = request.query_params.get("role", "developer")
     request.session["oauth_role"] = role
-    redirect_uri = request.url_for("github_callback")
+    import os
+    # Берем URL из .env, если есть (для продакшена), иначе используем стандартный request.url_for (для локалки)
+    redirect_uri = os.getenv("GITHUB_CALLBACK_URL") or request.url_for("github_callback")
     return await oauth.github.authorize_redirect(request, redirect_uri)
 
 @router.get("/github/callback", name="github_callback")

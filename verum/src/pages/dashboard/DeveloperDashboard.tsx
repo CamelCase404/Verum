@@ -103,7 +103,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   };
 
   return (
-    <div className="max-w-[1280px] mx-auto px-3 md:px-8 py-4 md:py-10 relative">
+    <div className="max-w-[1280px] w-full overflow-hidden mx-auto px-3 md:px-8 py-4 md:py-10 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
         <div>
           <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Личный кабинет</h1>
@@ -149,7 +149,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
               <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
                 <AlignLeft size={12} /> О себе
               </div>
-              <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed">
+              <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words">
                 {backendUser?.bio || "Добавьте описание своего опыта в настройках профиля."}
               </p>
             </div>
@@ -239,7 +239,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
 
             {isTested ? (
               <div className="space-y-6">
-                <div className="grid sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-2">
                   <ScoreRow label="Архитектурное мышление" value={skills.competency_architecture || 0} delay={0} />
                   <ScoreRow label="Ревью кода ИИ" value={skills.competency_code_understanding || 0} delay={1} />
                   <ScoreRow label="Работа с ИИ" value={skills.competency_prompting || 0} delay={2} />

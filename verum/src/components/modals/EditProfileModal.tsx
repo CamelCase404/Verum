@@ -46,7 +46,7 @@ export function EditProfileModal({ onClose, backendUser, onRefresh }: { onClose:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-md shadow-2xl relative">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-4 sm:p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-md shadow-2xl relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
         <h2 className="text-xl font-bold mb-4">Редактировать профиль</h2>
         

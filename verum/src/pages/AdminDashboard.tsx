@@ -54,7 +54,7 @@ export function AdminDashboard() {
   if (loading) return <div className="p-10 text-center">Загрузка...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-4 py-6 md:py-10">
+    <div className="max-w-4xl w-full overflow-hidden mx-auto px-3 md:px-4 py-6 md:py-10">
       <h1 className="text-3xl font-semibold mb-8 flex items-center gap-2">
         <ShieldCheck className="text-accent" /> Панель модератора
       </h1>
@@ -67,7 +67,7 @@ export function AdminDashboard() {
         /* Используем flex-col, чтобы карточки шли друг за другом по центру */
         <div className="flex flex-col gap-6">
           {pending.map(p => (
-            <div key={p.id} className="bg-surface border border-line rounded-2xl p-6 flex flex-col gap-4 shadow-sm w-full">
+            <div key={p.id} className="bg-surface border border-line rounded-2xl p-4 md:p-6 flex flex-col gap-3 md:gap-4 shadow-sm w-full">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-lg">{p.full_name}</h3>
@@ -114,7 +114,7 @@ export function AdminDashboard() {
                 </div>
               )}
 
-              <div className="flex gap-2 mt-auto pt-4 border-t border-line">
+              <div className="flex flex-col sm:flex-row gap-2 mt-auto pt-4 border-t border-line">
                 <button
                   onClick={() => handleAction(p.id, "approve")}
                   className="flex-1 py-2.5 bg-accent text-white rounded-lg font-medium hover:bg-accent-2 flex justify-center items-center gap-2"

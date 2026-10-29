@@ -54,10 +54,10 @@ export default function RegisterPage() {
                 <ArrowLeft size={16} /> <span className="hidden sm:inline">Вернуться на сайт</span>
             </motion.button>
 
-            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="w-full max-w-4xl bg-surface rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row md:min-h-[600px] relative z-10 border border-line mt-12 md:mt-0">
-                <motion.div variants={slideLeft} className="w-full md:w-[45%] bg-accent p-8 md:p-10 flex flex-col items-center justify-center text-center text-white relative overflow-hidden">
-                    <div className="relative z-10 space-y-4">
-                        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3, type: "spring" }} className="w-14 h-14 md:w-16 md:h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-4 md:mb-6 backdrop-blur-sm border border-white/20">
+            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="w-[calc(100vw-2rem)] max-w-4xl bg-surface rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row md:min-h-[600px] relative z-10 border border-line mt-0">
+                <motion.div variants={slideLeft} className="hidden md:flex md:w-[45%] bg-accent p-8 md:p-10 flex-col items-center justify-center text-center text-white relative overflow-hidden">
+                    <div className="relative z-10 space-y-2.5 sm:space-y-4">
+                        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3, type: "spring" }} className="w-14 h-14 md:w-16 md:h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-2 md:mb-6 backdrop-blur-sm border border-white/20">
                             <ShieldCheck size={28} className="md:w-8 md:h-8" />
                         </motion.div>
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Добро пожаловать!</h2>
@@ -67,16 +67,16 @@ export default function RegisterPage() {
                     </div>
                 </motion.div>
 
-                <motion.div variants={slideRight} className="w-full md:w-[55%] p-6 sm:p-12 flex flex-col justify-center bg-surface">
-                    <div className="text-center mb-6 md:mb-8">
-                        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Регистрация</h1>
+                <motion.div variants={slideRight} className="w-full md:w-[55%] p-4 sm:p-8 md:p-12 flex flex-col justify-center bg-surface">
+                    <div className="text-center mb-2 md:mb-8">
+                        <h1 className="text-2xl md:text-3xl font-bold mb-2 md:mb-6">Регистрация</h1>
                         
                         <div className="flex justify-center gap-3 mb-4">
                             {ROLES.map((opt) => {
                                 const Icon = opt.icon;
                                 const active = role === opt.key;
                                 return (
-                                    <button key={opt.key} type="button" onClick={() => setRole(opt.key)} className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 ${active ? "border-accent bg-accent text-white shadow-md scale-110" : "border-line-2 text-ink-3 hover:border-accent/50 hover:text-accent hover:bg-accent-soft"}`} title={opt.title}>
+                                    <button key={opt.key} type="button" onClick={() => setRole(opt.key)} className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border transition-all duration-300 ${active ? "border-accent bg-accent text-white shadow-md scale-110" : "border-line-2 text-ink-3 hover:border-accent/50 hover:text-accent hover:bg-accent-soft"}`} title={opt.title}>
                                         <Icon size={20} />
                                     </button>
                                 );
@@ -87,17 +87,17 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
-                    <motion.form variants={staggerContainer} initial="hidden" animate="visible" onSubmit={handleSubmit} className="space-y-4">
+                    <motion.form variants={staggerContainer} initial="hidden" animate="visible" onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder={isCompany ? "Название компании" : "Ваше имя"} className="w-full bg-bg-2 border-none rounded-lg px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder={isCompany ? "Название компании" : "Ваше имя"} className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
                             <User size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full bg-bg-2 border-none rounded-lg px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
                             <Mail size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-4 py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
                             <Lock size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
 
@@ -110,7 +110,7 @@ export default function RegisterPage() {
                         </AnimatePresence>
 
                         <div className="pt-2 flex flex-col items-center gap-4">
-                            <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="bg-accent text-white font-semibold py-3 px-10 rounded-full hover:bg-accent-2 transition-colors duration-300 shadow-lg disabled:opacity-60 flex items-center justify-center gap-2 text-sm uppercase tracking-wider w-full sm:w-auto">
+                            <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="bg-accent text-white font-semibold py-2.5 sm:py-3 px-10 rounded-full hover:bg-accent-2 transition-colors duration-300 shadow-lg disabled:opacity-60 flex items-center justify-center gap-2 text-sm uppercase tracking-wider w-full sm:w-auto">
                                 {loading ? <><Loader2 size={16} className="animate-spin" /> Загрузка...</> : "Создать аккаунт"}
                             </motion.button>
                             <div className="text-sm text-ink-3 mt-2">
@@ -133,7 +133,7 @@ export default function RegisterPage() {
                                         window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/github?role=${role}`;
                                     }}
                                     disabled={githubLoading}
-                                    className="w-12 h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm disabled:opacity-50" 
+                                    className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border border-line flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface-2 hover:border-line-2 transition-all shadow-sm disabled:opacity-50" 
                                     title="Зарегистрироваться через GitHub"
                                 >
                                     {githubLoading ? <Loader2 size={22} className="animate-spin text-accent" /> : <Github size={22} />}

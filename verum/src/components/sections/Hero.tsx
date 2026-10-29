@@ -46,7 +46,7 @@ export function Hero() {
             />
 
             <div className="max-w-[1280px] mx-auto px-4 md:px-6 relative">
-                <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-6 md:gap-12 lg:gap-[72px] items-center">
+                <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-4 md:gap-12 lg:gap-[72px] items-center">
                     <div className="text-center lg:text-left px-2 md:px-0">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -82,7 +82,7 @@ export function Hero() {
                                 delay: 0.2,
                                 ease: EASE,
                             }}
-                            className="font-semibold tracking-[-0.042em] leading-[1.04] text-[clamp(28px,7vw,64px)] relative"
+                            className="font-semibold tracking-[-0.042em] leading-[1.04] text-[clamp(26px,6vw,64px)] relative"
                         >
                             Платформа <br className="hidden sm:block" />
                             <span className="text-accent">проверенных</span>
@@ -153,7 +153,7 @@ export function Hero() {
                                 <Cpu size={20} />
                             </motion.div>
 
-                            <div className="bg-surface rounded-2xl md:rounded-[22px] shadow-2xl shadow-black/20 border-none overflow-hidden relative min-h-[340px] flex flex-col">
+                            <div className="bg-surface rounded-2xl md:rounded-[22px] shadow-2xl shadow-black/20 border-none overflow-hidden relative min-h-[280px] sm:min-h-[340px] flex flex-col">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={spec.id}
