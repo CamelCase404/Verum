@@ -85,7 +85,7 @@ export function Nav() {
                 title="Сообщения"
               >
                 <MessageSquare size={20} className="md:w-[18px] md:h-[18px]" />
-                <span className="hidden sm:inline">Сообщения</span>
+                <span className="hidden lg:inline">Сообщения</span>
               </Link>
               
               <Link 
@@ -93,7 +93,7 @@ export function Nav() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-2 border border-line text-ink text-sm font-medium hover:bg-surface-3 transition-colors shadow-sm"
               >
                 <User size={18} />
-                <span className="hidden xs:inline">Кабинет</span>
+                <span className="hidden lg:inline">Кабинет</span>
               </Link>
             </div>
           ) : (
