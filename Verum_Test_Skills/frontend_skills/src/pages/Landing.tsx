@@ -115,7 +115,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
         <div className="min-h-screen flex items-center justify-center p-4 sm:p-8 relative">
             {/* Кнопка переключения темы (Тумблер) */}
             <a 
-                href="http://localhost:5173/dashboard" 
+                href="https://verumskills.ru/dashboard" 
                 className="absolute top-6 left-6 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-divider text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors shadow-sm"
             >
                 <ArrowLeft size={16} /> <span className="hidden sm:inline">Вернуться на сайт</span>

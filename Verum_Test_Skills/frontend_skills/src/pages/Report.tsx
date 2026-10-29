@@ -46,7 +46,7 @@ export default function Report({
     report: ReportResponse;
 }) {
     const goToDashboard = () => {
-        window.location.href = "http://localhost:5173/dashboard";
+        window.location.href = "https://verumskills.ru/dashboard";
     };
 
     return (

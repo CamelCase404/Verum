@@ -89,7 +89,7 @@ export function Auth() {
           </Button>
 
           <div className="mt-6 text-center">
-            <a href="http://localhost:8000/api/auth/github" className="text-sm text-accent hover:underline">Войти через GitHub</a>
+            <a href="https://api.verumskills.ru/api/auth/github" className="text-sm text-accent hover:underline">Войти через GitHub</a>
           </div>
 
         </div>

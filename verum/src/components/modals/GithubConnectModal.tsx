@@ -15,7 +15,7 @@ export function GithubConnectModal({ onClose }: { onClose: () => void }) {
     setLoading(true);
     try {
       // Обращаемся к локальному бэкенду (порт 8000)
-      const res = await fetch("http://localhost:8000/api/github/analyze", {
+      const res = await fetch("https://api.verumskills.ru/api/github/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: username.trim() }),
