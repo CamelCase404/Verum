@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from ..auth import (
     UserDB, create_access_token, get_current_user, get_db, get_password_hash, verify_password,
 )
+from ..config import settings
 from ..schemas import Token, UserProfile, UserRegister, UpdateProfileReq
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -211,7 +212,7 @@ async def upload_avatar(file: UploadFile = File(...), user: UserDB = Depends(get
     filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
     filepath = f"uploads/avatars/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
-    user.avatar_url = f"http://localhost:8000/uploads/avatars/{filename}"
+    user.avatar_url = f"{settings.BACKEND_URL}/uploads/avatars/{filename}"
     db.commit()
     return {"url": user.avatar_url}
 
@@ -222,7 +223,7 @@ async def upload_image(file: UploadFile = File(...), user: UserDB = Depends(get_
     filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
     filepath = f"uploads/images/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
-    return {"url": f"http://localhost:8000/uploads/images/{filename}"}
+    return {"url": f"{settings.BACKEND_URL}/uploads/images/{filename}"}
 
 class UpdateJobsReq(BaseModel):
     job_postings: list[dict]
