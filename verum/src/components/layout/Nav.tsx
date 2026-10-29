@@ -38,9 +38,7 @@ export function Nav() {
           {/* Плавный переключатель темы (Тумблер) */}
           <button 
             onClick={toggleTheme} 
-            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none border ${
-              theme === "dark" ? "bg-surface-2 border-line-2" : "bg-surface-3 border-line"
-            }`}
+            className="hidden sm:inline-flex relative h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none border border-line-2 bg-surface-2"
             title="Переключить тему"
           >
             <span className="sr-only">Переключить тему</span>
@@ -61,7 +59,15 @@ export function Nav() {
             />
           </button>
 
-          <div className="w-px h-6 bg-line hidden sm:block"></div>
+          
+          <button 
+            onClick={toggleTheme} 
+            className="sm:hidden p-2 text-ink-2 hover:text-accent transition-colors flex items-center justify-center"
+            title="Переключить тему"
+          >
+            {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+<div className="w-px h-6 bg-line hidden sm:block"></div>
 
           {/* Кнопки авторизации / навигации */}
           {user ? (
