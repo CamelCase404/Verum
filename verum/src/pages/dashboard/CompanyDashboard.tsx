@@ -733,10 +733,10 @@ export function CompanyDashboard({
                     </AnimatePresence>
                 </div>
             </div>
-
             <AnimatePresence>
                 {isEditOpen && (
                     <EditCompanyModal
+                        key="edit-company"
                         onClose={() => setIsEditOpen(false)}
                         backendUser={backendUser}
                         onRefresh={onRefresh}
@@ -744,6 +744,7 @@ export function CompanyDashboard({
                 )}
                 {isJobOpen && (
                     <CreateJobModal
+                        key="create-job"
                         onClose={() => setIsJobOpen(false)}
                         backendUser={backendUser}
                         onRefresh={handleJobCreated}
@@ -751,6 +752,7 @@ export function CompanyDashboard({
                 )}
                 {isCompareOpen && (
                     <CompareCandidatesModal
+                        key="compare-candidates"
                         candidates={candidatesToCompare}
                         onClose={() => setIsCompareOpen(false)}
                     />

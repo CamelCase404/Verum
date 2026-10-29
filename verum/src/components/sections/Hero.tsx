@@ -46,7 +46,7 @@ export function Hero() {
             />
 
             <div className="max-w-[1280px] mx-auto px-4 md:px-6 relative">
-                <div className="grid lg:grid-cols-[1fr_460px] gap-4 md:gap-12 lg:gap-[72px] items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-4 md:gap-12 lg:gap-[72px] items-center">
                     <div className="text-center lg:text-left px-2 md:px-0">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -106,7 +106,7 @@ export function Hero() {
                         initial={{ opacity: 0, x: 50, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
-                        className="relative max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0"
+                        className="relative min-w-0 max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0"
                     >
                         {/* Внутренний контейнер для бесконечной левитации */}
                         <motion.div
@@ -192,7 +192,7 @@ export function Hero() {
                                                     {spec.handle} · {spec.role}
                                                 </div>
                                             </div>
-                                            <Badge variant={spec.level}>
+                                            <Badge variant={spec.level} className="min-w-[64px] justify-center">
                                                 {levelText}
                                             </Badge>
                                         </div>
