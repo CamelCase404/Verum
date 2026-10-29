@@ -123,8 +123,8 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
 
             <button 
                 onClick={toggleTheme} 
-                className={`fixed top-4 right-4 md:top-6 md:right-6 z-50 inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none shadow-md border ${
-                    theme === "dark" ? "bg-accent/20 border-accent/30" : "bg-card border-divider"
+                className={`fixed top-4 right-4 md:top-6 md:right-6 z-[100] inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none shadow-md border ${
+                    theme === "dark" ? "bg-accent/20 border-[#2a5442]" : "bg-surface-2 border-[#2a2a31]"
                 }`}
             >
                 <span className="sr-only">Переключить тему</span>
@@ -142,7 +142,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
             </button>
 
             <div className="w-full max-w-4xl">
-                <div className="mb-6 mt-20 md:mt-0 rounded-[22px] border border-amber-500/30 bg-amber-500/10 px-5 py-4 flex items-start gap-3 shadow-sm">
+                <div className="mb-6 mt-16 md:mt-0 rounded-[22px] border border-[#4a3e27] bg-amber-500/10 px-5 py-4 flex items-start gap-3 shadow-sm">
                     <ShieldAlert className="text-amber-500 mt-0.5 shrink-0" size={20} />
                     <div>
                         <h3 className="text-[14px] font-bold text-amber-500">Внимание: запись анализируется</h3>
@@ -153,13 +153,13 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                 </div>
 
                 {activeSession && (
-                    <div className="mb-4 rounded-[22px] border border-amber-500/30 bg-amber-500/10 px-4 py-3 flex items-start gap-3">
+                    <div className="mb-4 rounded-[22px] border border-[#4a3e27] bg-amber-500/10 px-4 py-3 flex items-start gap-3">
                         <AlertTriangle className="text-amber-500 mt-0.5" size={18} />
                         <div className="flex-1">
                             <div className="text-[14px] font-medium text-amber-500">Найдено незавершённое интервью</div>
                             <div className="text-[12px] text-amber-500/80">Вы не можете его продолжить, так как сессия была прервана. Начните заново.</div>
                         </div>
-                        <button onClick={onAbandon} className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 px-3 py-1.5 text-[13px] text-amber-500 hover:bg-amber-500/20 transition">
+                        <button onClick={onAbandon} className="inline-flex items-center gap-1 rounded-lg border border-[#4a3e27] px-3 py-1.5 text-[13px] text-amber-500 hover:bg-amber-500/20 transition">
                             <RotateCcw size={14} /> Сбросить
                         </button>
                     </div>

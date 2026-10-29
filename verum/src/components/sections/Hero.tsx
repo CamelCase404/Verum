@@ -185,10 +185,10 @@ export function Hero() {
                                                     .toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-[13px] md:text-[15.5px] font-semibold mb-0.5 truncate flex items-center gap-1.5">
+                                                <div className="text-[13px] md:text-[15.5px] font-semibold mb-0.5 truncate flex items-center gap-1.5 max-w-[200px]">
                                                     {spec.name}
                                                 </div>
-                                                <div className="text-[11px] md:text-[12.5px] text-ink-3 truncate">
+                                                <div className="text-[11px] md:text-[12.5px] text-ink-3 truncate max-w-[220px]">
                                                     {spec.handle} · {spec.role}
                                                 </div>
                                             </div>
