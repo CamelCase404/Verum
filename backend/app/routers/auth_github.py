@@ -6,6 +6,7 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from ..config import settings
 from ..auth import get_db, UserDB, create_access_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -42,7 +43,7 @@ async def github_callback(request: Request, db: Session = Depends(get_db)):
         }
         resp = await client.get("https://api.github.com/user", headers=headers)
         if resp.status_code != 200:
-            return RedirectResponse(url=f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/login?error=github_user")
+            return RedirectResponse(url=f"{settings.FRONTEND_URL}/login?error=github_user")
         user_data = resp.json()
 
         email = user_data.get("email")
@@ -126,4 +127,4 @@ async def github_callback(request: Request, db: Session = Depends(get_db)):
     db.commit()
 
     access_token = create_access_token({"sub": user.email})
-    return RedirectResponse(url=f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/auth/callback?token={access_token}")
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth/callback?token={access_token}")

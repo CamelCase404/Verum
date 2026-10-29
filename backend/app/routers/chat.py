@@ -7,6 +7,7 @@ import os
 import shutil
 import uuid
 
+from ..config import settings
 from ..auth import get_db, get_current_user, UserDB, Conversation, Message
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -111,7 +112,7 @@ async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: Us
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    return {"url": f"http://localhost:8000/uploads/chat/{filename}"}
+    return {"url": f"{settings.BACKEND_URL}/uploads/chat/{filename}"}
 
 @router.post("/{conv_id}/messages")
 def send_message(conv_id: int, req: SendMessageReq, user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):

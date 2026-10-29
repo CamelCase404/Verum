@@ -12,7 +12,7 @@ export function AdminDashboard() {
 
   const fetchPending = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/pending`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}/api/admin/pending`, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       if (!res.ok) throw new Error("Ошибка доступа");
@@ -37,7 +37,7 @@ export function AdminDashboard() {
 
   const handleAction = async (id: number, action: "approve" | "reject") => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/${action}/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}/api/admin/${action}/${id}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${getToken()}` }
       });
@@ -83,7 +83,7 @@ export function AdminDashboard() {
               </div>
 
               {activeVideo === p.id.toString() ? (
-                <video src={`${import.meta.env.VITE_API_URL}${p.video_url}`} controls className="w-full rounded-xl bg-black aspect-video" />
+                <video src={`${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}${p.video_url}`} controls className="w-full rounded-xl bg-black aspect-video" />
               ) : (
                 <button
                   onClick={() => setActiveVideo(p.id.toString())}

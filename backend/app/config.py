@@ -15,6 +15,7 @@ class Settings:
     )
     GIGACHAT_MODEL: str = os.getenv("GIGACHAT_MODEL", "GigaChat")
     BACKEND_URL: str = os.getenv("BACKEND_URL", "https://api.verumskills.ru")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://verumskills.ru")
 
     GIGACHAT_VERIFY_SSL: bool = (
         os.getenv("GIGACHAT_VERIFY_SSL", "false").lower() == "true"

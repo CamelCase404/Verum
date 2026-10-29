@@ -127,7 +127,7 @@ export default function Interview({
                 const formData = new FormData();
                 formData.append("file", blob, "interview.webm");
                 fetch(
-                    `${import.meta.env.VITE_API_URL}/api/media/upload?interview_id=${payload.interviewId}`,
+                    `${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}/api/media/upload?interview_id=${payload.interviewId}`,
                     { method: "POST", body: formData },
                 ).catch(console.error);
             }, 1000);
