@@ -98,10 +98,10 @@ export function Nav() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link to="/login" className="px-4 py-2 text-sm font-medium hover:text-accent transition-colors">
+              <Link to="/login" className="px-2 md:px-4 py-2 text-sm font-medium hover:text-accent transition-colors text-center">
                 Войти
               </Link>
-              <Link to="/register" className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-2 transition-colors shadow-sm">
+              <Link to="/register" className="px-3 py-2 md:px-4 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-2 transition-colors shadow-sm text-center">
                 Регистрация
               </Link>
             </div>

@@ -103,7 +103,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
   };
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 relative">
+    <div className="max-w-[1280px] mx-auto px-3 md:px-8 py-4 md:py-10 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
         <div>
           <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Личный кабинет</h1>
@@ -157,7 +157,7 @@ export function DeveloperDashboard({ backendUser, onRefresh }: { backendUser: an
             {/* ЕДИНАЯ КРАСИВАЯ КАРТОЧКА НАВЫКОВ */}
             {isTested && (
               <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
-                <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
+                <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-line border-b border-line">
                   <div className="p-4 flex flex-col justify-center">
                     <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1.5">
                       <ShieldCheck size={14} className="text-accent" /> Уровень

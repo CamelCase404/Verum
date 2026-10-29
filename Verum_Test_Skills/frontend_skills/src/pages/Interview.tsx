@@ -472,7 +472,7 @@ export default function Interview({
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="lg:col-span-1">
                     <div className="bg-card rounded-[22px] shadow-card p-4 sticky top-10">
                         <div className="flex items-center justify-between mb-3">
@@ -498,7 +498,7 @@ export default function Interview({
                 </div>
 
                 <div className="lg:col-span-2">
-                    <div className="bg-card rounded-[22px] shadow-card p-6 flex flex-col h-[80vh]">
+                    <div className="bg-card rounded-[22px] shadow-card p-3 md:p-6 flex flex-col h-[65vh] md:h-[80vh]">
                         <div className="flex items-center justify-between gap-3 shrink-0">
                             <div>
                                 <h1 className="text-[20px] font-bold">
@@ -567,7 +567,7 @@ export default function Interview({
                                                     <div className="whitespace-pre-wrap mb-3">
                                                         {textPart}
                                                     </div>
-                                                    <pre className="bg-[#1e1e1e] text-[#d4d4d4] p-4 rounded-xl overflow-x-auto text-[12px] font-mono whitespace-pre border border-gray-700">
+                                                    <pre className="bg-[#1e1e1e] text-[#d4d4d4] p-3 md:p-4 rounded-xl overflow-x-auto text-[10px] md:text-[12px] font-mono whitespace-pre border border-gray-700">
                                                         <code>{codePart}</code>
                                                     </pre>
                                                 </>

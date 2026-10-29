@@ -54,7 +54,7 @@ export function AdminDashboard() {
   if (loading) return <div className="p-10 text-center">Загрузка...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-3 md:px-4 py-6 md:py-10">
       <h1 className="text-3xl font-semibold mb-8 flex items-center gap-2">
         <ShieldCheck className="text-accent" /> Панель модератора
       </h1>
@@ -95,7 +95,7 @@ export function AdminDashboard() {
 
               {/* ИСТОРИЯ ЧАТА */}
               {p.chat_history && p.chat_history.length > 0 && (
-                <div className="bg-surface-2 border border-line rounded-xl overflow-hidden flex flex-col max-h-[400px]">
+                <div className="bg-surface-2 border border-line rounded-xl overflow-hidden flex flex-col max-h-[250px] md:max-h-[400px]">
                   {/* Заголовок ВНЕ зоны скролла */}
                   <div className="px-4 py-3 text-[11px] font-semibold text-ink-3 uppercase tracking-wider border-b border-line bg-surface-2 shrink-0">
                     История диалога

@@ -47,7 +47,7 @@ export function Hero() {
 
             <div className="max-w-[1280px] mx-auto px-4 md:px-6 relative">
                 <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-6 md:gap-12 lg:gap-[72px] items-center">
-                    <div className="text-center lg:text-left">
+                    <div className="text-center lg:text-left px-2 md:px-0">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -106,7 +106,7 @@ export function Hero() {
                         initial={{ opacity: 0, x: 50, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
-                        className="relative max-w-[100%] mx-auto w-full lg:w-auto mt-4 lg:mt-0"
+                        className="relative max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0"
                     >
                         {/* Внутренний контейнер для бесконечной левитации */}
                         <motion.div

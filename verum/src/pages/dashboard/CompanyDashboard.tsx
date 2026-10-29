@@ -168,7 +168,7 @@ export function CompanyDashboard({
         placeholder,
         icon: Icon,
     }: any) => (
-        <div className="relative flex-1 sm:flex-none">
+        <div className="relative w-full sm:w-auto flex-1 sm:flex-none">
             <button
                 onClick={() => setOpen(!open)}
                 className="w-full bg-surface-2 border border-line text-sm text-ink rounded-lg px-3 py-2 outline-none flex items-center justify-between gap-2 hover:bg-surface-3 transition-colors min-w-[130px]"
@@ -229,7 +229,7 @@ export function CompanyDashboard({
     );
 
     return (
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 relative">
+        <div className="max-w-[1280px] mx-auto px-3 md:px-8 py-4 md:py-10 relative">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">
@@ -431,7 +431,7 @@ export function CompanyDashboard({
                                     <div className="flex flex-wrap items-center gap-2 w-full">
                                         {/* ВЫБОР ВАКАНСИИ */}
                                         {jobs.length > 0 && (
-                                            <div className="relative flex-1 sm:flex-none">
+                                            <div className="relative w-full sm:w-auto flex-1 sm:flex-none">
                                                 <button
                                                     onClick={() => {
                                                         setOpenJob(!openJob);
