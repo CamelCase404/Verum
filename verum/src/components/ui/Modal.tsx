@@ -11,17 +11,23 @@ interface ModalProps {
 }
 
 export function Modal({ children, onClose, size = "md" }: ModalProps) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+    useEffect(() => {
+        const originalBodyOverflow = document.body.style.overflow;
+        const originalHtmlOverflow = document.documentElement.style.overflow;
+        const originalTouchAction = document.documentElement.style.touchAction;
+        
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
+        document.documentElement.style.touchAction = "none";
+        
+        return () => {
+            document.body.style.overflow = originalBodyOverflow;
+            document.documentElement.style.overflow = originalHtmlOverflow;
+            document.documentElement.style.touchAction = originalTouchAction;
+        };
+    }, []);
+
+  
 
   return createPortal(
     <div

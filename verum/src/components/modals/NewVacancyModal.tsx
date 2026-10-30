@@ -5,12 +5,6 @@ import { toast } from "@/components/layout/ToastContainer";
 
 export function NewVacancyModal({
  onClose }: { onClose: () => void }) {
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, []);
 
   const [title, setTitle] = useState("");
   const [salary, setSalary] = useState("");

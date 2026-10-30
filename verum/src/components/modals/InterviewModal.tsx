@@ -7,12 +7,6 @@ import { toast } from "@/components/layout/ToastContainer";
 
 export function InterviewModal({
  onClose }: { onClose: () => void }) {
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, []);
 
   const { updateProfile } = useAppStore();
   const [step, setStep] = useState<"start" | "loading">("start");

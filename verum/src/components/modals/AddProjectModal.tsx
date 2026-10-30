@@ -6,12 +6,6 @@ import { toast } from "@/components/layout/ToastContainer";
 
 export function AddProjectModal({
  onClose, backendUser, onRefresh, projectToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, projectToEdit?: any }) {
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, []);
 
   const isEditing = !!projectToEdit;
 
