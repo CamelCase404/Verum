@@ -6,11 +6,27 @@ import { Badge } from "@/components/ui/Badge";
 import { ShieldCheck, Code, Terminal, Cpu, Clock } from "lucide-react";
 import { Particles } from "@/components/ui/Particles";
 import { MOCK_SPECIALISTS } from "@/data/specialists";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store/useAppStore";
+import { toast } from "@/components/layout/ToastContainer";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
 export function Hero() {
+    const navigate = useNavigate();
+    const user = useAppStore((s) => s.user);
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    const handleStartInterview = () => {
+        if (!user) {
+            toast("Войдите или зарегистрируйтесь как разработчик");
+            navigate("/register");
+        } else if (user.role === "developer") {
+            navigate("/dashboard");
+        } else {
+            toast("❌ Собеседование доступно только для разработчиков");
+        }
+    };
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -99,6 +115,21 @@ export function Hero() {
                             тестирует архитектурное мышление и способность
                             находить ошибки в коде, сгенерированном ИИ.
                         </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
+                            className="mt-6 md:mt-8 flex flex-col items-center lg:items-start gap-2.5"
+                        >
+                            <button
+                                onClick={handleStartInterview}
+                                className="h-[46px] md:h-[50px] px-6 md:px-8 rounded-xl bg-accent text-white font-medium text-[14px] md:text-[15px] shadow-lg shadow-accent/20 hover:bg-accent-2 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+                            >
+                                Пройти собеседование
+                            </button>
+                            
+                        </motion.div>
                     </div>
 
                     {/* Внешний контейнер для стартовой анимации (выезд справа + прозрачность) */}
@@ -106,7 +137,7 @@ export function Hero() {
                         initial={{ opacity: 0, x: 50, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
-                        className="relative min-w-0 max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0"
+                        className="relative min-w-0 max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0 hidden lg:block"
                     >
                         {/* Внутренний контейнер для бесконечной левитации */}
                         <motion.div
