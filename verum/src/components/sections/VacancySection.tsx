@@ -35,10 +35,10 @@ export function VacancySection() {
   };
 
   return (
-    <section className="py-8 md:py-16 relative w-full overflow-hidden">
+    <section className="py-8 pb-20 md:py-16 relative w-full overflow-hidden">
       <div className="wrap">
         <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-12 lg:gap-20 items-center w-full min-w-0">
-          <Reveal delay={0.2} className="w-full max-w-full min-w-0">
+          <Reveal delay={0.2} className="w-full max-w-full min-w-0 order-2 lg:order-1">
             <div className="bg-surface border border-line rounded-2xl shadow-xl overflow-hidden relative w-full">
               <div className="px-4 md:px-5 py-3 md:py-4 border-b border-line bg-surface-2 flex items-center justify-between relative">
                 <span className="text-[14px] md:text-[15px] font-semibold flex items-center gap-2">
@@ -82,18 +82,18 @@ export function VacancySection() {
             </div>
           </Reveal>
 
-          <Reveal>
-            <span className="block text-[10px] md:text-[11px] uppercase tracking-[0.14em] font-semibold text-ink-3 mb-2 md:mb-4 flex items-center justify-center lg:justify-start gap-2">
+          <Reveal className="order-1 lg:order-2">
+            <span className="block text-[10px] md:text-[11px] uppercase tracking-[0.14em] font-semibold text-ink-3 mb-2 md:mb-4 flex items-center justify-center lg:justify-end gap-2">
               <span className="w-4 md:w-6 h-px bg-accent inline-block" /> Для компаний
             </span>
-            <h2 className="font-semibold tracking-[-0.038em] leading-[1.04] text-[clamp(22px,4.4vw,40px)] mb-3 md:mb-4 text-center lg:text-left break-words">
+            <h2 className="font-semibold tracking-[-0.038em] leading-[1.04] text-[clamp(22px,4.4vw,40px)] mb-3 md:mb-4 text-center lg:text-right break-words">
               Опишите вакансию — получите шортлист
             </h2>
-            <p className="text-[13px] md:text-[15px] text-ink-3 leading-relaxed max-w-[400px] mb-5 md:mb-8 mx-auto lg:mx-0 text-center lg:text-left">
+            <p className="text-[13px] md:text-[15px] text-ink-3 leading-relaxed max-w-[400px] mb-5 md:mb-8 mx-auto lg:ml-auto lg:mr-0 text-center lg:text-right">
               Вам не нужно вручную перебирать сотни резюме. Напишите, кто вам нужен, а система сама выделит требования и подберёт кандидатов.
             </p>
             
-            <div className="flex justify-center lg:justify-start">
+            <div className="flex justify-center lg:justify-end">
               <motion.button
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
