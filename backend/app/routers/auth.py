@@ -178,14 +178,15 @@ class SkillsReport(BaseModel):
 
 @router.post("/skills")
 async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    if user.role != "developer": raise HTTPException(403, "Only developers")
-    
+    if user.role != "developer":
+        raise HTTPException(403, "Only developers")
+
     # Защита от двойного инкремента при повторном вызове save_skills
     current_id = (user.pending_skills_data or {}).get("interview_id")
     new_id = report.model_dump().get("interview_id")
     if current_id != new_id:
         user.attempts_used = (user.attempts_used or 0) + 1
-    
+
     user.last_test_at = datetime.utcnow()
 
     # Подтягиваем историю чата из интервью (для профиля и модерации)
@@ -197,13 +198,13 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
                 chat_history = [{"role": t.role, "content": t.content} for t in _it.turns]
         except Exception as _e:
             print(f"  ⚠️ Не удалось получить chat_history: {_e}")
-    
+
     # Если ИИ отклонил (Reject) или прервал собеседование — НЕ отправляем на модерацию
     if report.rejected or report.final_grade == "Reject":
         user.test_status = "rejected"
         user.pending_skills_data = None
         user.interview_video_url = None
-        
+
         # Помечаем интервью как rejected, чтобы media.py отклонил поздние видео
         if report.interview_id:
             try:
@@ -214,7 +215,7 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
                     await save_interview(it)
             except Exception as e:
                 print(f"  ⚠️ Не удалось обновить interview rejected: {e}")
-            
+
             # УДАЛЯЕМ ВИДЕОФАЙЛ С СЕРВЕРА, если финальный грейд Reject
             files = glob.glob(f"uploads/{report.interview_id}_*.webm")
             for f in files:
@@ -232,18 +233,18 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
         user.pending_skills_data = report.model_dump()
         if chat_history:
             user.pending_skills_data["chat_history"] = chat_history
-user.test_status = "pending"
-    
+        user.test_status = "pending"
+
     # Ищем видео по ID собеседования
     if report.interview_id:
         files = glob.glob(f"uploads/{report.interview_id}_*.webm")
         if files:
             user.interview_video_url = f"/{files[0].replace(os.sep, '/')}"
-            
+
     await db.commit()
     return {"status": "ok"}
 
-# ОСТАЛЬНЫЕ РОУТЫ (profile, avatar, search и т.д.)
+
 @router.put("/profile")
 async def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if data.bio is not None: user.bio = data.bio
