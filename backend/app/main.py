@@ -40,3 +40,19 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 @app.get("/api/health")
 def health():
     return {"ok": True}
+
+
+from fastapi import Request, Response
+from fastapi.responses import JSONResponse
+from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
+
+@app.exception_handler(Exception)
+async def handle_general_exception(request: Request, exc: Exception):
+    # Логируем ошибку для отладки
+    print(f"Unhandled error: {exc}")
+    # Возвращаем ответ с заголовком CORS, чтобы браузер не блокировал его
+    return JSONResponse(
+        status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+        headers={"access-control-allow-origin": "*"}
+    )

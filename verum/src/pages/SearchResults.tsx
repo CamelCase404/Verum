@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, Building2, Code2, Star, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Search, Building2, Code2, ShieldCheck } from "lucide-react";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 import { motion } from "framer-motion";
@@ -72,17 +72,34 @@ export function SearchResults() {
                 ) : isJobsSearch ? (
                     <div className="grid gap-4 md:grid-cols-2">
                         {results.map((job: any, i: number) => (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} key={job.id} className="p-5 border border-line rounded-2xl bg-surface hover:border-accent transition-colors flex flex-col">
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }} 
+                                animate={{ opacity: 1, y: 0 }} 
+                                transition={{ delay: i * 0.05 }} 
+                                key={job.id} 
+                                onClick={() => navigate(`/profile/${job.company_id}`)}
+                                className="p-5 border border-line rounded-2xl bg-surface hover:border-accent cursor-pointer transition-colors flex flex-col group"
+                            >
                                 <div className="flex justify-between items-start mb-3 gap-2">
-                                    <h3 className="font-semibold text-[17px] leading-tight">{job.title}</h3>
+                                    <h3 className="font-semibold text-[17px] leading-tight group-hover:text-accent transition-colors">{job.title}</h3>
                                     {job.salary && <span className="text-sm font-bold text-accent whitespace-nowrap bg-accent/5 px-2.5 py-1 rounded-lg">{job.salary}</span>}
                                 </div>
                                 <p className="text-[13px] text-ink-3 line-clamp-2 mb-4 flex-1">{job.description}</p>
                                 
                                 <div className="flex flex-wrap gap-2 mb-4">
-                                    <span className="text-[11px] bg-bg-2 border border-line px-2 py-1 rounded-md">{job.company_name}</span>
                                     <span className="text-[11px] bg-bg-2 border border-line px-2 py-1 rounded-md">{job.level}</span>
                                     <span className="text-[11px] bg-bg-2 border border-line px-2 py-1 rounded-md">{job.format}</span>
+                                </div>
+
+                                <div className="flex items-center gap-3 pt-4 border-t border-line mt-auto">
+                                    <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center overflow-hidden shrink-0 text-xs font-bold">
+                                        {job.company_avatar ? (
+                                            <img src={job.company_avatar} alt="Logo" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Building2 size={16} />
+                                        )}
+                                    </div>
+                                    <span className="text-[13px] font-medium text-ink-2 truncate">{job.company_name}</span>
                                 </div>
                             </motion.div>
                         ))}
@@ -90,13 +107,24 @@ export function SearchResults() {
                 ) : (
                     <div className="grid gap-4">
                         {results.map((cand: any, i: number) => (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} key={cand.id} className="p-4 border border-line rounded-2xl bg-surface flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:border-accent transition-colors">
-                                <div className="w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center text-lg font-bold shrink-0">
-                                    {cand.avatar_url ? <img src={cand.avatar_url} className="w-full h-full object-cover rounded-full" /> : cand.full_name.substring(0, 2).toUpperCase()}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }} 
+                                animate={{ opacity: 1, y: 0 }} 
+                                transition={{ delay: i * 0.05 }} 
+                                key={cand.id} 
+                                onClick={() => navigate(`/profile/${cand.id}`)}
+                                className="p-4 border border-line rounded-2xl bg-surface flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:border-accent cursor-pointer transition-colors group"
+                            >
+                                <div className="w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center text-lg font-bold shrink-0 group-hover:scale-105 transition-transform">
+                                    {cand.avatar_url ? (
+                                        <img src={cand.avatar_url} className="w-full h-full object-cover rounded-full" />
+                                    ) : (
+                                        cand.full_name.substring(0, 2).toUpperCase()
+                                    )}
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-[16px]">{cand.full_name}</h3>
+                                        <h3 className="font-semibold text-[16px] group-hover:text-accent transition-colors">{cand.full_name}</h3>
                                         <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
                                             <ShieldCheck size={10} /> {cand.final_grade}
                                         </span>

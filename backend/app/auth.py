@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pwdlib import PasswordHash  # <-- НОВЫЙ ИМПОРТ
-from sqlalchemy import JSON, Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import select, JSON, Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
