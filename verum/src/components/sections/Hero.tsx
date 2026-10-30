@@ -119,6 +119,15 @@ export function Hero() {
                                 Пройти собеседование
                             </button>
                         </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
+                            className="mt-6 w-full max-w-[500px] mx-auto lg:mx-0"
+                        >
+                            <UniversalSearch />
+                        </motion.div>
                     </div>
 
                     {/* Внешний контейнер для стартовой анимации (выезд справа + прозрачность) */}

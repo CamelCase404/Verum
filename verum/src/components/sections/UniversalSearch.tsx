@@ -15,6 +15,7 @@ export function UniversalSearch() {
     const navigate = useNavigate();
     
     const [isOpen, setIsOpen] = useState(false);
+    const [searchRole, setSearchRole] = useState<"developer" | "company">("developer");
     
     // Фильтры
     const [stack, setStack] = useState("");
@@ -28,7 +29,11 @@ export function UniversalSearch() {
     const [openFormat, setOpenFormat] = useState(false);
     const [openLang, setOpenLang] = useState(false);
 
-    const isJobsSearch = user?.role === "developer";
+    const isJobsSearch = searchRole === "developer";
+
+    useEffect(() => {
+        if (user && isOpen) setSearchRole(user.role as any);
+    }, [user, isOpen]);
 
     useEffect(() => {
         if (isOpen) {
@@ -48,11 +53,6 @@ export function UniversalSearch() {
     }, [isOpen]);
 
     const handleOpen = () => {
-        if (!user) {
-            toast("Войдите в аккаунт, чтобы использовать поиск");
-            navigate("/login");
-            return;
-        }
         setIsOpen(true);
     };
 
@@ -89,13 +89,22 @@ export function UniversalSearch() {
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface border border-line rounded-[22px] p-5 sm:p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                             <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
                             
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isJobsSearch ? "bg-accent/10 text-accent" : "bg-blue/10 text-blue"}`}>
-                                    {isJobsSearch ? <Code2 size={20} /> : <Building2 size={20} />}
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold">{isJobsSearch ? "Поиск вакансий" : "Поиск кандидатов"}</h2>
-                                    <p className="text-[13px] text-ink-3">Укажите ваши требования</p>
+                            <div className="mb-6">
+                                <h2 className="text-xl font-bold mb-4">Умный поиск</h2>
+                                {/* Переключатель ролей */}
+                                <div className="flex bg-bg-2 p-1 rounded-xl">
+                                    <button
+                                        onClick={() => setSearchRole("developer")}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${searchRole === "developer" ? "bg-surface text-accent shadow-sm" : "text-ink-3 hover:text-ink"}`}
+                                    >
+                                        <Code2 size={16} /> Ищу работу
+                                    </button>
+                                    <button
+                                        onClick={() => setSearchRole("company")}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${searchRole === "company" ? "bg-surface text-accent shadow-sm" : "text-ink-3 hover:text-ink"}`}
+                                    >
+                                        <Building2 size={16} /> Ищу сотрудника
+                                    </button>
                                 </div>
                             </div>
 

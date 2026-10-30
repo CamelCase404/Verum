@@ -19,6 +19,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 дней
 # Инициализируем современный хэшер (по умолчанию использует Argon2)
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+from typing import Optional
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 import os
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://verum_user:verum_password_secure_change_me@db:5432/verum_db")
@@ -94,6 +96,21 @@ def create_access_token(data: dict) -> str:
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+
+
+async def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: AsyncSession = Depends(get_db)):
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+    except JWTError:
+        return None
+
+    result = await db.execute(select(UserDB).where(UserDB.email == email))
+    return result.scalars().first()
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     from sqlalchemy import select

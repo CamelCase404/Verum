@@ -11,7 +11,7 @@ import glob
 from pydantic import BaseModel
 
 from ..auth import (
-    UserDB, create_access_token, get_current_user, get_db, get_password_hash, verify_password,
+    UserDB, create_access_token, get_current_user, get_current_user_optional, get_db, get_password_hash, verify_password,
 )
 from ..config import settings
 from ..schemas import Token, UserProfile, UserRegister, UpdateProfileReq
@@ -81,7 +81,7 @@ class CandidateProfile(BaseModel):
     avatar_url: str | None = None
 
 @router.post("/search", response_model=list[CandidateProfile])
-async def search_candidates(req: SearchRequest, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(get_current_user_optional), db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.role == "developer", UserDB.skills_data.isnot(None)))
     users = result.scalars().all()
 
@@ -113,7 +113,7 @@ async def search_candidates(req: SearchRequest, user: UserDB = Depends(get_curre
             estimated_salary = int(test_salary + github_bonus)
 
             match_score = 0
-            if user.role == "company" and user.job_postings:
+            if user and user.role == "company" and user.job_postings:
                 target_job = None
                 if req.job_id:
                     target_job = next((j for j in user.job_postings if str(j.get("id")) == str(req.job_id)), None)
@@ -249,7 +249,7 @@ class SearchJobReq(BaseModel):
     min_salary: Optional[int] = None
 
 @router.post("/search-jobs")
-async def search_jobs(req: SearchJobReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def search_jobs(req: SearchJobReq, user: UserDB | None = Depends(get_current_user_optional), db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None)))
     companies = result.scalars().all()
     
