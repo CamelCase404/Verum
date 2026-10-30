@@ -62,10 +62,10 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       } else {
           const numbers = sal.match(/\d+/g);
           if (numbers && numbers.length >= 2) {
-              setSalaryFrom(numbers[0]);
-              setSalaryTo(numbers[1]);
+              setSalaryFrom(parseInt(numbers[0]).toLocaleString("ru-RU"));
+              setSalaryTo(parseInt(numbers[1]).toLocaleString("ru-RU"));
           } else if (numbers && numbers.length === 1) {
-              setSalaryFrom(numbers[0]);
+              setSalaryFrom(parseInt(numbers[0]).toLocaleString("ru-RU"));
           }
       }
     }
@@ -99,9 +99,11 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
     try {
       let finalSalary = "По договоренности";
       if (!isNegotiable) {
-          if (salaryFrom && salaryTo) finalSalary = `от ${salaryFrom} до ${salaryTo} ₽`;
-          else if (salaryFrom) finalSalary = `от ${salaryFrom} ₽`;
-          else if (salaryTo) finalSalary = `до ${salaryTo} ₽`;
+          const cleanFrom = salaryFrom.replace(/\D/g, "");
+          const cleanTo = salaryTo.replace(/\D/g, "");
+          if (cleanFrom && cleanTo) finalSalary = `от ${cleanFrom} до ${cleanTo} ₽`;
+          else if (cleanFrom) finalSalary = `от ${cleanFrom} ₽`;
+          else if (cleanTo) finalSalary = `до ${cleanTo} ₽`;
           else finalSalary = "По договоренности";
       }
 
@@ -188,50 +190,64 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="relative">
-              <label className="text-sm font-medium mb-1 block">Формат</label>
-              <button onClick={() => { setOpenFormat(!openFormat); setOpenStack(false); setOpenLevel(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
-                {format} <ChevronDown size={16} className={`transition-transform duration-200 ${openFormat ? "rotate-180" : ""}`} />
+          <div className="relative">
+            <label className="text-sm font-medium mb-1 block">Формат</label>
+            <button onClick={() => { setOpenFormat(!openFormat); setOpenStack(false); setOpenLevel(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
+              {format} <ChevronDown size={16} className={`transition-transform duration-200 ${openFormat ? "rotate-180" : ""}`} />
+            </button>
+            <AnimatePresence>
+              {openFormat && (
+                <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
+                  {FORMATS.map(f => (
+                    <button key={f} onClick={() => { setFormat(f); setOpenFormat(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
+                      {f} {format === f && <Check size={14} className="text-accent" />}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="pt-2">
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium block">Зарплата (₽)</label>
+              
+              {/* Кастомный чекбокс */}
+              <button 
+                type="button"
+                onClick={() => setIsNegotiable(!isNegotiable)}
+                className="flex items-center gap-2 group cursor-pointer py-2 -my-2"
+              >
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isNegotiable ? 'bg-accent border-accent' : 'border-line-2 group-hover:border-accent bg-surface'}`}>
+                  {isNegotiable && <Check size={14} className="text-white" />}
+                </div>
+                <span className={`text-[13px] transition-colors ${isNegotiable ? 'text-ink font-medium' : 'text-ink-3 group-hover:text-ink'}`}>По договоренности</span>
               </button>
-              <AnimatePresence>
-                {openFormat && (
-                  <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
-                    {FORMATS.map(f => (
-                      <button key={f} onClick={() => { setFormat(f); setOpenFormat(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
-                        {f} {format === f && <Check size={14} className="text-accent" />}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-[13px] font-medium block text-ink-2">Зарплата (₽)</label>
-                <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-ink-3 hover:text-ink transition-colors">
-                  <input type="checkbox" checked={isNegotiable} onChange={(e) => setIsNegotiable(e.target.checked)} className="accent-accent" />
-                  По договоренности
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input 
-                  value={salaryFrom} 
-                  onChange={(e) => setSalaryFrom(e.target.value.replace(/\D/g, ""))} 
-                  disabled={isNegotiable}
-                  className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors disabled:opacity-50" 
-                  placeholder="От" 
-                />
-                <span className="text-ink-3">—</span>
-                <input 
-                  value={salaryTo} 
-                  onChange={(e) => setSalaryTo(e.target.value.replace(/\D/g, ""))} 
-                  disabled={isNegotiable}
-                  className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors disabled:opacity-50" 
-                  placeholder="До" 
-                />
-              </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <input 
+                value={salaryFrom} 
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "");
+                  setSalaryFrom(raw ? parseInt(raw).toLocaleString("ru-RU") : "");
+                }} 
+                disabled={isNegotiable}
+                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-4 text-base outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
+                placeholder="От" 
+              />
+              <span className="text-ink-3 font-medium text-center sm:text-left hidden sm:block">—</span>
+              <span className="text-ink-3 font-medium text-center block sm:hidden text-xs my-1">до</span>
+              <input 
+                value={salaryTo} 
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "");
+                  setSalaryTo(raw ? parseInt(raw).toLocaleString("ru-RU") : "");
+                }} 
+                disabled={isNegotiable}
+                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-4 text-base outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
+                placeholder="До" 
+              />
             </div>
           </div>
         </div>
