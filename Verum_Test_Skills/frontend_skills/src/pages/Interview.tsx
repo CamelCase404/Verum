@@ -136,10 +136,19 @@ export default function Interview({
                 });
                 const formData = new FormData();
                 formData.append("file", blob, "interview.webm");
-                fetch(
-                    `${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}/api/media/upload?interview_id=${payload.interviewId}`,
-                    { method: "POST", body: formData },
-                ).catch(console.error);
+                const doUpload = async (attempt = 1) => {
+
+                    try {
+
+                        const r = await fetch(`/api/media/upload?interview_id=`, { method: "POST", body: formData });
+
+                        if (!r.ok) console.error("[video] upload failed", r.status); else console.log("[video] upload ok");
+
+                    } catch (e) { console.error("[video] error", e); if (attempt < 2) { await new Promise(x => setTimeout(x, 1500)); return doUpload(attempt + 1); } }
+
+                };
+
+                void doUpload(1);
             }, 1000);
         }
     }, [finished, failed, mediaRecorder]);
@@ -322,7 +331,7 @@ export default function Interview({
         const prevStage = currentStage;
 
         try {
-            const res = await api.answer(payload.interviewId, text, spent);
+            const res = await api.answer(payload.interviewId, text, isSkip ? 0 : spent);
             setCurrentStage(res.stage);
             setCurrentStageName(res.stage_name);
 
@@ -364,9 +373,29 @@ export default function Interview({
                     text: res.question,
                     stageName: res.stage_name,
                 };
-                if (res.code_snippet)
-                    newMsg.text =
-                        res.question + "\n\n__CODE__" + res.code_snippet;
+                if (res.code_snippet) {
+
+                    newMsg.text = res.question + "\n\n__CODE__" + res.code_snippet;
+
+                } else if (typeof res.question === "string" && /\n\s*Код:\s*\n/.test(res.question)) {
+
+                    const p = res.question.split(/\n\s*Код:\s*\n/);
+
+                    if (p.length >= 2 && p[1].trim()) newMsg.text = p[0] + "\n\n__CODE__" + p[1];
+
+                } else if (typeof res.question === "string" && /```/.test(res.question)) {
+
+                    const m = res.question.match(/```[a-zA-Z0-9+#.-]*\n([\s\S]*?)```/);
+
+                    if (m && m[1].trim()) {
+
+                        const b = res.question.slice(0, m.index).trim();
+
+                        newMsg.text = (b ? b + "\n\n" : "") + "__CODE__" + m[1].trim();
+
+                    }
+
+                }
 
                 if (res.stage !== prevStage) {
                     let stageTitle = "";
@@ -382,7 +411,7 @@ export default function Interview({
                             role: "ai",
                             text: `Переход на ${stageTitle}`,
                         };
-                        setMsgs([stageNotice, newMsg]);
+                        setMsgs((m) => [...m, stageNotice, newMsg]);
                     } else {
                         setMsgs((m) => [...m, newMsg]);
                     }

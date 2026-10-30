@@ -50,7 +50,7 @@ export function ToastContainer() {
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-2xl border min-w-[280px] max-w-sm backdrop-blur-md ${
               t.type === "success" 
-                ? "bg-accent/10 border-accent/20 text-ink" 
+                ? "bg-surface border-line text-ink" 
                 : "bg-surface border-line text-ink"
             }`}
           >

@@ -487,9 +487,40 @@ export function DeveloperDashboard({
                                         </div>
                                     </div>
                                 )}
+
+                                {skills.chat_history && skills.chat_history.length > 0 && (
+                                    <details className="mt-4 bg-surface-2 border border-line rounded-xl p-4">
+                                        <summary className="cursor-pointer text-[13px] font-semibold text-ink flex items-center justify-between">
+                                            <span className="flex items-center gap-2">
+                                                <Brain size={14} className="text-accent" />
+                                                История собеседования
+                                                <span className="text-[11px] font-normal text-ink-3">({skills.chat_history.length} сообщ.)</span>
+                                            </span>
+                                            <span className="text-[12px] text-accent">Развернуть ▼</span>
+                                        </summary>
+                                        <div className="mt-3 space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                                            {skills.chat_history.map((m: any, i: number) => {
+                                                const isUser = m.role === "user";
+                                                const codeMatch = String(m.content).match(/\n\nКод:\n([\s\S]*)$/);
+                                                const textPart = codeMatch ? m.content.slice(0, codeMatch.index) : m.content;
+                                                const codePart = codeMatch ? codeMatch[1] : "";
+                                                return (
+                                                    <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                                                        <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed ${isUser ? "bg-accent text-white" : "bg-surface border border-line text-ink-2"}`}>
+                                                            <div className="whitespace-pre-wrap break-words">{textPart}</div>
+                                                            {codePart && (
+                                                                <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-2.5 rounded-lg overflow-x-auto text-[10px] font-mono whitespace-pre"><code>{codePart}</code></pre>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </details>
+                                )}
                             </div>
                         ) : isBlocked ? (
-                            <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
+                            <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line">
                                 <AlertCircle
                                     size={32}
                                     className="mx-auto text-warn mb-2 opacity-80"
@@ -520,7 +551,7 @@ export function DeveloperDashboard({
                                 </p>
                             </div>
                         ) : isRejected ? (
-                            <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-warn/40">
+                            <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line">
                                 <AlertCircle
                                     size={32}
                                     className="mx-auto text-warn mb-2 opacity-80"

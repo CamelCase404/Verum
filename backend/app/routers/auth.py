@@ -157,6 +157,7 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
     return results
 
 class SkillsReport(BaseModel):
+    chat_history: Optional[list[dict]] = None
 
     final_grade: str
     total_score_100: int
@@ -186,6 +187,16 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
         user.attempts_used = (user.attempts_used or 0) + 1
     
     user.last_test_at = datetime.utcnow()
+
+    # Подтягиваем историю чата из интервью (для профиля и модерации)
+    chat_history = []
+    if report.interview_id:
+        try:
+            _it = await get_interview(report.interview_id)
+            if _it:
+                chat_history = [{"role": t.role, "content": t.content} for t in _it.turns]
+        except Exception as _e:
+            print(f"  ⚠️ Не удалось получить chat_history: {_e}")
     
     # Если ИИ отклонил (Reject) или прервал собеседование — НЕ отправляем на модерацию
     if report.rejected or report.final_grade == "Reject":
@@ -219,7 +230,9 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
     else:
         # Если прошел успешно — отправляем на модерацию
         user.pending_skills_data = report.model_dump()
-        user.test_status = "pending"
+        if chat_history:
+            user.pending_skills_data["chat_history"] = chat_history
+user.test_status = "pending"
     
     # Ищем видео по ID собеседования
     if report.interview_id:

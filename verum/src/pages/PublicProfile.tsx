@@ -30,9 +30,8 @@ export function PublicProfile() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`)
-      .then(res => res.json())
-      .then(data => { setUser(data); setLoading(false); })
+    authApi.getPublicUser(id as string)
+      .then(res => { setUser(res.data); setLoading(false); })
       .catch(() => { setLoading(false); navigate("/"); });
   }, [id, navigate]);
 
@@ -293,6 +292,8 @@ export function PublicProfile() {
             </div>
           )}
 
+          <ChatHistoryBlock messages={skills?.chat_history || []} />
+
           {/* ПОРТФОЛИО (ПЕРЕМЕЩЕНО ВЫШЕ GITHUB) */}
           {user.projects && user.projects.length > 0 && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
@@ -431,5 +432,58 @@ export function PublicProfile() {
         </div>
       )}
 </div>
+  );
+}
+
+// ─── История собеседования (свёрнуто по умолчанию) ───
+function ChatHistoryBlock({ messages }: { messages: Array<{ role: string; content: string }> }) {
+  const [open, setOpen] = useState(false);
+  if (!messages || messages.length === 0) return null;
+
+  return (
+    <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm mt-6">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between text-left"
+      >
+        <h2 className="font-semibold flex items-center gap-2">
+          <MessageSquare size={18} className="text-accent" />
+          История собеседования
+          <span className="text-[11px] font-normal text-ink-3">({messages.length} сообщ.)</span>
+        </h2>
+        <span className="text-[13px] text-accent font-medium">
+          {open ? "Свернуть ▲" : "Развернуть ▼"}
+        </span>
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-3 max-h-[500px] overflow-y-auto pr-2">
+          {messages.map((m, i) => {
+            const isUser = m.role === "user";
+            const codeMatch = m.content.match(/\n\nКод:\n([\s\S]*)$/);
+            const textPart = codeMatch ? m.content.slice(0, codeMatch.index) : m.content;
+            const codePart = codeMatch ? codeMatch[1] : "";
+            return (
+              <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                    isUser
+                      ? "bg-accent text-white"
+                      : "bg-surface-2 border border-line text-ink-2"
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap break-words">{textPart}</div>
+                  {codePart && (
+                    <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-3 rounded-lg overflow-x-auto text-[11px] font-mono whitespace-pre">
+                      <code>{codePart}</code>
+                    </pre>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

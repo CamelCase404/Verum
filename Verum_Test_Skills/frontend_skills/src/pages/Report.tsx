@@ -42,10 +42,13 @@ function StatBar({
 
 export default function Report({
     report,
+    onRestart,
 }: {
     report: ReportResponse;
+    onRestart?: () => void;
 }) {
     const goToDashboard = () => {
+        if (onRestart) { onRestart(); return; }
         window.location.href = "https://verumskills.ru/dashboard";
     };
 

@@ -38,7 +38,9 @@ async def get_pending(admin: UserDB = Depends(require_admin), db: AsyncSession =
     result = []
     for u in users:
         chat_history = []
-        if u.pending_skills_data:
+        if u.pending_skills_data and u.pending_skills_data.get("chat_history"):
+            chat_history = u.pending_skills_data["chat_history"]
+        elif u.pending_skills_data:
             it_id = u.pending_skills_data.get("interview_id")
             if it_id:
                 it = await get_interview(it_id)

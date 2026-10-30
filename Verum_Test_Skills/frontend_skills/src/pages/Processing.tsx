@@ -38,7 +38,7 @@ export default function Processing({
                 if (token) {
                     try {
                         // ВАЖНО: Передаем interview_id вместе с отчетом
-                        await api.saveSkills({ ...report, interview_id: report.interview_id || interviewId });
+                        await api.saveSkills({ ...report, interview_id: report.interview_id || interviewId, rejected: report.rejected ?? false });
                         console.log("✅ Результаты сохранены в профиль");
                     } catch (e) {
                         console.warn("⚠ Не удалось сохранить навыки:", e);

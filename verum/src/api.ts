@@ -38,6 +38,8 @@ export const authApi = {
 
   getMe: () => request("/api/auth/me"),
 
+  getPublicUser: (id: number | string) => request(`/api/auth/user/`),
+
   uploadAvatar: async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);

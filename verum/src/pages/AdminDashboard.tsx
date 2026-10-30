@@ -73,7 +73,7 @@ export function AdminDashboard() {
                   <h3 className="font-bold text-lg">{p.full_name}</h3>
                   <p className="text-sm text-ink-3">{p.email}</p>
                 </div>
-                <div className="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm font-semibold">
+                <div className="px-3 py-1 bg-surface-2 text-accent rounded-full text-sm font-semibold">
                   {p.skills?.final_grade || "Reject"}
                 </div>
               </div>
@@ -123,7 +123,7 @@ export function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => handleAction(p.id, "reject")}
-                  className="flex-1 py-2.5 bg-warn-soft text-warn border border-warn/20 rounded-lg font-medium hover:bg-warn/10 flex justify-center items-center gap-2"
+                  className="flex-1 py-2.5 bg-warn-soft text-warn border border-line rounded-lg font-medium hover:bg-warn/10 flex justify-center items-center gap-2"
                 >
                   <XCircle size={18} /> Отклонить
                 </button>

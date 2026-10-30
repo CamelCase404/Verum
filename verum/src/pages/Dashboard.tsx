@@ -12,7 +12,6 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   
   const setStoreUser = useAppStore((s) => s.setUser);
-  const setStoreRole = useAppStore((s) => s.setRole);
 
   const fetchUser = useCallback(() => {
     if (!getToken()) {
@@ -22,10 +21,9 @@ export function Dashboard() {
     authApi.getMe().then((res) => {
       setBackendUser(res.data);
       if (setStoreUser) setStoreUser({ name: res.data.full_name, email: res.data.email, role: res.data.role });
-      if (setStoreRole) setStoreRole(res.data.role);
       setLoading(false);
     }).catch(() => navigate("/login"));
-  }, [navigate, setStoreUser, setStoreRole]);
+  }, [navigate, setStoreUser]);
 
   useEffect(() => {
     fetchUser();

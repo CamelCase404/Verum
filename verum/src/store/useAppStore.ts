@@ -18,8 +18,6 @@ interface AppState {
   toggleChat: () => void;
   togglePalette: () => void;
   setUser: (u: User | null) => void;
-  setRole: (r: any) => void;
-  setView: (v: any) => void;
   updateProfile: (p: Partial<Profile>) => void;
   addProject: (project: any) => void;
   removeProject: (id: string) => void;
@@ -28,15 +26,15 @@ interface AppState {
 }
 
 const defaultProfile: Profile = {
-  github: "mkovaleva",
+  github: "",
   comment: "",
-  tested: true,
-  bio: "Frontend-разработчик с 5-летним опытом. Специализируюсь на React, TypeScript и создании высоконагруженных интерфейсов.",
+  tested: false,
+  bio: "",
   avatarColor: "accent",
   avatarImage: "",
-  githubData: null, // Поле для данных из GitHub
+  githubData: null,
   projects: [],
-  scores: { arch: 82, code: 86, ai: 78, adapt: 74 },
+  scores: null,
 };
 
 export const useAppStore = create<AppState>()(
@@ -59,8 +57,6 @@ export const useAppStore = create<AppState>()(
       toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
       togglePalette: () => set((s) => ({ paletteOpen: !s.paletteOpen })),
       setUser: (u) => set({ user: u }),
-      setRole: () => {},
-      setView: () => {},
       updateProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
       addProject: (project) => set((s) => ({ profile: { ...s.profile, projects: [project, ...s.profile.projects] } })),
       removeProject: (id) => set((s) => ({ profile: { ...s.profile, projects: s.profile.projects.filter(p => p.id !== id) } })),

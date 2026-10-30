@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { X, Loader2, UploadCloud, Trash2 } from "lucide-react";
 import { authApi } from "@/api";

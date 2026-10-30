@@ -8,7 +8,6 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const token = params.get("token");
-    console.log("🔍 Токен из URL:", token);
     
     if (token) {
       setToken(token);
