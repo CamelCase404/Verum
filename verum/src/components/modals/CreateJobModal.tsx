@@ -233,7 +233,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                   setSalaryFrom(raw ? parseInt(raw).toLocaleString("ru-RU") : "");
                 }} 
                 disabled={isNegotiable}
-                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-4 text-base outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
+                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl py-2.5 px-4 text-[15px] outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
                 placeholder="От" 
               />
               <span className="text-ink-3 font-medium text-center sm:text-left hidden sm:block">—</span>
@@ -245,7 +245,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                   setSalaryTo(raw ? parseInt(raw).toLocaleString("ru-RU") : "");
                 }} 
                 disabled={isNegotiable}
-                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-4 text-base outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
+                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl py-2.5 px-4 text-[15px] outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
                 placeholder="До" 
               />
             </div>

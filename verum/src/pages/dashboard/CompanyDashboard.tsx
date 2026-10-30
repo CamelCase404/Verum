@@ -163,9 +163,15 @@ export function CompanyDashboard({
 
     const formatSalary = (val: string) => {
         if (!val) return "";
-        const num = parseInt(val.replace(/\D/g, ""));
-        if (isNaN(num)) return val;
-        return num.toLocaleString("ru-RU") + " ₽";
+        if (val.toLowerCase().includes("договоренности")) return val;
+        
+        const numbers = val.match(/\d+/g);
+        if (numbers && numbers.length >= 2) {
+            return `от ${parseInt(numbers[0]).toLocaleString('ru-RU')} до ${parseInt(numbers[1]).toLocaleString('ru-RU')} ₽`;
+        } else if (numbers && numbers.length === 1) {
+            return `от ${parseInt(numbers[0]).toLocaleString('ru-RU')} ₽`;
+        }
+        return val;
     };
 
     // Компонент выпадающего списка
@@ -387,8 +393,8 @@ export function CompanyDashboard({
                                                         )}
                                                     </div>
                                                     {job.salary && (
-                                                        <div className="text-[13px] font-bold text-accent flex items-center gap-1">
-                                                            <Banknote size={14} /> {formatSalary(job.salary)}
+                                                        <div className="text-[13px] font-bold text-accent whitespace-nowrap">
+                                                            {formatSalary(job.salary)}
                                                         </div>
                                                     )}
                                                 </div>
