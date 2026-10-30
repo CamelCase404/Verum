@@ -11,12 +11,12 @@ const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 export function CreateJobModal({
  onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [stack, setStack] = useState("Frontend");
-  const [level, setLevel] = useState("Middle");
-  const [format, setFormat] = useState("Удалённо");
-  const [salary, setSalary] = useState("");
+  const [title, setTitle] = useState(jobToEdit?.title || "");
+  const [description, setDescription] = useState(jobToEdit?.description || "");
+  const [stack, setStack] = useState(jobToEdit?.stack || "Frontend");
+  const [level, setLevel] = useState(jobToEdit?.level || "Middle");
+  const [format, setFormat] = useState(jobToEdit?.format || "Удалённо");
+  const [salary, setSalary] = useState(jobToEdit?.salary || "");
   const [loading, setLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
@@ -65,10 +65,18 @@ export function CreateJobModal({
     if (!title.trim()) return toast("Введите название вакансии");
     setLoading(true);
     try {
-      const newJob = { id: Date.now().toString(), title, description, stack, level, salary, format };
       const currentJobs = backendUser?.job_postings || [];
-      await authApi.updateJobs([...currentJobs, newJob]);
-      toast("Вакансия опубликована");
+      if (isEditing) {
+        const updatedJobs = currentJobs.map((j: any) => 
+          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary, format } : j
+        );
+        await authApi.updateJobs(updatedJobs);
+        toast("Вакансия обновлена", "success");
+      } else {
+        const newJob = { id: Date.now().toString(), title, description, stack, level, salary, format };
+        await authApi.updateJobs([...currentJobs, newJob]);
+        toast("Вакансия опубликована", "success");
+      }
       onRefresh();
       onClose();
     } catch (e: any) {
@@ -82,7 +90,7 @@ export function CreateJobModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-[22px] p-4 sm:p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
-        <h2 className="text-xl font-bold mb-4">Создать вакансию</h2>
+        <h2 className="text-xl font-bold mb-4">{isEditing ? "Редактировать вакансию" : "Создать вакансию"}</h2>
         
         <div className="space-y-4 mb-6">
           <div className="relative">
@@ -186,7 +194,7 @@ export function CreateJobModal({
         <div className="flex gap-3 justify-end pt-4 border-t border-line">
           <button onClick={onClose} className="px-4 py-2 rounded-xl font-medium hover:bg-surface-2 transition-colors">Отмена</button>
           <button onClick={handleSave} disabled={loading} className="px-5 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 transition-colors flex items-center gap-2 shadow-lg">
-            {loading && <Loader2 size={16} className="animate-spin" />} Опубликовать
+            {loading && <Loader2 size={16} className="animate-spin" />} {isEditing ? "Сохранить" : "Опубликовать"}
           </button>
         </div>
       </motion.div>

@@ -60,6 +60,7 @@ export function CompanyDashboard({
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isJobOpen, setIsJobOpen] = useState(false);
+    const [editingJob, setEditingJob] = useState<any>(null);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
 
     const [activeTab, setActiveTab] = useState<"jobs" | "candidates">("jobs");
@@ -336,7 +337,7 @@ export function CompanyDashboard({
                                         Активные вакансии
                                     </h3>
                                     <button
-                                        onClick={() => setIsJobOpen(true)}
+                                        onClick={() => { setEditingJob(null); setIsJobOpen(true); }}
                                         className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-accent-2 transition-colors"
                                     >
                                         <Plus size={16} /> Создать
@@ -355,9 +356,18 @@ export function CompanyDashboard({
                                             >
                                                 <div>
                                                     <div className="flex justify-between items-start mb-1 gap-2">
+                                                        <div className="flex justify-between items-start gap-2">
                                                         <h4 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">
                                                             {job.title}
                                                         </h4>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setEditingJob(job); setIsJobOpen(true); }}
+                                                            className="p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors"
+                                                            title="Редактировать вакансию"
+                                                        >
+                                                            <Pencil size={14} />
+                                                        </button>
+                                                    </div>
                                                     </div>
                                                     <p className="text-[12px] text-ink-3 line-clamp-2 mb-3">
                                                         {job.description}
@@ -401,7 +411,7 @@ export function CompanyDashboard({
                                             Пока нет вакансий
                                         </div>
                                         <button
-                                            onClick={() => setIsJobOpen(true)}
+                                            onClick={() => { setEditingJob(null); setIsJobOpen(true); }}
                                             className="text-[13px] text-accent font-medium hover:underline"
                                         >
                                             Создать первую вакансию
@@ -729,6 +739,7 @@ export function CompanyDashboard({
                         onClose={() => setIsJobOpen(false)}
                         backendUser={backendUser}
                         onRefresh={handleJobCreated}
+                        jobToEdit={editingJob}
                     />
                 )}
                 {isCompareOpen && (

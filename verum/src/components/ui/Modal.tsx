@@ -12,20 +12,29 @@ interface ModalProps {
 
 export function Modal({ children, onClose, size = "md" }: ModalProps) {
     useEffect(() => {
-        const originalBodyOverflow = document.body.style.overflow;
-        const originalHtmlOverflow = document.documentElement.style.overflow;
-        const originalTouchAction = document.documentElement.style.touchAction;
-        
-        document.body.style.overflow = "hidden";
-        document.documentElement.style.overflow = "hidden";
-        document.documentElement.style.touchAction = "none";
+        const scrollY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
         
         return () => {
-            document.body.style.overflow = originalBodyOverflow;
-            document.documentElement.style.overflow = originalHtmlOverflow;
-            document.documentElement.style.touchAction = originalTouchAction;
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
         };
     }, []);
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [onClose]);
+
+    
 
   
 
