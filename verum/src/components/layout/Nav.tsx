@@ -1,9 +1,29 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { chatApi } from "@/api";
 import { Menu, MessageSquare, User, Sun, Moon, ShieldCheck } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Nav() {
   const { toggleDrawer, user, theme } = useAppStore();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+        setUnreadCount(0);
+        return;
+    }
+    const fetchUnread = async () => {
+        try {
+            const res = await chatApi.getConversations();
+            const total = res.data.reduce((sum: number, c: any) => sum + (c.unread || 0), 0);
+            setUnreadCount(total);
+        } catch (e) {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000); // Каждые 15 сек
+    return () => clearInterval(interval);
+  }, [user]);
   const location = useLocation();
 
   const toggleTheme = () => {
@@ -87,10 +107,16 @@ export function Nav() {
 
               <Link 
                 to="/messages" 
-                className="flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors"
+                className="relative flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors"
                 title="Сообщения"
               >
                 <MessageSquare size={20} className="md:w-[18px] md:h-[18px]" />
+                {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 md:top-1.5 md:right-2 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-surface"></span>
+                    </span>
+                )}
                 <span className="hidden lg:inline">Сообщения</span>
               </Link>
               

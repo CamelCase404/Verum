@@ -97,7 +97,7 @@ export function Messages() {
   };
 
   return (
-    <div className="flex-1 w-full flex overflow-hidden bg-bg">
+    <div className="flex w-full overflow-hidden bg-bg flex-1 h-[calc(100dvh-56px)] md:h-[calc(100vh-64px)]">
       
       {/* ЛЕВАЯ КОЛОНКА */}
       <div className={`w-full md:w-[320px] lg:w-[380px] border-r border-line-2 flex-col bg-surface shadow-[2px_0_12px_rgba(0,0,0,0.04)] dark:shadow-[2px_0_12px_rgba(0,0,0,0.4)] z-10 ${activeConv ? "hidden md:flex" : "flex"}`}>
@@ -128,7 +128,7 @@ export function Messages() {
       </div>
 
       {/* ПРАВАЯ КОЛОНКА */}
-      <div className={`flex-1 flex-col bg-bg relative ${activeConv ? "flex" : "hidden md:flex"}`}>
+      <div className={`flex-1 flex flex-col bg-bg relative h-full min-h-0 ${activeConv ? "flex" : "hidden md:flex"}`}>
         {activeConv ? (
           <>
             <div className="p-3 border-b border-line bg-surface flex items-center gap-3 shadow-sm z-10">
@@ -177,7 +177,7 @@ export function Messages() {
               </div>
             )}
 
-            <div className="p-2 sm:p-3 bg-surface border-t border-line flex gap-2 items-end">
+            <div className="p-2 sm:p-3 bg-surface border-t border-line flex gap-2 items-end shrink-0">
               <button 
                 onClick={() => fileInputRef.current?.click()} 
                 className="p-2.5 text-ink-3 hover:text-accent transition-colors bg-bg-2 rounded-xl"
