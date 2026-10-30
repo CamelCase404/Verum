@@ -45,7 +45,7 @@ export function Hero() {
               : "Junior";
 
     return (
-        <section className="pt-8 md:pt-20 pb-8 md:pb-20 relative overflow-hidden">
+        <section className="pt-4 md:pt-10 pb-8 md:pb-20 relative overflow-hidden">
             <Particles />
 
             <motion.div
@@ -69,7 +69,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: EASE }}
-                    className="w-full max-w-[800px] mb-12 md:mb-16 z-20"
+                    className="w-full max-w-[800px] mb-8 md:mb-12 z-20"
                 >
                     <UniversalSearch />
                 </motion.div>
