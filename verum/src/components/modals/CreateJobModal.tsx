@@ -16,7 +16,11 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
   const [stack, setStack] = useState("Frontend");
   const [level, setLevel] = useState("Middle");
   const [format, setFormat] = useState("Удалённо");
-  const [salary, setSalary] = useState("");
+  
+  // Зарплата
+  const [salaryFrom, setSalaryFrom] = useState("");
+  const [salaryTo, setSalaryTo] = useState("");
+  const [isNegotiable, setIsNegotiable] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -50,7 +54,20 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       setStack(jobToEdit.stack || "Frontend");
       setLevel(jobToEdit.level || "Middle");
       setFormat(jobToEdit.format || "Удалённо");
-      setSalary(jobToEdit.salary || "");
+      
+      // Парсим старую зарплату
+      const sal = jobToEdit.salary || "";
+      if (sal.includes("договоренности") || sal === "") {
+          setIsNegotiable(true);
+      } else {
+          const numbers = sal.match(/\d+/g);
+          if (numbers && numbers.length >= 2) {
+              setSalaryFrom(numbers[0]);
+              setSalaryTo(numbers[1]);
+          } else if (numbers && numbers.length === 1) {
+              setSalaryFrom(numbers[0]);
+          }
+      }
     }
   }, [jobToEdit]);
 
@@ -63,10 +80,10 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       if (res.data.stack) setStack(res.data.stack);
       if (res.data.level) setLevel(res.data.level);
       if (res.data.format) setFormat(res.data.format);
+      
       if (res.data.suggested_salary) {
         const num = parseInt(res.data.suggested_salary.replace(/\D/g, ''));
-        if (!isNaN(num)) setSalary(num.toLocaleString('ru-RU'));
-        else setSalary(res.data.suggested_salary);
+        if (!isNaN(num)) setSalaryFrom(num.toString());
       }
       toast("ИИ успешно разобрал вакансию!", "success");
     } catch (e: any) {
@@ -76,26 +93,28 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
     }
   };
 
-  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let rawValue = e.target.value.replace(/\D/g, "");
-    if (rawValue) setSalary(parseInt(rawValue).toLocaleString('ru-RU'));
-    else setSalary("");
-  };
-
   const handleSave = async () => {
     if (!title.trim()) return toast("Введите название вакансии");
     setLoading(true);
     try {
+      let finalSalary = "По договоренности";
+      if (!isNegotiable) {
+          if (salaryFrom && salaryTo) finalSalary = `от ${salaryFrom} до ${salaryTo} ₽`;
+          else if (salaryFrom) finalSalary = `от ${salaryFrom} ₽`;
+          else if (salaryTo) finalSalary = `до ${salaryTo} ₽`;
+          else finalSalary = "По договоренности";
+      }
+
       const currentJobs = backendUser?.job_postings || [];
       
       if (isEditing) {
         const updatedJobs = currentJobs.map((j: any) => 
-          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary, format } : j
+          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format } : j
         );
         await authApi.updateJobs(updatedJobs);
         toast("Вакансия обновлена", "success");
       } else {
-        const newJob = { id: Date.now().toString(), title, description, stack, level, salary, format };
+        const newJob = { id: Date.now().toString(), title, description, stack, level, salary: finalSalary, format };
         await authApi.updateJobs([...currentJobs, newJob]);
         toast("Вакансия опубликована", "success");
       }
@@ -189,10 +208,29 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1 block">Зарплата (опционально)</label>
-              <div className="relative">
-                <input value={salary} onChange={handleSalaryChange} className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors pr-8" placeholder="150 000" />
-                {salary && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 font-medium text-xs">₽</span>}
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-[13px] font-medium block text-ink-2">Зарплата (₽)</label>
+                <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-ink-3 hover:text-ink transition-colors">
+                  <input type="checkbox" checked={isNegotiable} onChange={(e) => setIsNegotiable(e.target.checked)} className="accent-accent" />
+                  По договоренности
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  value={salaryFrom} 
+                  onChange={(e) => setSalaryFrom(e.target.value.replace(/\D/g, ""))} 
+                  disabled={isNegotiable}
+                  className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors disabled:opacity-50" 
+                  placeholder="От" 
+                />
+                <span className="text-ink-3">—</span>
+                <input 
+                  value={salaryTo} 
+                  onChange={(e) => setSalaryTo(e.target.value.replace(/\D/g, ""))} 
+                  disabled={isNegotiable}
+                  className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors disabled:opacity-50" 
+                  placeholder="До" 
+                />
               </div>
             </div>
           </div>

@@ -15,6 +15,28 @@ export function PublicProfile() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
+  const formatSalaryText = (val: string) => {
+      if (!val) return "";
+      // Если там уже есть текст (например "По договоренности"), просто возвращаем
+      if (val.toLowerCase().includes("договоренности")) return val;
+      
+      // Ищем все числа
+      const numbers = val.match(/\d+/g);
+      if (numbers && numbers.length > 0) {
+          const formattedNums = numbers.map(n => parseInt(n).toLocaleString("ru-RU"));
+          // Если было "80000", вернет "80 000 ₽"
+          // Если было "от 100000 до 150000", вернет "от 100 000 до 150 000 ₽"
+          // Если там уже был знак рубля, он просто добавит его в конец (или заменит, если мы перепишем)
+          let result = val;
+          numbers.forEach((num, idx) => {
+              result = result.replace(num, formattedNums[idx]);
+          });
+          if (!result.includes("₽")) result += " ₽";
+          return result;
+      }
+      return val;
+  };
+
   useEffect(() => {
     if (!id) return;
     fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`)
@@ -259,7 +281,7 @@ export function PublicProfile() {
                         <h3 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">{job.title}</h3>
                         {job.salary && (
                           <span className="text-[13px] font-bold text-accent whitespace-nowrap ml-2">
-                            {job.salary}
+                            {formatSalaryText(job.salary)}
                           </span>
                         )}
                       </div>
