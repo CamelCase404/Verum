@@ -27,6 +27,14 @@ export function SearchResults() {
     
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const formatSalary = (val: string | number) => {
+        if (!val) return "";
+        const strVal = String(val);
+        const num = parseInt(strVal.replace(/\D/g, ""));
+        if (isNaN(num)) return strVal;
+        return num.toLocaleString("ru-RU") + " ₽";
+    };
     
     // Состояния фильтров
     const [stack, setStack] = useState(params.get("stack") || "");
@@ -223,7 +231,7 @@ export function SearchResults() {
                                     >
                                         <div className="flex justify-between items-start mb-3 gap-2">
                                             <h3 className="font-semibold text-[17px] leading-tight group-hover:text-accent transition-colors">{job.title}</h3>
-                                            {job.salary && <span className="text-sm font-bold text-accent whitespace-nowrap bg-accent/5 px-2.5 py-1 rounded-lg">{job.salary}</span>}
+                                            {job.salary && <span className="text-sm font-bold text-accent whitespace-nowrap bg-accent/5 px-2.5 py-1 rounded-lg">{formatSalary(job.salary)}</span>}
                                         </div>
                                         <p className="text-[13px] text-ink-3 line-clamp-2 mb-4 flex-1">{job.description}</p>
                                         

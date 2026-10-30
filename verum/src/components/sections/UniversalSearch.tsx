@@ -202,9 +202,16 @@ export function UniversalSearch() {
                                     <label className="text-[13px] font-medium mb-1.5 block text-ink-2">Зарплата от (₽)</label>
                                     <input 
                                         value={minSalary} 
-                                        onChange={(e) => setMinSalary(e.target.value.replace(/\D/g, ""))} 
+                                        onChange={(e) => {
+                                            const rawValue = e.target.value.replace(/\D/g, "");
+                                            if (rawValue) {
+                                                setMinSalary(parseInt(rawValue).toLocaleString("ru-RU"));
+                                            } else {
+                                                setMinSalary("");
+                                            }
+                                        }} 
                                         className="w-full bg-bg-2 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-accent/20 border border-transparent hover:border-line-2 focus:border-accent transition-colors" 
-                                        placeholder="Например: 150000"  
+                                        placeholder="Например: 150 000"  
                                     />
                                 </div>
                             </div>
