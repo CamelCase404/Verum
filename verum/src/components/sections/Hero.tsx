@@ -69,7 +69,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: EASE }}
-                    className="w-full max-w-[800px] mb-8 md:mb-12 z-20"
+                    className="w-full max-w-[800px] mb-16 md:mb-24 z-20"
                 >
                     <UniversalSearch />
                 </motion.div>

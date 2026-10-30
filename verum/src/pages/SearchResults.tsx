@@ -31,9 +31,15 @@ export function SearchResults() {
     const formatSalary = (val: string | number) => {
         if (!val) return "";
         const strVal = String(val);
-        const num = parseInt(strVal.replace(/\D/g, ""));
-        if (isNaN(num)) return strVal;
-        return num.toLocaleString("ru-RU") + " ₽";
+        if (strVal.toLowerCase().includes("договоренности")) return strVal;
+        
+        const numbers = strVal.match(/\d+/g);
+        if (numbers && numbers.length >= 2) {
+            return `${parseInt(numbers[0]).toLocaleString('ru-RU')} — ${parseInt(numbers[1]).toLocaleString('ru-RU')} ₽`;
+        } else if (numbers && numbers.length === 1) {
+            return `от ${parseInt(numbers[0]).toLocaleString('ru-RU')} ₽`;
+        }
+        return strVal;
     };
     
     // Состояния фильтров
