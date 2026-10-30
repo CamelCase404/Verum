@@ -32,8 +32,6 @@ export function Drawer() {
     ]},
     { title: "КОМПАНИЯ", links: [
       
-      { name: "Пресс-центр", path: "/press" },
-      { name: "Вакансии", path: "/careers" },
       { name: "Контакты", path: "/contacts" },
       { name: "Статус сервиса", path: "/status" },
     ]}
