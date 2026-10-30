@@ -352,21 +352,21 @@ export function CompanyDashboard({
                                                 onClick={() =>
                                                     handleJobClick(job)
                                                 }
-                                                className="p-4 border border-line rounded-xl bg-surface-2 hover:border-accent cursor-pointer transition-colors group flex flex-col justify-between"
+                                                className="relative p-4 border border-line rounded-xl bg-surface-2 hover:border-accent cursor-pointer transition-colors group flex flex-col justify-between"
                                             >
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setEditingJob(job); setIsJobOpen(true); }}
+                                                    className="absolute top-3 right-3 p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors z-10"
+                                                    title="Редактировать вакансию"
+                                                >
+                                                    <Pencil size={14} />
+                                                </button>
                                                 <div>
                                                     <div className="flex justify-between items-start mb-1 gap-2">
-                                                        <div className="flex justify-between items-start gap-2">
+                                                        <div className="flex justify-between items-start mb-1 gap-2 pr-8">
                                                         <h4 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">
                                                             {job.title}
                                                         </h4>
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); setEditingJob(job); setIsJobOpen(true); }}
-                                                            className="p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors"
-                                                            title="Редактировать вакансию"
-                                                        >
-                                                            <Pencil size={14} />
-                                                        </button>
                                                     </div>
                                                     </div>
                                                     <p className="text-[12px] text-ink-3 line-clamp-2 mb-3">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, Sparkles, ChevronDown, Check } from "lucide-react";
 import { authApi } from "@/api";
@@ -8,21 +8,51 @@ const STACKS = ["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data / 
 const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 
-export function CreateJobModal({
- onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
-
-  const [title, setTitle] = useState(jobToEdit?.title || "");
-  const [description, setDescription] = useState(jobToEdit?.description || "");
-  const [stack, setStack] = useState(jobToEdit?.stack || "Frontend");
-  const [level, setLevel] = useState(jobToEdit?.level || "Middle");
-  const [format, setFormat] = useState(jobToEdit?.format || "Удалённо");
-  const [salary, setSalary] = useState(jobToEdit?.salary || "");
+export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, jobToEdit?: any }) {
+  const isEditing = !!jobToEdit;
+  
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [stack, setStack] = useState("Frontend");
+  const [level, setLevel] = useState("Middle");
+  const [format, setFormat] = useState("Удалённо");
+  const [salary, setSalary] = useState("");
+  
   const [loading, setLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   const [openStack, setOpenStack] = useState(false);
   const [openLevel, setOpenLevel] = useState(false);
   const [openFormat, setOpenFormat] = useState(false);
+
+  // Блокировка скролла
+  useEffect(() => {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+          const scrollY = document.body.style.top;
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+  }, []);
+
+  // Заполнение полей при редактировании
+  useEffect(() => {
+    if (jobToEdit) {
+      setTitle(jobToEdit.title || "");
+      setDescription(jobToEdit.description || "");
+      setStack(jobToEdit.stack || "Frontend");
+      setLevel(jobToEdit.level || "Middle");
+      setFormat(jobToEdit.format || "Удалённо");
+      setSalary(jobToEdit.salary || "");
+    }
+  }, [jobToEdit]);
 
   const handleAiParse = async () => {
     if (!description.trim()) return toast("Сначала вставьте описание вакансии");
@@ -32,15 +62,11 @@ export function CreateJobModal({
       if (res.data.title) setTitle(res.data.title);
       if (res.data.stack) setStack(res.data.stack);
       if (res.data.level) setLevel(res.data.level);
-      if (res.data.format) setFormat(res.data.format); // <-- ДОБАВЛЕНО
+      if (res.data.format) setFormat(res.data.format);
       if (res.data.suggested_salary) {
-        // Если ИИ вернул число, форматируем его
         const num = parseInt(res.data.suggested_salary.replace(/\D/g, ''));
-        if (!isNaN(num)) {
-           setSalary(num.toLocaleString('ru-RU'));
-        } else {
-           setSalary(res.data.suggested_salary);
-        }
+        if (!isNaN(num)) setSalary(num.toLocaleString('ru-RU'));
+        else setSalary(res.data.suggested_salary);
       }
       toast("ИИ успешно разобрал вакансию!", "success");
     } catch (e: any) {
@@ -50,15 +76,10 @@ export function CreateJobModal({
     }
   };
 
-  // Автоформатирование ввода зарплаты
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let rawValue = e.target.value.replace(/\D/g, ""); // Убираем всё кроме цифр
-    if (rawValue) {
-      const formatted = parseInt(rawValue).toLocaleString('ru-RU');
-      setSalary(formatted);
-    } else {
-      setSalary("");
-    }
+    let rawValue = e.target.value.replace(/\D/g, "");
+    if (rawValue) setSalary(parseInt(rawValue).toLocaleString('ru-RU'));
+    else setSalary("");
   };
 
   const handleSave = async () => {
@@ -66,6 +87,7 @@ export function CreateJobModal({
     setLoading(true);
     try {
       const currentJobs = backendUser?.job_postings || [];
+      
       if (isEditing) {
         const updatedJobs = currentJobs.map((j: any) => 
           j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary, format } : j
@@ -77,18 +99,19 @@ export function CreateJobModal({
         await authApi.updateJobs([...currentJobs, newJob]);
         toast("Вакансия опубликована", "success");
       }
+      
       onRefresh();
       onClose();
     } catch (e: any) {
-      toast(e.message || "Ошибка публикации");
+      toast(e.message || "Ошибка сохранения");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-[22px] p-4 sm:p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-[22px] p-4 sm:p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
         <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
         <h2 className="text-xl font-bold mb-4">{isEditing ? "Редактировать вакансию" : "Создать вакансию"}</h2>
         
@@ -96,22 +119,11 @@ export function CreateJobModal({
           <div className="relative">
             <label className="text-sm font-medium mb-1 flex justify-between items-end">
               <span>Описание вакансии</span>
-              <button 
-                onClick={handleAiParse}
-                disabled={isAiLoading}
-                className="text-xs font-semibold text-accent hover:text-accent-2 flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-md transition-colors"
-              >
-                {isAiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                Определить автоматически
+              <button onClick={handleAiParse} disabled={isAiLoading} className="text-xs font-semibold text-accent hover:text-accent-2 flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-md transition-colors">
+                {isAiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} Определить автоматически
               </button>
             </label>
-            <textarea 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
-              rows={4} 
-              className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors placeholder:text-ink-4" 
-              placeholder="Скопируйте сюда текст вакансии, и ИИ сам заполнит поля ниже..." 
-            />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors placeholder:text-ink-4" placeholder="Скопируйте сюда текст вакансии..." />
           </div>
 
           <div>
@@ -122,12 +134,12 @@ export function CreateJobModal({
           <div className="grid grid-cols-2 gap-3">
             <div className="relative">
               <label className="text-sm font-medium mb-1 block">Стек</label>
-              <button onClick={() => { setOpenStack(!openStack); setOpenLevel(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
+              <button onClick={() => { setOpenStack(!openStack); setOpenLevel(false); setOpenFormat(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
                 {stack} <ChevronDown size={16} className={`transition-transform duration-200 ${openStack ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
                 {openStack && (
-                  <motion.div initial={{ opacity: 0, y: -5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
                     {STACKS.map(s => (
                       <button key={s} onClick={() => { setStack(s); setOpenStack(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                         {s} {stack === s && <Check size={14} className="text-accent" />}
@@ -140,12 +152,12 @@ export function CreateJobModal({
 
             <div className="relative">
               <label className="text-sm font-medium mb-1 block">Уровень</label>
-              <button onClick={() => { setOpenLevel(!openLevel); setOpenStack(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
+              <button onClick={() => { setOpenLevel(!openLevel); setOpenStack(false); setOpenFormat(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
                 {level} <ChevronDown size={16} className={`transition-transform duration-200 ${openLevel ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
                 {openLevel && (
-                  <motion.div initial={{ opacity: 0, y: -5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
                     {LEVELS.map(l => (
                       <button key={l} onClick={() => { setLevel(l); setOpenLevel(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                         {l} {level === l && <Check size={14} className="text-accent" />}
@@ -165,7 +177,7 @@ export function CreateJobModal({
               </button>
               <AnimatePresence>
                 {openFormat && (
-                  <motion.div initial={{ opacity: 0, y: -5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+                  <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
                     {FORMATS.map(f => (
                       <button key={f} onClick={() => { setFormat(f); setOpenFormat(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                         {f} {format === f && <Check size={14} className="text-accent" />}
@@ -179,12 +191,7 @@ export function CreateJobModal({
             <div>
               <label className="text-sm font-medium mb-1 block">Зарплата (опционально)</label>
               <div className="relative">
-                <input 
-                  value={salary} 
-                  onChange={handleSalaryChange} 
-                  className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors pr-10" 
-                  placeholder="150 000" 
-                />
+                <input value={salary} onChange={handleSalaryChange} className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors pr-8" placeholder="150 000" />
                 {salary && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 font-medium text-xs">₽</span>}
               </div>
             </div>
