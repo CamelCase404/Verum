@@ -75,6 +75,9 @@ export const authApi = {
 
   searchCandidates: (filters: any) =>
     request("/api/auth/search", { method: "POST", body: JSON.stringify(filters) }),
+
+  searchJobs: (filters: any) =>
+    request("/api/auth/search-jobs", { method: "POST", body: JSON.stringify(filters) }),
 };
 
 export const chatApi = {

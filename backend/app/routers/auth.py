@@ -239,6 +239,34 @@ async def update_jobs(data: UpdateJobsReq, user: UserDB = Depends(get_current_us
     await db.commit()
     return {"status": "ok"}
 
+
+class SearchJobReq(BaseModel):
+    stack: Optional[str] = None
+    level: Optional[str] = None
+    format: Optional[str] = None
+
+@router.post("/search-jobs")
+async def search_jobs(req: SearchJobReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None)))
+    companies = result.scalars().all()
+    
+    matched_jobs = []
+    for comp in companies:
+        for job in comp.job_postings:
+            match = True
+            if req.stack and req.stack.lower() not in job.get("stack", "").lower(): match = False
+            if req.level and req.level.lower() != job.get("level", "").lower(): match = False
+            if req.format and req.format.lower() != job.get("format", "").lower(): match = False
+            
+            if match:
+                matched_jobs.append({
+                    **job,
+                    "company_name": comp.full_name,
+                    "company_id": comp.id,
+                    "company_avatar": comp.avatar_url
+                })
+    return matched_jobs
+
 @router.get("/user/{user_id}", response_model=UserProfile)
 async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.id == user_id))

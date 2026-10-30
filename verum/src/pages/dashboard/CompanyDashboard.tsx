@@ -349,11 +349,10 @@ export function CompanyDashboard({
                                         {jobs.map((job: any) => (
                                             <div
                                                 key={job.id}
-                                                onClick={() =>
-                                                    handleJobClick(job)
-                                                }
+                                                onClick={() => handleJobClick(job)}
                                                 className="relative p-4 border border-line rounded-xl bg-surface-2 hover:border-accent cursor-pointer transition-colors group flex flex-col justify-between"
                                             >
+                                                {/* Кнопка редактирования в верхнем правом углу */}
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setEditingJob(job); setIsJobOpen(true); }}
                                                     className="absolute top-3 right-3 p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors z-10"
@@ -361,18 +360,18 @@ export function CompanyDashboard({
                                                 >
                                                     <Pencil size={14} />
                                                 </button>
+                                                
                                                 <div>
-                                                    <div className="flex justify-between items-start mb-1 gap-2">
-                                                        <div className="flex justify-between items-start mb-1 gap-2 pr-8">
+                                                    <div className="flex justify-between items-start mb-1 gap-2 pr-8">
                                                         <h4 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">
                                                             {job.title}
                                                         </h4>
-                                                    </div>
                                                     </div>
                                                     <p className="text-[12px] text-ink-3 line-clamp-2 mb-3">
                                                         {job.description}
                                                     </p>
                                                 </div>
+                                                
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2 text-[11px] text-ink-3 flex-wrap">
                                                         <span className="px-2 py-1 bg-surface border border-line rounded">
@@ -389,12 +388,7 @@ export function CompanyDashboard({
                                                     </div>
                                                     {job.salary && (
                                                         <div className="text-[13px] font-bold text-accent flex items-center gap-1">
-                                                            <Banknote
-                                                                size={14}
-                                                            />{" "}
-                                                            {formatSalary(
-                                                                job.salary,
-                                                            )}
+                                                            <Banknote size={14} /> {formatSalary(job.salary)}
                                                         </div>
                                                     )}
                                                 </div>
