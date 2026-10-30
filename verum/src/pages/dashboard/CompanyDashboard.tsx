@@ -425,13 +425,21 @@ export function CompanyDashboard({
                             >
                                 <div className="flex flex-col gap-4 mb-6">
                                     <div className="flex items-center justify-between">
-                                        <h3 className="font-semibold text-lg flex items-center gap-2">
-                                            <Search
-                                                size={18}
-                                                className="text-accent"
-                                            />{" "}
-                                            Подходящие кандидаты
-                                        </h3>
+                                        <div className="flex items-center gap-4">
+                                            <h3 className="font-semibold text-lg flex items-center gap-2">
+                                                <Search
+                                                    size={18}
+                                                    className="text-accent"
+                                                />{" "}
+                                                Подходящие кандидаты
+                                            </h3>
+                                            <button
+                                                onClick={() => navigate("/search?type=candidates")}
+                                                className="text-[12px] bg-accent/10 text-accent px-3 py-1.5 rounded-lg font-medium hover:bg-accent/20 transition-colors hidden sm:block"
+                                            >
+                                                Глобальный поиск →
+                                            </button>
+                                        </div>
                                         {(filterGrade ||
                                             filterStack ||
                                             filterLang ||
