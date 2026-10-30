@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ShieldCheck, Code, Terminal, Cpu, Clock } from "lucide-react";
 import { Particles } from "@/components/ui/Particles";
 import { MOCK_SPECIALISTS } from "@/data/specialists";
+import { UniversalSearch } from "./UniversalSearch";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
@@ -73,22 +74,7 @@ export function Hero() {
                                 ease: EASE,
                             }}
                             className="flex flex-wrap justify-center lg:justify-start items-center gap-2 mb-4 md:mb-8"
-                        >
-                            <div className="inline-flex items-center gap-1.5 bg-accent text-white shadow-md shadow-black/20 rounded-lg px-2.5 py-1 md:px-3 md:py-1.5 text-[10px] md:text-[12.5px] font-medium tracking-wide">
-                                <Clock
-                                    size={12}
-                                    className="md:w-3.5 md:h-3.5"
-                                />{" "}
-                                Подбор за 24 часа
-                            </div>
-                            <div className="inline-flex items-center gap-1.5 bg-surface-2 border border-line text-ink-2 rounded-lg px-2.5 py-1 md:px-3 md:py-1.5 text-[10px] md:text-[12.5px] font-medium tracking-wide">
-                                <ShieldCheck
-                                    size={12}
-                                    className="md:w-3.5 md:h-3.5 text-accent"
-                                />{" "}
-                                Реальные навыки
-                            </div>
-                        </motion.div>
+                        ></motion.div>
 
                         <motion.h2
                             initial={{ opacity: 0, y: 30 }}
@@ -119,7 +105,11 @@ export function Hero() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.5,
+                                ease: EASE,
+                            }}
                             className="mt-6 md:mt-8 flex flex-col items-center lg:items-start gap-2.5"
                         >
                             <button
@@ -128,7 +118,6 @@ export function Hero() {
                             >
                                 Пройти собеседование
                             </button>
-                            
                         </motion.div>
                     </div>
 
@@ -223,7 +212,10 @@ export function Hero() {
                                                     {spec.handle} · {spec.role}
                                                 </div>
                                             </div>
-                                            <Badge variant={spec.level} className="min-w-[64px] justify-center">
+                                            <Badge
+                                                variant={spec.level}
+                                                className="min-w-[64px] justify-center"
+                                            >
                                                 {levelText}
                                             </Badge>
                                         </div>

@@ -1,5 +1,4 @@
 import { Hero } from "@/components/sections/Hero";
-import { UniversalSearch } from "@/components/sections/UniversalSearch";
 import { VacancySection } from "@/components/sections/VacancySection";
 import { StatsSection } from "@/components/sections/StatsSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
@@ -10,7 +9,6 @@ export function Landing() {
   return (
     <>
       <Hero />
-      <UniversalSearch />
       <Divider />
       <VacancySection />
       <Divider />

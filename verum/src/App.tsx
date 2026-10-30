@@ -39,6 +39,7 @@ import { Dashboard } from "@/pages/Dashboard";
 import { Messages } from "@/pages/Messages";
 import { PublicProfile } from "@/pages/PublicProfile";
 import { AdminDashboard } from "@/pages/AdminDashboard";
+import { SearchResults } from "@/pages/SearchResults";
 
 function Layout() {
   const location = useLocation();
@@ -116,6 +117,7 @@ export default function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile/:id" element={<PublicProfile />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/search" element={<SearchResults />} />
         </Route>
       </Routes>
 

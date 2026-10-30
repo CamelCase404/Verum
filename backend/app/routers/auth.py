@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
@@ -63,6 +64,7 @@ class SearchRequest(BaseModel):
     stack: Optional[str] = None
     language: Optional[str] = None
     job_id: Optional[str] = None
+    min_salary: Optional[int] = None
 
 class CandidateProfile(BaseModel):
     id: int
@@ -244,6 +246,7 @@ class SearchJobReq(BaseModel):
     stack: Optional[str] = None
     level: Optional[str] = None
     format: Optional[str] = None
+    min_salary: Optional[int] = None
 
 @router.post("/search-jobs")
 async def search_jobs(req: SearchJobReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -258,6 +261,12 @@ async def search_jobs(req: SearchJobReq, user: UserDB = Depends(get_current_user
             if req.level and req.level.lower() != job.get("level", "").lower(): match = False
             if req.format and req.format.lower() != job.get("format", "").lower(): match = False
             
+            if req.min_salary:
+                job_salary_str = str(job.get("salary", "0")).replace(" ", "").replace("\xa0", "")
+                job_salary = int(re.sub(r'\D', '', job_salary_str) or 0)
+                if job_salary < req.min_salary:
+                    match = False
+
             if match:
                 matched_jobs.append({
                     **job,
