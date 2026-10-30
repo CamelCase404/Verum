@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Loader2, Play } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
-export function InterviewModal({ onClose }: { onClose: () => void }) {
+export function InterviewModal({
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
+ onClose }: { onClose: () => void }) {
   const { updateProfile } = useAppStore();
   const [step, setStep] = useState<"start" | "loading">("start");
 

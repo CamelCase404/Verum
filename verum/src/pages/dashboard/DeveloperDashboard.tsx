@@ -614,6 +614,7 @@ export function DeveloperDashboard({
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();
+                                                        e.stopPropagation();
                                                         setEditingProject(
                                                             project,
                                                         );
@@ -628,6 +629,7 @@ export function DeveloperDashboard({
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();
+                                                        e.stopPropagation();
                                                         handleDeleteProject(
                                                             project.id,
                                                         );

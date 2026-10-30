@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Github, Loader2 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
-export function GithubConnectModal({ onClose }: { onClose: () => void }) {
+export function GithubConnectModal({
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
+ onClose }: { onClose: () => void }) {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const updateProfile = useAppStore((s) => s.updateProfile);

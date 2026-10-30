@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { toast } from "@/components/layout/ToastContainer";
 
-export function NewVacancyModal({ onClose }: { onClose: () => void }) {
+export function NewVacancyModal({
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
+ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [salary, setSalary] = useState("");
   const [desc, setDesc] = useState("");
