@@ -24,7 +24,7 @@ export function Hero() {
         } else if (user.role === "developer") {
             navigate("/dashboard");
         } else {
-            toast("❌ Собеседование доступно только для разработчиков");
+            toast("Собеседование доступно только для разработчиков");
         }
     };
 

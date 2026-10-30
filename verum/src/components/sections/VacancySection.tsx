@@ -219,7 +219,7 @@ export function VacancySection() {
         } else if (user.role === "company") {
             navigate("/dashboard");
         } else {
-            toast("❌ Размещать вакансии могут только компании");
+            toast("Размещать вакансии могут только компании");
         }
     };
 

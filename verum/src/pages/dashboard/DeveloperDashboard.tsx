@@ -100,7 +100,7 @@ export function DeveloperDashboard({
     const handleRetakeClick = () => {
         if (!canRetake) {
             toast(
-                `⏳ Грейд подтвержден. Перепройти тест можно будет с ${nextRetakeDate}.`,
+                `Грейд подтвержден. Перепройти тест можно будет с ${nextRetakeDate}.`,
             );
             return;
         }
@@ -610,7 +610,7 @@ export function DeveloperDashboard({
                                                     <ImageIcon size={24} />
                                                 </div>
                                             )}
-                                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();

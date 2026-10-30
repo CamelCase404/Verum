@@ -40,7 +40,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
            setSalary(res.data.suggested_salary);
         }
       }
-      toast("✨ ИИ успешно разобрал вакансию!");
+      toast("ИИ успешно разобрал вакансию!", "success");
     } catch (e: any) {
       toast(e.message || "Ошибка ИИ");
     } finally {

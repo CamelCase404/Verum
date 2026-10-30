@@ -1,26 +1,18 @@
-import { motion } from "framer-motion";
-import { X, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, ExternalLink } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 
 export function ViewProjectModal({ project, onClose }: { project: any; onClose: () => void }) {
     const allImages = project.images || (project.cover ? [project.cover] : []);
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-surface border border-line rounded-2xl w-full max-w-4xl shadow-2xl relative max-h-[90vh] flex flex-col overflow-hidden"
-            >
-                <div className="p-4 border-b border-line flex justify-between items-center bg-surface-2">
-                    <h2 className="font-bold text-lg">{project.title}</h2>
-                    <button onClick={onClose} className="text-ink-3 hover:text-ink p-1">
-                        <X size={20} />
-                    </button>
+        <Modal onClose={onClose} size="lg">
+            <div className="flex flex-col max-h-[85vh]">
+                <div className="p-6 border-b border-line bg-surface-2 flex justify-between items-center rounded-t-2xl">
+                    <h2 className="font-bold text-xl text-ink pr-8">{project.title}</h2>
                 </div>
                 
-                <div className="p-6 overflow-y-auto space-y-6">
-                    <p className="text-ink-2 text-sm whitespace-pre-line leading-relaxed">
+                <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+                    <p className="text-ink-2 text-[15px] whitespace-pre-line leading-relaxed">
                         {project.description || "Описание отсутствует"}
                     </p>
                     
@@ -32,20 +24,23 @@ export function ViewProjectModal({ project, onClose }: { project: any; onClose: 
                                     target="_blank" 
                                     rel="noreferrer" 
                                     key={idx} 
-                                    className="rounded-xl overflow-hidden border border-line hover:opacity-90 transition-opacity aspect-video bg-bg-2 flex items-center justify-center"
+                                    className="group relative rounded-xl overflow-hidden border border-line hover:border-accent/50 transition-colors aspect-video bg-bg-2 flex items-center justify-center"
                                 >
                                     <img src={img} alt={`Фото ${idx+1}`} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                        <ExternalLink size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                                    </div>
                                 </a>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2">
-                            <ImageIcon size={32} className="mx-auto text-ink-4 mb-2" />
-                            <p className="text-[13px] text-ink-3">К этому проекту не прикреплены фотографии.</p>
+                        <div className="text-center py-12 border border-dashed border-line-2 rounded-xl bg-surface-2">
+                            <ImageIcon size={36} className="mx-auto text-ink-4 mb-3" />
+                            <p className="text-[14px] text-ink-3">К этому проекту не прикреплены фотографии.</p>
                         </div>
                     )}
                 </div>
-            </motion.div>
-        </div>
+            </div>
+        </Modal>
     );
 }
