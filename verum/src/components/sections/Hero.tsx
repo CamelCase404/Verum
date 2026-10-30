@@ -137,7 +137,7 @@ export function Hero() {
                         initial={{ opacity: 0, x: 50, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
-                        className="relative min-w-0 max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0 hidden lg:block"
+                        className="relative min-w-0 max-w-full mx-auto w-full lg:w-auto mt-8 lg:mt-0 px-2 md:px-0"
                     >
                         {/* Внутренний контейнер для бесконечной левитации */}
                         <motion.div

@@ -25,13 +25,13 @@ export function Drawer() {
       { name: "Для специалистов", path: "/specialists" },
     ]},
     { title: "МАТЕРИАЛЫ", links: [
-      { name: "Кейсы", path: "/cases" },
+      
       { name: "Блог", path: "/blog" },
       { name: "Вопросы и ответы", path: "/faq" },
       { name: "Центр помощи", path: "/help" },
     ]},
     { title: "КОМПАНИЯ", links: [
-      { name: "Партнёры", path: "/partners" },
+      
       { name: "Пресс-центр", path: "/press" },
       { name: "Вакансии", path: "/careers" },
       { name: "Контакты", path: "/contacts" },

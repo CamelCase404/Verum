@@ -24,7 +24,7 @@ import {
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
-import { authApi } from "@/api";
+import { authApi, chatApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
 const STACKS = [
@@ -141,6 +141,15 @@ export function CompanyDashboard({
     const candidatesToCompare = candidates.filter((c) =>
         selectedCandidates.includes(c.id),
     );
+
+    const handleHire = async (candidateId: number) => {
+        try {
+            const res = await chatApi.startChat(candidateId);
+            navigate(`/messages?chat=${res.data.conversation_id}`);
+        } catch (e) {
+            toast("Ошибка при создании чата");
+        }
+    };
 
     const handleJobCreated = () => {
         setIsJobOpen(false);
@@ -709,6 +718,16 @@ export function CompanyDashboard({
                                                                 звезд
                                                             </span>
                                                         </div>
+                                                    </div>
+                                                    
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleHire(cand.id); }}
+                                                        className="mt-3 px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap self-start sm:self-center"
+                                                    >
+                                                        Нанять
+                                                    </button>
+                                                </div>
+                                            );
                                                     </div>
                                                 </div>
                                             );
