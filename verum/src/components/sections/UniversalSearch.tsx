@@ -74,7 +74,7 @@ export function UniversalSearch() {
             <div className="w-full flex justify-center mt-6 relative z-20">
                 <button 
                     onClick={handleOpen}
-                    className="w-full h-[56px] bg-surface border border-line rounded-2xl shadow-xl flex items-center px-5 gap-3 hover:border-accent transition-colors group"
+                    className="w-full max-w-[800px] mx-auto h-[60px] bg-surface border border-line rounded-2xl shadow-xl flex items-center px-6 gap-4 hover:border-accent transition-colors group"
                 >
                     <Search size={20} className="text-ink-3 group-hover:text-accent transition-colors shrink-0" />
                     <span className="text-ink-2 text-[14px] sm:text-[15px] truncate text-left">Умный поиск вакансий или специалистов...</span>
@@ -86,7 +86,7 @@ export function UniversalSearch() {
             <AnimatePresence>
                 {isOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface border border-line rounded-[22px] p-5 sm:p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface border border-line rounded-[22px] p-6 sm:p-8 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                             <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
                             
                             <div className="mb-6">
@@ -108,8 +108,8 @@ export function UniversalSearch() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 mb-8">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+                                <div className="contents">
                                     <div className="relative">
                                         <label className="text-sm font-medium mb-1 block">Стек</label>
                                         <button onClick={() => { setOpenStack(!openStack); setOpenLevel(false); setOpenLang(false); setOpenFormat(false); }} className="w-full bg-bg-2 rounded-xl p-3 text-sm text-left flex justify-between items-center">
@@ -143,10 +143,7 @@ export function UniversalSearch() {
                                             )}
                                         </AnimatePresence>
                                     </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {isJobsSearch ? (
+                                {isJobsSearch ? (
                                         <div className="relative">
                                             <label className="text-sm font-medium mb-1 block">Формат</label>
                                             <button onClick={() => { setOpenFormat(!openFormat); setOpenStack(false); setOpenLevel(false); setOpenLang(false); }} className="w-full bg-bg-2 rounded-xl p-3 text-sm text-left flex justify-between items-center">
@@ -182,15 +179,14 @@ export function UniversalSearch() {
                                         </div>
                                     )}
 
-                                    <div>
-                                        <label className="text-sm font-medium mb-1 block">Зарплата от (₽)</label>
-                                        <input 
-                                            value={minSalary} 
-                                            onChange={(e) => setMinSalary(e.target.value.replace(/\D/g, ""))} 
-                                            className="w-full bg-bg-2 rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent" 
-                                            placeholder="Например: 150000" 
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="text-sm font-medium mb-1 block">Зарплата от (₽)</label>
+                                    <input 
+                                        value={minSalary} 
+                                        onChange={(e) => setMinSalary(e.target.value.replace(/\D/g, ""))} 
+                                        className="w-full bg-bg-2 rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent" 
+                                        placeholder="Например: 150000" 
+                                    />
                                 </div>
                             </div>
 

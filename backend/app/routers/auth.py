@@ -92,7 +92,7 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
 
         match = True
         if req.grade and data.get("final_grade", "").lower() != req.grade.lower(): match = False
-        if req.stack and data.get("stack_id", "").lower() != req.stack.lower(): match = False
+        if req.stack and req.stack.lower() not in data.get("stack_id", "").lower(): match = False
         if req.language:
             cand_langs = [l.strip().lower() for l in data.get("language_id", "").split(",")]
             if req.language.lower() not in cand_langs:
@@ -257,15 +257,27 @@ async def search_jobs(req: SearchJobReq, user: UserDB | None = Depends(get_curre
     for comp in companies:
         for job in comp.job_postings:
             match = True
-            if req.stack and req.stack.lower() not in job.get("stack", "").lower(): match = False
-            if req.level and req.level.lower() != job.get("level", "").lower(): match = False
-            if req.format and req.format.lower() != job.get("format", "").lower(): match = False
+            # Умный поиск по стеку (вхождение)
+            if req.stack and req.stack.lower() not in job.get("stack", "").lower(): 
+                match = False
+            # Строгий поиск по уровню (Junior ищет Junior)
+            if req.level and req.level.lower() != job.get("level", "").lower(): 
+                match = False
+            # Поиск по формату
+            if req.format and req.format.lower() != job.get("format", "").lower(): 
+                match = False
             
+            # Умный поиск по зарплате (вытаскиваем первое число из строки)
             if req.min_salary:
-                job_salary_str = str(job.get("salary", "0")).replace(" ", "").replace("\xa0", "")
-                job_salary = int(re.sub(r'\D', '', job_salary_str) or 0)
-                if job_salary < req.min_salary:
-                    match = False
+                salary_str = str(job.get("salary", "0"))
+                # Ищем первое вхождение цифр в строке (например, из "от 150 000 ₽" достанет 150000)
+                numbers = re.findall(r'\d+', salary_str.replace(" ", "").replace("\xa0", ""))
+                if numbers:
+                    job_salary = int("".join(numbers))
+                    if job_salary < req.min_salary:
+                        match = False
+                else:
+                    match = False # Если зарплата не указана, а фильтр стоит - не показываем
 
             if match:
                 matched_jobs.append({

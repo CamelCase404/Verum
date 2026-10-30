@@ -73,8 +73,10 @@ export function Hero() {
                                 delay: 0.1,
                                 ease: EASE,
                             }}
-                            className="flex flex-wrap justify-center lg:justify-start items-center gap-2 mb-4 md:mb-8"
-                        ></motion.div>
+                            className="w-full mb-6 md:mb-8"
+                        >
+                            <UniversalSearch />
+                        </motion.div>
 
                         <motion.h2
                             initial={{ opacity: 0, y: 30 }}
@@ -120,14 +122,7 @@ export function Hero() {
                             </button>
                         </motion.div>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
-                            className="mt-6 w-full max-w-[500px] mx-auto lg:mx-0"
-                        >
-                            <UniversalSearch />
-                        </motion.div>
+
                     </div>
 
                     {/* Внешний контейнер для стартовой анимации (выезд справа + прозрачность) */}
