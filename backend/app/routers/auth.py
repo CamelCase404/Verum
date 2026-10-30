@@ -14,6 +14,7 @@ from ..auth import (
     UserDB, create_access_token, get_current_user, get_current_user_optional, get_db, get_password_hash, verify_password,
 )
 from ..config import settings
+from ..interview_store import save as save_interview, get as get_interview
 from ..schemas import Token, UserProfile, UserRegister, UpdateProfileReq
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -190,6 +191,28 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
     if report.rejected or report.final_grade == "Reject":
         user.test_status = "rejected"
         user.pending_skills_data = None
+        user.interview_video_url = None
+        
+        # Помечаем интервью как rejected, чтобы media.py отклонил поздние видео
+        if report.interview_id:
+            try:
+                it = await get_interview(report.interview_id)
+                if it:
+                    it.rejected = True
+                    it.finished = True
+                    await save_interview(it)
+            except Exception as e:
+                print(f"  ⚠️ Не удалось обновить interview rejected: {e}")
+            
+            # УДАЛЯЕМ ВИДЕОФАЙЛ С СЕРВЕРА, если финальный грейд Reject
+            files = glob.glob(f"uploads/{report.interview_id}_*.webm")
+            for f in files:
+                try:
+                    os.remove(f)
+                    print(f"  🗑️ Удалено видео для Reject-интервью: {f}")
+                except Exception as e:
+                    print(f"  ⚠️ Не удалось удалить видео {f}: {e}")
+
         # Если это была 3-я попытка — блокируем на полгода
         if (user.attempts_used or 0) >= 3:
             user.blocked_until = datetime.utcnow() + timedelta(days=180)

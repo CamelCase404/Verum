@@ -24,7 +24,7 @@ interface Props {
 }
 
 const TOTAL_STAGES = 5;
-const TOTAL_QUESTIONS = 14;
+const TOTAL_QUESTIONS = 12;
 
 export default function Interview({
     payload,
@@ -56,6 +56,7 @@ export default function Interview({
 
     const scroller = useRef<HTMLDivElement>(null);
     const isFailingRef = useRef(false);
+    const isRejectedRef = useRef(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
@@ -77,9 +78,9 @@ export default function Interview({
                     video: true,
                     audio: true,
                 });
-                
+
                 if (!active) {
-                    stream.getTracks().forEach(t => t.stop());
+                    stream.getTracks().forEach((t) => t.stop());
                     return;
                 }
 
@@ -97,12 +98,14 @@ export default function Interview({
             } catch (err: any) {
                 if (!active) return;
                 console.error("Camera error:", err);
-                setCameraError(err.message || "Нет доступа к камере или микрофону.");
+                setCameraError(
+                    err.message || "Нет доступа к камере или микрофону.",
+                );
             }
         };
-        
+
         startCamera();
-        
+
         return () => {
             active = false;
             if (stream) {
@@ -119,6 +122,13 @@ export default function Interview({
             mediaRecorder.state !== "inactive"
         ) {
             mediaRecorder.stop();
+
+            // Если это ранний Reject (спам или выход из окна) - НЕ загружаем видео вообще
+            if (isRejectedRef.current) {
+                console.log("Interview rejected early. Skipping video upload.");
+                return;
+            }
+
             setTimeout(() => {
                 if (chunksRef.current.length === 0) return;
                 const blob = new Blob(chunksRef.current, {
@@ -133,7 +143,6 @@ export default function Interview({
             }, 1000);
         }
     }, [finished, failed, mediaRecorder]);
-
 
     // Эффект для привязки видеопотока к тегу <video>
     useEffect(() => {
@@ -174,6 +183,7 @@ export default function Interview({
     const failInterview = async (reason: string) => {
         if (isFailingRef.current || finished || failed) return;
         isFailingRef.current = true;
+        isRejectedRef.current = true;
         setFailed(true);
         setBusy(true);
         try {
@@ -319,6 +329,7 @@ export default function Interview({
             setAnsweredCount((c) => c + 1);
 
             if (res.rejected) {
+                isRejectedRef.current = true;
                 setFinished(true);
                 setMsgs((m) => [
                     ...m,
@@ -396,7 +407,8 @@ export default function Interview({
             e.preventDefault();
             void send(false);
         }
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") e.preventDefault();
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v")
+            e.preventDefault();
         if (e.shiftKey && e.key === "Insert") e.preventDefault();
     };
 

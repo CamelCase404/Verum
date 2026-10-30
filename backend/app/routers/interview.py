@@ -39,12 +39,12 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
     prev_q_str = "\n".join(f"- {q[:50]}..." for q in past_questions[-5:]) if past_questions else "Нет"
     
     # Передаем stack везде
-    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id)
+    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id, prev_code="(см. ниже)")
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
 
     prompt = f"Стадия: {stage}. {stage_desc}\nУже заданные вопросы:\n{prev_q_str}\n\n"
-    if stage == 2 and prev_code_context:
-        prompt += f"Код с предыдущего этапа:\n{prev_code_context[:1500]}...\n\nКандидат написал промпт:\n'{prev_answer}'\n\nПридумай проблему (нагрузка/падение) и спроси, как исправить именно этот код. Верни ТОЛЬКО текст вопроса."
+    if stage in (2, 4) and prev_code_context:
+        prompt += f"Код с предыдущего этапа:\n{prev_code_context[:4000]}\n\nКандидат написал промпт:\n'{prev_answer}'\n\nПридумай проблему (нагрузка/падение) и спроси, как исправить именно этот код. Верни ТОЛЬКО текст вопроса."
     else:
         prompt += "Задай СЛЕДУЮЩИЙ новый вопрос. Верни ТОЛЬКО текст вопроса."
 
@@ -68,17 +68,37 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
 async def _generate_code_review_task(it) -> tuple[str, str]:
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
     
-    if it.level.lower() == "junior": difficulty = "Добавь простые ошибки (отсутствие проверки на null, неэффективный цикл)."
-    elif it.level.lower() == "middle": difficulty = "Добавь ошибки среднего уровня (N+1, неправильная обработка исключений, проблемы с многопоточностью)."
-    else: difficulty = "Добавь СЛОЖНЫЕ ошибки (race conditions, утечки памяти, проблемы с ACID)."
+    # Абстрактные описания — без конкретных примеров (N+1, race condition и т.д.)
+    if it.level.lower() == "junior":
+        difficulty = (
+            "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior. "
+            "Подумай, какие типичные ошибки новичков бывают именно в стеке {stack} на языке {langs}. "
+            "Выбирай РАЗНООБРАЗНО: логика, обработка данных, работа с API, память, безопасность или другое."
+        )
+    elif it.level.lower() == "middle":
+        difficulty = (
+            "Добавь ОДНУ-ДВЕ ошибки уровня Middle. "
+            "Подумай, какие проблемы бывают у разработчиков среднего уровня в стеке {stack} на языке {langs}. "
+            "Выбирай РАЗНООБРАЗНО: производительность, архитектура, обработка ошибок, безопасность, кэширование, работа с БД или другое."
+        )
+    else:
+        difficulty = (
+            "Добавь ОДНУ-ДВЕ СЛОЖНЫЕ ошибки уровня Senior. "
+            "Подумай, какие проблемы характерны для senior-разработчиков в стеке {stack} на языке {langs}. "
+            "Выбирай РАЗНООБРАЗНО: архитектурные ошибки, утечки, гонки, масштабирование, безопасность или другое. "
+            "Не повторяй одни и те же паттерны."
+        )
+    
+    diff_text = difficulty.format(stack=it.stack_id, langs=it.language_id)
 
     prompt = (
-        f"Сгенерируй код СТРОГО на одном из этих языков: {it.language_id}.\\n"
-        f"ОБЯЗАТЕЛЬНО используй самые современные и актуальные библиотеки/фреймворки для этого стека.\\n"
-        f"{difficulty}\\n"
-        f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ КОММЕНТАРИЕВ И ПОДСКАЗОК.\\n"
-        f"КРИТИЧЕСКОЕ ПРАВИЛО 2: Ты должен выдать только код и сухое задание.\\n"
-        f"ВЕРНИ СТРОГО: 'Найдите ошибки в коде и напишите промпт для их исправления', затем символ '|', затем код."
+        f"Сгенерируй РОВНО ОДИН блок кода СТРОГО на одном из этих языков: {it.language_id}.\n"
+        f"ОБЯЗАТЕЛЬНО используй самые современные и актуальные библиотеки/фреймворки для этого стека.\n"
+        f"{diff_text}\n"
+        f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ НИ ОДНОГО КОММЕНТАРИЯ (убери //, #, /* */ и т.д.).\n"
+        f"КРИТИЧЕСКОЕ ПРАВИЛО 2: НИКАКИХ подсказок, списков ошибок или пояснений в тексте или коде.\n"
+        f"КРИТИЧЕСКОЕ ПРАВИЛО 3: Выдай ТОЛЬКО ОДИН кусок кода. Никаких двух файлов.\n"
+        f"ВЕРНИ СТРОГО: 'Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления', затем символ '|', затем код."
     )
     
     history = _get_history(it)
@@ -88,21 +108,30 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
         parts = raw.split("|", 1)
         code = parts[1].strip()
         
-        # Жесткая очистка от любых комментариев
-        code = re.sub(r"#.*", "", code)          # Python, Bash
-        code = re.sub(r"//.*", "", code)         # JS, C#, Java, Go
-        code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL) # C-style block
-        code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)  # HTML
-        code = re.sub(r"--.*", "", code)         # SQL, Lua
-        code = re.sub(r"\n\s*\n", "\n", code)  # Убираем пустые строки
+        # Экстремальная очистка от любых комментариев
+        code = re.sub(r"#.*", "", code)
+        code = re.sub(r"//.*", "", code)
+        code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
+        code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
+        code = re.sub(r"--.*", "", code)
+        code = re.sub(r"\n\s*\n", "\n", code)
         
-        # Убираем фразы-подсказки, если ИИ их все-таки вставил
-        code = code.replace("Потенциальная ошибка:", "")
-        code = code.replace("Ошибка:", "")
-        code = code.replace("Баг:", "")
-        if "\n" not in code: code = code.replace("{", "{\n").replace("}", "\n}").replace(";", ";\n")
+        # Убираем фразы-подсказки если ИИ их вставил
+        for hint in ["Ошибка:", "Баг:", "Проблема:", "Потенциальная ошибка:", "Уязвимость:", "Плохо:"]:
+            code = code.replace(hint, "")
+        
+        # Если ИИ выдал два блока ```, берём только первый
+        if "```" in code:
+            code_blocks = [b for b in code.split("```") if b.strip() and not b.strip().startswith("language")]
+            if code_blocks:
+                code = code_blocks[0].strip()
+        
+        if "\n" not in code:
+            code = code.replace("{", "{\n").replace("}", "\n}").replace(";", ";\n")
+        
         return parts[0].strip(), code.strip()
-    return "Найдите ошибки в коде и напишите промпт.", raw
+    
+    return "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления.", raw
 
 @router.post("/start", response_model=StartInterviewResponse)
 async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
@@ -119,6 +148,14 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
                 f"Доступ к собеседованию заблокирован до {blocked.strftime('%d.%m.%Y')}. "
                 f"Вы исчерпали все попытки."
             )
+    # Сбрасываем "хвосты" от прошлой попытки, чтобы админ не увидел старое видео с новым чатом
+    user.interview_video_url = None
+    user.pending_skills_data = None
+    from ..auth import SessionLocal
+    async with SessionLocal() as db:
+        await db.merge(user)
+        await db.commit()
+
     langs_str = ", ".join(req.language_ids)
     it = await create(req.level, req.stack_id, langs_str)
     try:
