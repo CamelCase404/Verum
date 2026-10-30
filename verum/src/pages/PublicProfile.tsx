@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
 import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
+import { ViewJobModal } from "@/components/modals/ViewJobModal";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -12,6 +13,7 @@ export function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [showAllRepos, setShowAllRepos] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -252,9 +254,9 @@ export function PublicProfile() {
               {user.job_postings && user.job_postings.length > 0 ? (
                 <div className="grid gap-3">
                   {user.job_postings.map((job: any) => (
-                    <div key={job.id} className="p-4 border border-line rounded-xl bg-surface-2 flex flex-col gap-2 hover:border-line-2 transition-colors">
+                    <div key={job.id} onClick={() => setSelectedJob(job)} className="p-4 border border-line rounded-xl bg-surface-2 flex flex-col gap-2 hover:border-accent cursor-pointer transition-colors group">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-semibold text-[15px] text-ink">{job.title}</h3>
+                        <h3 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">{job.title}</h3>
                         {job.salary && (
                           <span className="text-[13px] font-bold text-accent whitespace-nowrap ml-2">
                             {job.salary}
@@ -372,6 +374,15 @@ export function PublicProfile() {
         </div>
       </div>
     
+      {/* МОДАЛКА ПРОСМОТРА ВАКАНСИИ */}
+      {selectedJob && (
+        <ViewJobModal 
+            job={selectedJob} 
+            companyName={user.full_name} 
+            onClose={() => setSelectedJob(null)} 
+        />
+      )}
+
       {/* МОДАЛКА ПРОСМОТРА ПРОЕКТА */}
       {selectedProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
