@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from ..auth import get_db, get_current_user, UserDB
 from ..interview_store import get as get_interview
 
@@ -12,15 +12,17 @@ def require_admin(user: UserDB = Depends(get_current_user)):
     return user
 
 @router.get("/pending")
-def get_pending(admin: UserDB = Depends(require_admin), db: Session = Depends(get_db)):
-    users = db.query(UserDB).filter(UserDB.test_status == "pending").all()
+async def get_pending(admin: UserDB = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    result = await db.execute(select(UserDB).where(UserDB.test_status == "pending"))
+    users = result.scalars().all()
     result = []
     for u in users:
         chat_history = []
         if u.pending_skills_data:
             it_id = u.pending_skills_data.get("interview_id")
             if it_id:
-                it = get_interview(it_id)
+                it = await get_interview(it_id)
                 if it:
                     chat_history = [{"role": t.role, "content": t.content} for t in it.turns]
         
@@ -35,8 +37,10 @@ def get_pending(admin: UserDB = Depends(require_admin), db: Session = Depends(ge
     return result
 
 @router.post("/approve/{user_id}")
-def approve(user_id: int, admin: UserDB = Depends(require_admin), db: Session = Depends(get_db)):
-    user = db.query(UserDB).filter(UserDB.id == user_id).first()
+async def approve(user_id: int, admin: UserDB = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    result = await db.execute(select(UserDB).where(UserDB.id == user_id))
+    user = result.scalars().first()
     if not user or not user.pending_skills_data:
         raise HTTPException(404, "Not found")
     user.skills_data = user.pending_skills_data
@@ -44,12 +48,14 @@ def approve(user_id: int, admin: UserDB = Depends(require_admin), db: Session = 
     user.pending_skills_data = None
     user.blocked_until = datetime.utcnow() + timedelta(days=180)
     user.attempts_used = 0
-    db.commit()
+    await db.commit()
     return {"status": "ok"}
 
 @router.post("/reject/{user_id}")
-def reject(user_id: int, admin: UserDB = Depends(require_admin), db: Session = Depends(get_db)):
-    user = db.query(UserDB).filter(UserDB.id == user_id).first()
+async def reject(user_id: int, admin: UserDB = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    result = await db.execute(select(UserDB).where(UserDB.id == user_id))
+    user = result.scalars().first()
     if not user:
         raise HTTPException(404, "Not found")
     user.pending_skills_data = None
@@ -59,5 +65,5 @@ def reject(user_id: int, admin: UserDB = Depends(require_admin), db: Session = D
         user.attempts_used = 0
     # Если у юзера был предыдущий одобренный грейд - оставляем approved
     user.test_status = "approved" if user.skills_data else "rejected"
-    db.commit()
+    await db.commit()
     return {"status": "ok"}

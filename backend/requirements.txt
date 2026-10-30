@@ -26,3 +26,4 @@ psycopg2-binary==2.9.9
 
 # GigaChat
 gigachat==0.2.3
+asyncpg==0.30.0

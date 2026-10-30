@@ -1,7 +1,8 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update
 from typing import List
 import os
 import shutil
@@ -20,41 +21,47 @@ class SendMessageReq(BaseModel):
     image_url: str | None = None
 
 @router.post("/start")
-def start_chat(req: StartChatReq, user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
+async def start_chat(req: StartChatReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     company_id = user.id if user.role == "company" else req.target_user_id
     developer_id = user.id if user.role == "developer" else req.target_user_id
     
-    conv = db.query(Conversation).filter(
+    res_conv = await db.execute(select(Conversation).where(
         Conversation.company_id == company_id,
         Conversation.developer_id == developer_id
-    ).first()
+    ))
+    conv = res_conv.scalars().first()
     
     if not conv:
         conv = Conversation(company_id=company_id, developer_id=developer_id)
         db.add(conv)
-        db.commit()
-        db.refresh(conv)
+        await db.commit()
+        await db.refresh(conv)
     
     return {"conversation_id": conv.id}
 
 @router.get("/conversations")
-def get_conversations(user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_conversations(user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if user.role == "company":
-        convs = db.query(Conversation).filter(Conversation.company_id == user.id).all()
+        result = await db.execute(select(Conversation).where(Conversation.company_id == user.id))
+        convs = result.scalars().all()
     else:
-        convs = db.query(Conversation).filter(Conversation.developer_id == user.id).all()
+        result = await db.execute(select(Conversation).where(Conversation.developer_id == user.id))
+        convs = result.scalars().all()
     
     result = []
     for c in convs:
         other_id = c.developer_id if user.role == "company" else c.company_id
-        other_user = db.query(UserDB).filter(UserDB.id == other_id).first()
+        res_user = await db.execute(select(UserDB).where(UserDB.id == other_id))
+        other_user = res_user.scalars().first()
         
-        last_msg = db.query(Message).filter(Message.conversation_id == c.id).order_by(Message.created_at.desc()).first()
-        unread_count = db.query(Message).filter(
+        res_msg = await db.execute(select(Message).where(Message.conversation_id == c.id).order_by(Message.created_at.desc()))
+        last_msg = res_msg.scalars().first()
+        res_unread = await db.execute(select(Message).where(
             Message.conversation_id == c.id, 
             Message.is_read == False, 
             Message.sender_id != user.id
-        ).count()
+        ))
+        unread_count = len(res_unread.scalars().all())
         
         # Определяем текст последнего сообщения (текст или "Фото")
         last_text = "Нет сообщений"
@@ -73,24 +80,27 @@ def get_conversations(user: UserDB = Depends(get_current_user), db: Session = De
     return result
 
 @router.get("/{conv_id}/messages")
-def get_messages(conv_id: int, user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
-    conv = db.query(Conversation).filter(Conversation.id == conv_id).first()
+async def get_messages(conv_id: int, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    res_conv = await db.execute(select(Conversation).where(Conversation.id == conv_id))
+    conv = res_conv.scalars().first()
     if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
         raise HTTPException(status_code=403, detail="Access denied")
     
-    db.query(Message).filter(
+    await db.execute(update(Message).where(
         Message.conversation_id == conv_id, 
         Message.sender_id != user.id, 
         Message.is_read == False
-    ).update({"is_read": True})
-    db.commit()
+    ).values(is_read=True))
+    await db.commit()
     
-    msgs = db.query(Message).filter(Message.conversation_id == conv_id).order_by(Message.created_at.asc()).all()
+    res_msgs = await db.execute(select(Message).where(Message.conversation_id == conv_id).order_by(Message.created_at.asc()))
+    msgs = res_msgs.scalars().all()
     return [{"id": m.id, "text": m.text, "image_url": m.image_url, "is_mine": m.sender_id == user.id, "created_at": m.created_at.isoformat()} for m in msgs]
 
 @router.post("/{conv_id}/upload")
-async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
-    conv = db.query(Conversation).filter(Conversation.id == conv_id).first()
+async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    res_conv = await db.execute(select(Conversation).where(Conversation.id == conv_id))
+    conv = res_conv.scalars().first()
     if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
         raise HTTPException(status_code=403, detail="Access denied")
     
@@ -115,8 +125,9 @@ async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: Us
     return {"url": f"{settings.BACKEND_URL}/uploads/chat/{filename}"}
 
 @router.post("/{conv_id}/messages")
-def send_message(conv_id: int, req: SendMessageReq, user: UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
-    conv = db.query(Conversation).filter(Conversation.id == conv_id).first()
+async def send_message(conv_id: int, req: SendMessageReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    res_conv = await db.execute(select(Conversation).where(Conversation.id == conv_id))
+    conv = res_conv.scalars().first()
     if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
         raise HTTPException(status_code=403, detail="Access denied")
     
@@ -125,5 +136,5 @@ def send_message(conv_id: int, req: SendMessageReq, user: UserDB = Depends(get_c
     
     msg = Message(conversation_id=conv_id, sender_id=user.id, text=req.text.strip(), image_url=req.image_url)
     db.add(msg)
-    db.commit()
+    await db.commit()
     return {"status": "ok"}

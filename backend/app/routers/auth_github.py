@@ -4,7 +4,8 @@ import asyncio
 import httpx
 from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from ..config import settings
 from ..auth import get_db, UserDB, create_access_token
@@ -44,7 +45,7 @@ async def github_callback(
     request: Request,
     code: str | None = None,
     state: str | None = None,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     if not code:
         return RedirectResponse(url=f"{settings.FRONTEND_URL}/login?error=no_code")
@@ -172,7 +173,8 @@ async def github_callback(
         }
 
     # ─── 3. Сохраняем пользователя ───
-    user = db.query(UserDB).filter(UserDB.email == email).first()
+    result = await db.execute(select(UserDB).where(UserDB.email == email))
+    user = result.scalars().first()
     if not user:
         user = UserDB(
             email=email,
@@ -181,12 +183,12 @@ async def github_callback(
             full_name=user_data.get("name") or user_data.get("login"),
         )
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
 
     user.github_username = user_data["login"]
     user.github_stats = stats
-    db.commit()
+    await db.commit()
 
     # ─── 4. Возвращаем на фронт с токеном ───
     access_jwt = create_access_token({"sub": user.email})

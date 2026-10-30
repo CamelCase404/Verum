@@ -35,7 +35,7 @@ def _clean_text(raw: str) -> str:
 def _get_history(it) -> list[dict]:
     return [{"role": t.role, "content": t.content} for t in it.turns]
 
-def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code_context: str = "", prev_answer: str = "") -> str:
+async def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code_context: str = "", prev_answer: str = "") -> str:
     prev_q_str = "\n".join(f"- {q[:50]}..." for q in past_questions[-5:]) if past_questions else "Нет"
     
     # Передаем stack везде
@@ -49,23 +49,23 @@ def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code
         prompt += "Задай СЛЕДУЮЩИЙ новый вопрос. Верни ТОЛЬКО текст вопроса."
 
     history = _get_history(it)
-    raw = ask_chat(sys_prompt, history, prompt).strip()
+    raw = await ask_chat(sys_prompt, history, prompt).strip()
     return _clean_text(raw)
 
-def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
+async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
     if is_skip: return 0
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
     
     prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Верни ТОЛЬКО число. Не додумывай за кандидата!"
     history = _get_history(it)
-    raw = ask_chat(sys_prompt, history, prompt).strip()
+    raw = await ask_chat(sys_prompt, history, prompt).strip()
     match = re.search(r"\d+", raw)
     if match:
         score = int(match.group())
         return max(0, min(100, score))
     return 40
 
-def _generate_code_review_task(it) -> tuple[str, str]:
+async def _generate_code_review_task(it) -> tuple[str, str]:
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
     
     if it.level.lower() == "junior": difficulty = "Добавь простые ошибки (отсутствие проверки на null, неэффективный цикл)."
@@ -82,7 +82,7 @@ def _generate_code_review_task(it) -> tuple[str, str]:
     )
     
     history = _get_history(it)
-    raw = ask_chat(sys_prompt, history, prompt).strip()
+    raw = await ask_chat(sys_prompt, history, prompt).strip()
 
     if "|" in raw:
         parts = raw.split("|", 1)
@@ -105,7 +105,7 @@ def _generate_code_review_task(it) -> tuple[str, str]:
     return "Найдите ошибки в коде и напишите промпт.", raw
 
 @router.post("/start", response_model=StartInterviewResponse)
-def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
+async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
     from datetime import datetime
     now = datetime.utcnow()
     if user.blocked_until:
@@ -120,26 +120,26 @@ def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) 
                 f"Вы исчерпали все попытки."
             )
     langs_str = ", ".join(req.language_ids)
-    it = create(req.level, req.stack_id, langs_str)
+    it = await create(req.level, req.stack_id, langs_str)
     try:
-        q = _generate_pure_question(0, it, [])
+        q = await _generate_pure_question(0, it, [])
     except Exception as e:
         import traceback
         traceback.print_exc()
         raise HTTPException(500, f"Ошибка генерации вопроса: {str(e)}")
         
     it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
-    save(it)
+    await save(it)
     return StartInterviewResponse(interview_id=it.id, stage=0, stage_name=STAGE_NAMES[0], question=q)
 
 @router.post("/answer", response_model=AnswerResponse)
-def answer(req: AnswerRequest) -> AnswerResponse:
-    it = get(req.interview_id)
+async def answer(req: AnswerRequest) -> AnswerResponse:
+    it = await get(req.interview_id)
     if not it: raise HTTPException(404, "interview not found")
 
     if req.answer == "___TAB_SWITCH_FAIL___":
         it.finished, it.rejected, it.reject_reason = True, True, "Выход из окна."
-        save(it)
+        await save(it)
         return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     is_skip = req.answer == "___SKIP___"
@@ -151,57 +151,57 @@ def answer(req: AnswerRequest) -> AnswerResponse:
     
     it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent))
     
-    score = _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
+    score = await _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
 
     if not is_skip and score <= 5:
         it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме (бред или спам)."
-        save(it)
+        await save(it)
         return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
 
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
-        question, code = _generate_code_review_task(it)
+        question, code = await _generate_code_review_task(it)
         it.turns.append(Turn(role="assistant", content=question + "\n\nКод:\n" + code, seconds_spent=0))
-        save(it)
+        await save(it)
         return AnswerResponse(stage=1, stage_name=STAGE_NAMES[1], question=question, code_snippet=code)
 
     elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:
         it.stage = 2
         prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10), "")
         prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
-        q = _generate_pure_question(2, it, past_questions, prev_code, prev_prompt)
+        q = await _generate_pure_question(2, it, past_questions, prev_code, prev_prompt)
         it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
-        save(it)
+        await save(it)
         return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], question=q)
 
     elif it.stage == 2 and answers_on_stage >= STAGE0_QUESTIONS + 2:
         it.stage = 3
-        question, code = _generate_code_review_task(it)
+        question, code = await _generate_code_review_task(it)
         it.turns.append(Turn(role="assistant", content=question + "\n\nКод:\n" + code, seconds_spent=0))
-        save(it)
+        await save(it)
         return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], question=question, code_snippet=code)
 
     elif it.stage == 3 and answers_on_stage >= STAGE0_QUESTIONS + 3:
         it.stage = 4
         prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10), "")
         prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
-        q = _generate_pure_question(4, it, past_questions, prev_code, prev_prompt)
+        q = await _generate_pure_question(4, it, past_questions, prev_code, prev_prompt)
         it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
-        save(it)
+        await save(it)
         return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], question=q)
 
     elif it.stage == 4 and answers_on_stage >= STAGE0_QUESTIONS + 4:
         it.finished = True
-        save(it)
+        await save(it)
         return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], finished=True)
 
-    q = _generate_pure_question(it.stage, it, past_questions)
+    q = await _generate_pure_question(it.stage, it, past_questions)
     if not q or len(q.strip()) < 10: q = "Опишите ваш подход к решению подобных задач."
 
     it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
-    save(it)
+    await save(it)
     return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], question=q)
 
 class _Report(BaseModel):
@@ -230,8 +230,8 @@ def _parse_report_json(content: str) -> dict:
     return {}
 
 @router.get("/{interview_id}/report", response_model=ReportResponse)
-def report(interview_id: str) -> ReportResponse:
-    it = get(interview_id)
+async def report(interview_id: str) -> ReportResponse:
+    it = await get(interview_id)
     if not it: raise HTTPException(404, "interview not found")
     if not it.finished: raise HTTPException(409, "interview is not finished")
 
@@ -248,7 +248,7 @@ def report(interview_id: str) -> ReportResponse:
     user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."
 
     try:
-        raw = ask_chat(SYSTEM_REPORT, history, user)
+        raw = await ask_chat(SYSTEM_REPORT, history, user)
         parsed = _Report.model_validate(_parse_report_json(raw))
         
         # Считаем средний балл СТРОГО по оценкам навыков, а не берем из ИИ

@@ -1,6 +1,8 @@
 from typing import Optional
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 import shutil
 import uuid
 import os
@@ -20,27 +22,29 @@ class LoginReq(BaseModel):
     password: str
 
 @router.post("/register", response_model=Token)
-def register(data: UserRegister, db=Depends(get_db)):
-    existing = db.query(UserDB).filter(UserDB.email == data.email).first()
+async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserDB).where(UserDB.email == data.email))
+    existing = result.scalars().first()
     if existing: raise HTTPException(400, "Email already registered")
     
     user = UserDB(email=data.email, hashed_password=get_password_hash(data.password), role=data.role.value, full_name=data.full_name)
     db.add(user)
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
-def login(data: LoginReq, db=Depends(get_db)):
-    user = db.query(UserDB).filter(UserDB.email == data.email).first()
+async def login(data: LoginReq, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserDB).where(UserDB.email == data.email))
+    user = result.scalars().first()
     if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(401, "Incorrect email or password")
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserProfile)
-def me(user: UserDB = Depends(get_current_user)):
+async def me(user: UserDB = Depends(get_current_user)):
     return UserProfile(
         id=user.id, email=user.email, role=user.role, full_name=user.full_name,
         skills=user.skills_data, company_name=user.company_name, website=user.website,
@@ -75,9 +79,9 @@ class CandidateProfile(BaseModel):
     avatar_url: str | None = None
 
 @router.post("/search", response_model=list[CandidateProfile])
-def search_candidates(req: SearchRequest, user: UserDB = Depends(get_current_user), db=Depends(get_db)):
-    query = db.query(UserDB).filter(UserDB.role == "developer", UserDB.skills_data.isnot(None))
-    users = query.all()
+async def search_candidates(req: SearchRequest, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserDB).where(UserDB.role == "developer", UserDB.skills_data.isnot(None)))
+    users = result.scalars().all()
 
     results = []
     for u in users:
@@ -164,7 +168,7 @@ class SkillsReport(BaseModel):
     rejected: Optional[bool] = False
 
 @router.post("/skills")
-def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_user), db=Depends(get_db)):
+async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if user.role != "developer": raise HTTPException(403, "Only developers")
     
     # Защита от двойного инкремента при повторном вызове save_skills
@@ -193,27 +197,27 @@ def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_user), 
         if files:
             user.interview_video_url = f"/{files[0].replace(os.sep, '/')}"
             
-    db.commit()
+    await db.commit()
     return {"status": "ok"}
 
 # ОСТАЛЬНЫЕ РОУТЫ (profile, avatar, search и т.д.)
 @router.put("/profile")
-def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_current_user), db=Depends(get_db)):
+async def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if data.bio is not None: user.bio = data.bio
     if data.avatar_url is not None: user.avatar_url = data.avatar_url
     if data.projects is not None: user.projects = data.projects
-    db.commit()
+    await db.commit()
     return {"status": "ok"}
 
 @router.post("/upload-avatar")
-async def upload_avatar(file: UploadFile = File(...), user: UserDB = Depends(get_current_user), db=Depends(get_db)):
+async def upload_avatar(file: UploadFile = File(...), user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if not file.content_type.startswith("image/"): raise HTTPException(400, "Только изображения")
     os.makedirs("uploads/avatars", exist_ok=True)
     filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
     filepath = f"uploads/avatars/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
     user.avatar_url = f"{settings.BACKEND_URL}/uploads/avatars/{filename}"
-    db.commit()
+    await db.commit()
     return {"url": user.avatar_url}
 
 @router.post("/upload-image")
@@ -229,15 +233,16 @@ class UpdateJobsReq(BaseModel):
     job_postings: list[dict]
 
 @router.put("/jobs")
-def update_jobs(data: UpdateJobsReq, user: UserDB = Depends(get_current_user), db=Depends(get_db)):
+async def update_jobs(data: UpdateJobsReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if user.role != "company": raise HTTPException(403, "Только для компаний")
     user.job_postings = data.job_postings
-    db.commit()
+    await db.commit()
     return {"status": "ok"}
 
 @router.get("/user/{user_id}", response_model=UserProfile)
-def get_public_profile(user_id: int, db=Depends(get_db)):
-    user = db.query(UserDB).filter(UserDB.id == user_id).first()
+async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserDB).where(UserDB.id == user_id))
+    user = result.scalars().first()
     if not user: raise HTTPException(404, "User not found")
     return UserProfile(
         id=user.id, email=user.email, role=user.role, full_name=user.full_name,

@@ -10,7 +10,7 @@ class ParseJobReq(BaseModel):
     description: str
 
 @router.post("/parse-job")
-def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
+async def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
     if user.role != "company":
         raise HTTPException(status_code=403, detail="Только для компаний")
     
@@ -26,7 +26,7 @@ def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
     prompt = f"Текст вакансии:\n{req.description}"
     
     try:
-        raw = ask_text(sys_prompt, prompt)
+        raw = await ask_text(sys_prompt, prompt)
         # Очистка от возможных markdown-тегов
         raw = raw.replace("```json", "").replace("```", "").strip()
         start = raw.find("{")

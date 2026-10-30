@@ -4,8 +4,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pwdlib import PasswordHash  # <-- НОВЫЙ ИМПОРТ
-from sqlalchemy import JSON, Column, Integer, String, Boolean, DateTime, ForeignKey, create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import JSON, Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 
 from .schemas import UserRole
 
@@ -20,12 +21,11 @@ password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 import os
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./portal.db")
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-else:
-    engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://verum_user:verum_password_secure_change_me@db:5432/verum_db")
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+engine = create_async_engine(DATABASE_URL, echo=False)
+SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 Base = declarative_base()
 
 
@@ -71,16 +71,11 @@ class Message(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     is_read = Column(Boolean, default=False)
 
-Base.metadata.create_all(bind=engine)
 
 
-
-def get_db():
-    db = SessionLocal()
-    try:
+async def get_db():
+    async with SessionLocal() as db:
         yield db
-    finally:
-        db.close()
 
 
 def verify_password(plain: str, hashed: str) -> bool:
@@ -100,7 +95,8 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_db)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -113,7 +109,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_db)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = db.query(UserDB).filter(UserDB.email == email).first()
+
+    result = await db.execute(select(UserDB).where(UserDB.email == email))
+    user = result.scalars().first()
     if user is None:
         raise credentials_exception
     return user
