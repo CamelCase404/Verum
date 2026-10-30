@@ -210,8 +210,7 @@ export function UniversalSearch() {
                                                 setMinSalary("");
                                             }
                                         }} 
-                                        className="w-full bg-bg-2 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-accent/20 border border-transparent hover:border-line-2 focus:border-accent transition-colors" 
-                                        placeholder="Например: 150 000"  
+                                        className="w-full bg-bg-2 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-accent/20 border border-transparent hover:border-line-2 focus:border-accent transition-colors"  
                                     />
                                 </div>
                             </div>

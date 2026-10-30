@@ -194,7 +194,6 @@ export function SearchResults() {
                                 value={minSalary} 
                                 onChange={(e) => setMinSalary(e.target.value.replace(/\D/g, ""))} 
                                 className="w-full bg-bg-2 border border-line rounded-xl p-2.5 text-sm outline-none focus:border-accent transition-colors" 
-                                placeholder="Например: 150000" 
                             />
                         </div>
 

@@ -149,7 +149,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
 
           <div>
             <label className="text-sm font-medium mb-1 block">Название вакансии</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors" placeholder="Например: Senior React Developer" />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -234,7 +234,6 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                 }} 
                 disabled={isNegotiable}
                 className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl py-2.5 px-4 text-[15px] outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
-                placeholder="От" 
               />
               <span className="text-ink-3 font-medium text-center sm:text-left hidden sm:block">—</span>
               <span className="text-ink-3 font-medium text-center block sm:hidden text-xs my-1">до</span>
@@ -246,7 +245,6 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                 }} 
                 disabled={isNegotiable}
                 className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl py-2.5 px-4 text-[15px] outline-none focus:ring-2 focus:ring-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" 
-                placeholder="До" 
               />
             </div>
           </div>
