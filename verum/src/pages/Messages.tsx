@@ -97,10 +97,10 @@ export function Messages() {
   };
 
   return (
-    <div className="flex w-full overflow-hidden bg-bg flex-1 h-[calc(100dvh-56px)] md:h-[calc(100vh-64px)]">
+    <div className="flex w-full h-full overflow-hidden bg-bg">
       
       {/* ЛЕВАЯ КОЛОНКА */}
-      <div className={`w-full md:w-[320px] lg:w-[380px] border-r border-line-2 flex-col bg-surface shadow-[2px_0_12px_rgba(0,0,0,0.04)] dark:shadow-[2px_0_12px_rgba(0,0,0,0.4)] z-10 ${activeConv ? "hidden md:flex" : "flex"}`}>
+      <div className={`w-full md:w-[320px] lg:w-[380px] border-r border-line-2 flex-col bg-surface shadow-[2px_0_12px_rgba(0,0,0,0.04)] dark:shadow-[2px_0_12px_rgba(0,0,0,0.4)] z-10 h-full ${activeConv ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-line bg-surface">
           <h1 className="text-xl font-bold tracking-tight">Сообщения</h1>
         </div>
@@ -128,7 +128,7 @@ export function Messages() {
       </div>
 
       {/* ПРАВАЯ КОЛОНКА */}
-      <div className={`flex-1 flex flex-col bg-bg relative h-full min-h-0 ${activeConv ? "flex" : "hidden md:flex"}`}>
+      <div className={`flex-1 flex flex-col bg-bg relative h-full min-h-0 overflow-hidden ${activeConv ? "flex" : "hidden md:flex"}`}>
         {activeConv ? (
           <>
             <div className="p-3 border-b border-line bg-surface flex items-center gap-3 shadow-sm z-10">
@@ -177,7 +177,7 @@ export function Messages() {
               </div>
             )}
 
-            <div className="p-2 sm:p-3 bg-surface border-t border-line flex gap-2 items-end shrink-0">
+            <div className="p-2 sm:p-3 bg-surface border-t border-line flex gap-2 items-end shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
               <button 
                 onClick={() => fileInputRef.current?.click()} 
                 className="p-2.5 text-ink-3 hover:text-accent transition-colors bg-bg-2 rounded-xl"
@@ -206,7 +206,7 @@ export function Messages() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-ink-3">
+          <div className="flex-1 flex flex-col items-center justify-center text-ink-3 h-full w-full">
             <div className="w-16 h-16 rounded-full bg-surface-2 flex items-center justify-center mb-4"><Send size={24} /></div>
             <p>Выберите чат, чтобы начать общение</p>
           </div>

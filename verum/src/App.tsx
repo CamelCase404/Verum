@@ -52,7 +52,7 @@ function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col ${isMessagesPage ? "h-[100dvh] w-screen overflow-hidden" : "min-h-screen"}`}>
       <Nav />
       
       {/* Плавная анимация появления без скачков по Y */}
@@ -66,7 +66,7 @@ function Layout() {
           damping: 25,
           mass: 0.8
         }}
-        className="flex-1 flex flex-col relative"
+        className={`flex-1 flex flex-col relative ${isMessagesPage ? "overflow-hidden h-full" : ""}`}
       >
         <Outlet />
       </motion.main>
