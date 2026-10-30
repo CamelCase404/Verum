@@ -627,28 +627,18 @@ export function CompanyDashboard({
                                 ) : candidates.length > 0 ? (
                                     <div className="space-y-3">
                                         {candidates.map((cand: any) => {
-                                            const isSelected =
-                                                selectedCandidates.includes(
-                                                    cand.id,
-                                                );
+                                            const isSelected = selectedCandidates.includes(cand.id);
                                             return (
                                                 <div
                                                     key={cand.id}
                                                     className={`flex items-start gap-3 p-3.5 border rounded-xl transition-colors ${isSelected ? "border-accent bg-accent/5" : "border-line bg-surface-2 hover:border-line-2"}`}
                                                 >
                                                     <button
-                                                        onClick={() =>
-                                                            toggleSelect(
-                                                                cand.id,
-                                                            )
-                                                        }
+                                                        onClick={() => toggleSelect(cand.id)}
                                                         className="mt-1 text-ink-3 hover:text-accent transition-colors focus:outline-none"
                                                     >
                                                         {isSelected ? (
-                                                            <CheckSquare
-                                                                size={20}
-                                                                className="text-accent"
-                                                            />
+                                                            <CheckSquare size={20} className="text-accent" />
                                                         ) : (
                                                             <Square size={20} />
                                                         )}
@@ -657,78 +647,45 @@ export function CompanyDashboard({
                                                     <div className="flex-1 min-w-0 overflow-hidden">
                                                         <div className="flex items-center justify-between mb-1">
                                                             <div
-                                                                onClick={() =>
-                                                                    navigate(
-                                                                        `/profile/${cand.id}`,
-                                                                    )
-                                                                }
+                                                                onClick={() => navigate(`/profile/${cand.id}`)}
                                                                 className="font-semibold text-[15px] text-ink truncate flex items-center gap-2 hover:text-accent cursor-pointer transition-colors"
                                                             >
                                                                 {cand.full_name}
                                                                 <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                                    <ShieldCheck
-                                                                        size={
-                                                                            10
-                                                                        }
-                                                                    />{" "}
-                                                                    {
-                                                                        cand.final_grade
-                                                                    }
+                                                                    <ShieldCheck size={10} /> {cand.final_grade}
                                                                 </span>
                                                             </div>
                                                             <div className="text-sm font-bold text-accent whitespace-nowrap ml-2">
-                                                                ~{" "}
-                                                                {cand.estimated_salary.toLocaleString(
-                                                                    "ru-RU",
-                                                                )}{" "}
-                                                                ₽
+                                                                ~ {cand.estimated_salary.toLocaleString("ru-RU")} ₽
                                                             </div>
                                                         </div>
 
                                                         <div className="flex items-center gap-4 mt-2">
                                                             <div className="text-[12px] font-medium text-ink-2">
-                                                                Совпадение:{" "}
-                                                                {
-                                                                    cand.match_score
-                                                                }
-                                                                %
+                                                                Совпадение: {cand.match_score}%
                                                             </div>
                                                             <div className="text-[11px] text-ink-3">
-                                                                Тест:{" "}
-                                                                {
-                                                                    cand.total_score
-                                                                }
-                                                                /100
+                                                                Тест: {cand.total_score}/100
                                                             </div>
                                                         </div>
 
                                                         <div className="text-[12px] text-ink-3 flex items-center gap-3 flex-wrap">
                                                             <span className="capitalize">
-                                                                {cand.stack} •{" "}
-                                                                {cand.language}
+                                                                {cand.stack} • {cand.language}
                                                             </span>
                                                             <span className="flex items-center gap-1">
-                                                                <Star
-                                                                    size={12}
-                                                                    className="text-amber-500"
-                                                                />{" "}
-                                                                {
-                                                                    cand.github_stars
-                                                                }{" "}
-                                                                звезд
+                                                                <Star size={12} className="text-amber-500" />{" "}
+                                                                {cand.github_stars} звезд
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    
-                                                    <button 
+
+                                                    <button
                                                         onClick={(e) => { e.stopPropagation(); handleHire(cand.id); }}
-                                                        className="mt-3 px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap self-start sm:self-center"
+                                                        className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
                                                     >
                                                         Нанять
                                                     </button>
-                                                </div>
-                                            );
-                                                    </div>
                                                 </div>
                                             );
                                         })}
