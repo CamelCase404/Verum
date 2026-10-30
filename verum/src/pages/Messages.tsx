@@ -19,6 +19,7 @@ export function Messages() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -41,11 +42,15 @@ export function Messages() {
     const fetchMessages = () => {
       chatApi.getMessages(activeConv.id).then(res => {
         setMessages(res.data);
-        setTimeout(() => {
-          if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
-        }, 100);
+        
+        // Скроллим вниз ТОЛЬКО если пользователь находится внизу
+        if (isAtBottomRef.current) {
+            setTimeout(() => {
+              if (messagesEndRef.current) {
+                messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              }
+            }, 100);
+        }
       }).catch(console.error);
     };
     
@@ -86,6 +91,7 @@ export function Messages() {
       setText("");
       clearImage();
       
+      isAtBottomRef.current = true; // Принудительно скроллим при отправке
       const res = await chatApi.getMessages(activeConv.id);
       setMessages(res.data);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
@@ -144,7 +150,14 @@ export function Messages() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div 
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+              onScroll={(e) => {
+                  const target = e.currentTarget;
+                  // Считаем, что мы внизу, если до конца осталось меньше 60px
+                  isAtBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < 60;
+              }}
+            >
               {messages.map((m, idx) => (
                 <motion.div 
                   key={m.id}
