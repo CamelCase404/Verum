@@ -6,13 +6,14 @@ import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function GithubConnectModal({
+ onClose }: { onClose: () => void }) {
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
     }, []);
- onClose }: { onClose: () => void }) {
+
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const updateProfile = useAppStore((s) => s.updateProfile);

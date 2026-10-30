@@ -9,13 +9,14 @@ const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 
 export function CreateJobModal({
+ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
     }, []);
- onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [stack, setStack] = useState("Frontend");

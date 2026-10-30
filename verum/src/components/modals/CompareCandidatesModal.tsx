@@ -3,13 +3,14 @@ import { motion } from "framer-motion";
 import { X, ShieldCheck, Github, Star, CheckCircle2 } from "lucide-react";
 
 export function CompareCandidatesModal({
+ candidates, onClose }: { candidates: any[], onClose: () => void }) {
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
     }, []);
- candidates, onClose }: { candidates: any[], onClose: () => void }) {
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-[22px] w-[calc(100vw-2rem)] sm:w-full max-w-5xl shadow-2xl relative max-h-[90vh] flex flex-col overflow-hidden">

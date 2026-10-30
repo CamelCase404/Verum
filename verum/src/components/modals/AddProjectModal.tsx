@@ -1,17 +1,18 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Loader2, UploadCloud, Trash2 } from "lucide-react";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function AddProjectModal({
+ onClose, backendUser, onRefresh, projectToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, projectToEdit?: any }) {
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
     }, []);
- onClose, backendUser, onRefresh, projectToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, projectToEdit?: any }) {
+
   const isEditing = !!projectToEdit;
 
   const [title, setTitle] = useState("");

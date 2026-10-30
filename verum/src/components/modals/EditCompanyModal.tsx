@@ -5,13 +5,14 @@ import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function EditCompanyModal({
+ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
     }, []);
- onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
+
   const [bio, setBio] = useState(backendUser?.bio || "");
   const [website, setWebsite] = useState(backendUser?.website || "");
   const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");

@@ -6,13 +6,14 @@ import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function InterviewModal({
+ onClose }: { onClose: () => void }) {
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
     }, []);
- onClose }: { onClose: () => void }) {
+
   const { updateProfile } = useAppStore();
   const [step, setStep] = useState<"start" | "loading">("start");
 
