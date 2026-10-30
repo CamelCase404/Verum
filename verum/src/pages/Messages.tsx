@@ -117,7 +117,7 @@ export function Messages() {
             <button 
               key={c.id} 
               onClick={() => { setActiveConv(c); clearImage(); setText(""); }}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-0 ${activeConv?.id === c.id ? "bg-surface-2 border border-line-2 shadow-sm" : "hover:bg-surface-2 border border-transparent"}`}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-colors duration-200 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 ${activeConv?.id === c.id ? "border-line-2 bg-surface-2" : "border-transparent hover:bg-surface-2"}`}
             >
               <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center overflow-hidden flex-shrink-0">
                 {c.other_avatar ? <img src={c.other_avatar} className="w-full h-full object-cover" /> : c.other_name.substring(0, 2).toUpperCase()}
