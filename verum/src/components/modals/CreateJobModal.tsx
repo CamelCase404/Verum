@@ -6,18 +6,21 @@ import { toast } from "@/components/layout/ToastContainer";
 
 const STACKS = ["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data / ML"];
 const LEVELS = ["Junior", "Middle", "Senior"];
+const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 
 export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [stack, setStack] = useState("Frontend");
   const [level, setLevel] = useState("Middle");
+  const [format, setFormat] = useState("Удалённо");
   const [salary, setSalary] = useState("");
   const [loading, setLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   const [openStack, setOpenStack] = useState(false);
   const [openLevel, setOpenLevel] = useState(false);
+  const [openFormat, setOpenFormat] = useState(false);
 
   const handleAiParse = async () => {
     if (!description.trim()) return toast("Сначала вставьте описание вакансии");
@@ -59,7 +62,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
     if (!title.trim()) return toast("Введите название вакансии");
     setLoading(true);
     try {
-      const newJob = { id: Date.now().toString(), title, description, stack, level, salary };
+      const newJob = { id: Date.now().toString(), title, description, stack, level, salary, format };
       const currentJobs = backendUser?.job_postings || [];
       await authApi.updateJobs([...currentJobs, newJob]);
       toast("Вакансия опубликована");
@@ -143,16 +146,36 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium mb-1 block">Зарплата (опционально)</label>
+          <div className="grid grid-cols-2 gap-3">
             <div className="relative">
-              <input 
-                value={salary} 
-                onChange={handleSalaryChange} 
-                className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors pr-10" 
-                placeholder="Например: 150 000" 
-              />
-              {salary && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-3 font-medium">₽</span>}
+              <label className="text-sm font-medium mb-1 block">Формат</label>
+              <button onClick={() => { setOpenFormat(!openFormat); setOpenStack(false); setOpenLevel(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">
+                {format} <ChevronDown size={16} className={`transition-transform duration-200 ${openFormat ? "rotate-180" : ""}`} />
+              </button>
+              <AnimatePresence>
+                {openFormat && (
+                  <motion.div initial={{ opacity: 0, y: -5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -5, scale: 0.95 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+                    {FORMATS.map(f => (
+                      <button key={f} onClick={() => { setFormat(f); setOpenFormat(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
+                        {f} {format === f && <Check size={14} className="text-accent" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Зарплата (опционально)</label>
+              <div className="relative">
+                <input 
+                  value={salary} 
+                  onChange={handleSalaryChange} 
+                  className="w-full bg-bg-2 border border-transparent focus:border-accent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-accent transition-colors pr-10" 
+                  placeholder="150 000" 
+                />
+                {salary && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 font-medium text-xs">₽</span>}
+              </div>
             </div>
           </div>
         </div>

@@ -364,13 +364,18 @@ export function CompanyDashboard({
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2 text-[11px] text-ink-3">
+                                                    <div className="flex items-center gap-2 text-[11px] text-ink-3 flex-wrap">
                                                         <span className="px-2 py-1 bg-surface border border-line rounded">
                                                             {job.stack}
                                                         </span>
                                                         <span className="px-2 py-1 bg-surface border border-line rounded">
                                                             {job.level}
                                                         </span>
+                                                        {job.format && (
+                                                            <span className="px-2 py-1 bg-surface border border-line rounded">
+                                                                {job.format}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     {job.salary && (
                                                         <div className="text-[13px] font-bold text-accent flex items-center gap-1">

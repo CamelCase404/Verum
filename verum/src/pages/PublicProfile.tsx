@@ -243,6 +243,41 @@ export function PublicProfile() {
           </div>
           )}
 
+          {/* ВАКАНСИИ КОМПАНИИ */}
+          {user.role === "company" && (
+            <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
+              <h2 className="font-semibold flex items-center gap-2 mb-4">
+                <Briefcase size={18} className="text-accent" /> Вакансии компании
+              </h2>
+              {user.job_postings && user.job_postings.length > 0 ? (
+                <div className="grid gap-3">
+                  {user.job_postings.map((job: any) => (
+                    <div key={job.id} className="p-4 border border-line rounded-xl bg-surface-2 flex flex-col gap-2 hover:border-line-2 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-semibold text-[15px] text-ink">{job.title}</h3>
+                        {job.salary && (
+                          <span className="text-[13px] font-bold text-accent whitespace-nowrap ml-2">
+                            {job.salary}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[13px] text-ink-3 line-clamp-2">{job.description}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {job.stack && <span className="px-2 py-1 bg-surface border border-line rounded text-[11px]">{job.stack}</span>}
+                        {job.level && <span className="px-2 py-1 bg-surface border border-line rounded text-[11px]">{job.level}</span>}
+                        {job.format && <span className="px-2 py-1 bg-surface border border-line rounded text-[11px]">{job.format}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 border border-dashed border-line-2 rounded-xl bg-surface-2">
+                  <p className="text-[13px] text-ink-3">У компании пока нет активных вакансий.</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ПОРТФОЛИО (ПЕРЕМЕЩЕНО ВЫШЕ GITHUB) */}
           {user.projects && user.projects.length > 0 && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
