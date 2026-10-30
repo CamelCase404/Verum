@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { AddProjectModal } from "@/components/modals/AddProjectModal";
+import { ViewProjectModal } from "@/components/modals/ViewProjectModal";
 import { InterviewModal } from "@/components/modals/InterviewModal";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
@@ -59,6 +60,7 @@ export function DeveloperDashboard({
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isInterviewOpen, setIsInterviewOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<any>(null);
+    const [viewingProject, setViewingProject] = useState<any>(null);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [showAllRepos, setShowAllRepos] = useState(false);
 
@@ -590,7 +592,8 @@ export function DeveloperDashboard({
                                 {projects.map((project: any) => (
                                     <div
                                         key={project.id}
-                                        className="group relative border border-line rounded-xl overflow-hidden bg-surface flex flex-col"
+                                        onClick={() => setViewingProject(project)}
+                                        className="group relative border border-line rounded-xl overflow-hidden bg-surface flex flex-col cursor-pointer hover:border-accent/40 transition-colors"
                                     >
                                         <div className="aspect-video bg-surface-2 relative overflow-hidden">
                                             {project.cover || project.image ? (
@@ -856,6 +859,13 @@ export function DeveloperDashboard({
                     <InterviewModal
                         key="interview-modal"
                         onClose={() => setIsInterviewOpen(false)}
+                    />
+                )}
+                {viewingProject && (
+                    <ViewProjectModal
+                        key="view-project-modal"
+                        project={viewingProject}
+                        onClose={() => setViewingProject(null)}
                     />
                 )}
             </AnimatePresence>

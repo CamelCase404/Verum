@@ -30,6 +30,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh }: { onClose: (
       if (res.data.title) setTitle(res.data.title);
       if (res.data.stack) setStack(res.data.stack);
       if (res.data.level) setLevel(res.data.level);
+      if (res.data.format) setFormat(res.data.format); // <-- ДОБАВЛЕНО
       if (res.data.suggested_salary) {
         // Если ИИ вернул число, форматируем его
         const num = parseInt(res.data.suggested_salary.replace(/\D/g, ''));

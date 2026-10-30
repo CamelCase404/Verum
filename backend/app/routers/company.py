@@ -20,7 +20,8 @@ async def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
   "title": "Краткое название (например, 'Senior React Developer')",
   "stack": "Одно из: Frontend, Backend, Fullstack, Mobile, DevOps, Data / ML",
   "level": "Одно из: Junior, Middle, Senior",
-  "suggested_salary": "Примерная рыночная зарплата в рублях (только число, например 200000)"
+  "suggested_salary": "Примерная рыночная зарплата в рублях (только число, например 200000)",
+  "format": "Одно из: Удалённо, Гибрид, Офис. Если в тексте нет информации о формате, верни 'Удалённо'"
 }"""
 
     prompt = f"Текст вакансии:\n{req.description}"
@@ -39,7 +40,8 @@ async def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
             "title": data.get("title", "Разработчик"),
             "stack": data.get("stack", "Frontend"),
             "level": data.get("level", "Middle"),
-            "suggested_salary": data.get("suggested_salary", "")
+            "suggested_salary": data.get("suggested_salary", ""),
+            "format": data.get("format", "Удалённо")
         }
     except Exception as e:
         # Если ИИ ошибся, отдаем дефолтные значения
