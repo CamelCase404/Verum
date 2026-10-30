@@ -49,7 +49,7 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
         prompt += "Задай СЛЕДУЮЩИЙ новый вопрос. Верни ТОЛЬКО текст вопроса."
 
     history = _get_history(it)
-    raw = await ask_chat(sys_prompt, history, prompt).strip()
+    raw = (await ask_chat(sys_prompt, history, prompt)).strip()
     return _clean_text(raw)
 
 async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
@@ -58,7 +58,7 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
     
     prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Верни ТОЛЬКО число. Не додумывай за кандидата!"
     history = _get_history(it)
-    raw = await ask_chat(sys_prompt, history, prompt).strip()
+    raw = (await ask_chat(sys_prompt, history, prompt)).strip()
     match = re.search(r"\d+", raw)
     if match:
         score = int(match.group())
@@ -82,7 +82,7 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     )
     
     history = _get_history(it)
-    raw = await ask_chat(sys_prompt, history, prompt).strip()
+    raw = (await ask_chat(sys_prompt, history, prompt)).strip()
 
     if "|" in raw:
         parts = raw.split("|", 1)
