@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, Building2, Code2, ShieldCheck, ChevronDown, SlidersHorizontal, X, Check } from "lucide-react";
 import { authApi } from "@/api";
+import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,6 +20,7 @@ const STACK_LANGS: Record<string, string[]> = {
 const ALL_LANGS = ["html", "css", "js", "ts", "react", "vue", "python", "go", "java", "csharp", "kotlin", "swift", "bash", "sql", "node"];
 
 export function SearchResults() {
+    const user = useAppStore((s) => s.user);
     const [params, setParams] = useSearchParams();
     const navigate = useNavigate();
     
@@ -274,8 +276,11 @@ export function SearchResults() {
                                             </div>
                                             <div className="text-[13px] text-ink-3 mb-2 truncate">{cand.stack} • {cand.language}</div>
                                             <div className="flex items-center gap-4 text-[12px]">
+                                                {/* Показываем "Совпадение" только если ищет компания */}
+                                            {user?.role === "company" && (
                                                 <span className="text-ink-2">Совпадение: <b className="text-accent">{cand.match_score}%</b></span>
-                                                <span className="text-ink-3">Тест: {cand.total_score}/100</span>
+                                            )}
+                                            <span className="text-ink-3">Балл теста: <b className="text-ink-2">{cand.total_score}/100</b></span>
                                             </div>
                                         </div>
                                         <div className="text-right shrink-0">

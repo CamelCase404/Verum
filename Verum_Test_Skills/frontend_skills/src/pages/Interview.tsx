@@ -42,6 +42,8 @@ export default function Interview({
 
     const [answer, setAnswer] = useState("");
     const [busy, setBusy] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadText, setUploadText] = useState("Отправляем видео...");
     const [finished, setFinished] = useState(false);
     const [failed, setFailed] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -498,6 +500,16 @@ export default function Interview({
                 </p>
             </div>
         );
+
+    if (isUploading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-page p-4">
+                <Loader2 size={48} className="animate-spin text-accent mb-6" />
+                <h2 className="text-2xl font-bold text-ink mb-2">Завершаем собеседование</h2>
+                <p className="text-ink-3 text-lg animate-pulse">{uploadText}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-6xl w-full overflow-hidden mx-auto px-4 py-10 select-none relative">

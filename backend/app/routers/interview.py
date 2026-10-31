@@ -4,7 +4,7 @@ import json
 import re
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from ..auth import UserDB, get_current_user, utcnow_naive
 from ..gigachat_client import ask_chat, ask_text
@@ -278,11 +278,11 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
     return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], question=q)
 
 class _Report(BaseModel):
-    summary: str
-    stages: list[StageScore]
-    strengths: list[str]
-    gaps: list[str]
-    recommendation: str
+    summary: str = "Резюме отсутствует."
+    stages: list[StageScore] = Field(default_factory=list)
+    strengths: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    recommendation: str = "insufficient_evidence"
     competency_architecture: int | None = None
     competency_code_understanding: int | None = None
     competency_prompting: int | None = None

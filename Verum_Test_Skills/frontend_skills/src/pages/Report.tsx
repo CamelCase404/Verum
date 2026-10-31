@@ -52,7 +52,7 @@ export default function Report({
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-10 animate-in fade-in duration-500">
+        <div className="max-w-5xl mx-auto px-4 py-10 animate-in fade-in duration-500">
             <div className="bg-card border border-divider rounded-[22px] shadow-card p-8 space-y-8">
                 <header className="text-center border-b border-divider pb-6">
                     <h1 className="text-[28px] font-bold text-ink">Результат интервью</h1>
