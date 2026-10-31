@@ -83,7 +83,14 @@ export function AdminDashboard() {
               </div>
 
               {activeVideo === p.id.toString() ? (
-                <video src={`${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}${p.video_url}`} controls className="w-full rounded-xl bg-black aspect-video" />
+                p.video_url ? (
+                  <video src={`${import.meta.env.VITE_API_URL || "https://api.verumskills.ru"}${p.video_url}`} controls className="w-full rounded-xl bg-black aspect-video" />
+                ) : (
+                  <div className="w-full rounded-xl bg-surface-2 border border-dashed border-line-2 aspect-video flex flex-col items-center justify-center text-ink-3">
+                    <XCircle size={32} className="mb-2 opacity-50" />
+                    <span>Видео не загружено или не привязано</span>
+                  </div>
+                )
               ) : (
                 <button
                   onClick={() => setActiveVideo(p.id.toString())}
