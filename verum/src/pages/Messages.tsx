@@ -210,7 +210,9 @@ export function Messages() {
 
             <div className="p-2 sm:p-3 bg-surface border-t border-line flex gap-2 items-end shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
               <button 
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()} 
+                tabIndex={-1}
                 className="p-2.5 text-ink-3 hover:text-accent transition-colors bg-bg-2 rounded-xl"
                 title="Прикрепить фото"
               >
@@ -229,8 +231,10 @@ export function Messages() {
               />
               
               <button 
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={sendMessage} 
                 disabled={isUploading || (!text.trim() && !selectedImage)} 
+                tabIndex={-1}
                 className="p-2.5 bg-accent text-white rounded-xl hover:bg-accent-2 transition-colors disabled:opacity-50 flex-shrink-0"
               >
                 {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}

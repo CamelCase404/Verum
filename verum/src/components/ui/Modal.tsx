@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -11,20 +11,23 @@ interface ModalProps {
 }
 
 export function Modal({ children, onClose, size = "md" }: ModalProps) {
+    const savedScrollY = useRef(0);
     useEffect(() => {
-        const scrollY = window.scrollY;
+        savedScrollY.current = window.scrollY;
         document.body.style.position = 'fixed';
-        document.body.style.top = `-${scrollY}px`;
+        document.body.style.top = `-${savedScrollY.current}px`;
         document.body.style.width = '100%';
         document.body.style.overflow = 'hidden';
         
         return () => {
-            const scrollY = document.body.style.top;
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.width = '';
             document.body.style.overflow = '';
-            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            // requestAnimationFrame — чтобы браузер успел пересчитать layout
+            requestAnimationFrame(() => {
+                window.scrollTo(0, savedScrollY.current);
+            });
         };
     }, []);
 
