@@ -36,6 +36,7 @@ export function PublicProfile() {
       setUser(null);
       return;
     }
+    console.log("[PublicProfile] CALLING getPublicUser with id =", id, "type =", typeof id);
     authApi.getPublicUser(id as string)
       .then(res => { setUser(res.data); setLoading(false); })
       .catch((e: any) => {
