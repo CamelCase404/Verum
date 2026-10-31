@@ -49,6 +49,14 @@ function Layout() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
+    // Сброс блокировки скролла при навигации (если модалка не сняла)
+    if (location.pathname !== "/messages") {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
   }, [location.pathname]);
 
   return (
