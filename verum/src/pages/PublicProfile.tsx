@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
 import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
 import { ViewJobModal } from "@/components/modals/ViewJobModal";
-import { Modal } from "@/components/ui/Modal";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -44,6 +43,34 @@ export function PublicProfile() {
       });
   }, [id]);
 
+
+  // Скролл-лок для модалок (проект, вакансия)
+  useEffect(() => {
+    const isOpen = !!selectedProject || !!selectedJob;
+    if (!isOpen) return;
+
+    const scrollY = window.scrollY;
+    const origPos = document.body.style.position;
+    const origTop = document.body.style.top;
+    const origWidth = document.body.style.width;
+    const origOverflow = document.body.style.overflow;
+
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.position = origPos;
+      document.body.style.top = origTop;
+      document.body.style.width = origWidth;
+      document.body.style.overflow = origOverflow;
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+        requestAnimationFrame(() => window.scrollTo(0, scrollY));
+      });
+    };
+  }, [selectedProject, selectedJob]);
   if (loading) return <div className="p-10 text-center text-ink">Загрузка профиля...</div>;
   if (!user) return <div className="p-10 text-center text-ink">Пользователь не найден</div>;
 
@@ -408,37 +435,21 @@ export function PublicProfile() {
 
       {/* МОДАЛКА ПРОСМОТРА ПРОЕКТА */}
       {selectedProject && (
-        <Modal onClose={() => setSelectedProject(null)} size="lg">
-          <div className="flex flex-col max-h-[85vh]">
-            <div className="p-4 border-b border-line bg-surface-2 rounded-t-2xl">
-              <h2 className="font-bold text-lg pr-8">{selectedProject.title}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-surface border border-line rounded-2xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+            <div className="p-4 border-b border-line flex justify-between items-center bg-surface-2">
+              <h2 className="font-bold text-lg">{selectedProject.title}</h2>
+              <button onClick={() => setSelectedProject(null)} className="text-ink-3 hover:text-ink p-1"><X size={20} /></button>
             </div>
             
-            <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
-              <p className="text-ink-2 text-sm whitespace-pre-line [overflow-wrap:anywhere]">{selectedProject.description}</p>
+            <div className="p-6 overflow-y-auto space-y-6">
+              <p className="text-ink-2 text-sm whitespace-pre-line">{selectedProject.description}</p>
               
               {selectedProject.cover && (
                 <div className="rounded-xl overflow-hidden border border-line bg-bg-2">
                   <img src={selectedProject.cover} alt="Cover" className="w-full h-auto max-h-[400px] object-contain" />
                 </div>
               )}
-              
-              {selectedProject.images && selectedProject.images.length > 1 && (
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Дополнительные фото</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {selectedProject.images.slice(1).map((img: string, idx: number) => (
-                      <a href={img} target="_blank" rel="noreferrer" key={idx} className="rounded-lg overflow-hidden border border-line hover:opacity-80 transition-opacity aspect-video">
-                        <img src={img} alt={`Фото ${idx+1}`} className="w-full h-full object-cover" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </Modal>
-      )}
               
               {selectedProject.images && selectedProject.images.length > 1 && (
                 <div>
