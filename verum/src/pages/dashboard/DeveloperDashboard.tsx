@@ -215,7 +215,7 @@ export function DeveloperDashboard({
 
             <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
                 {/* ЛЕВАЯ КОЛОНКА */}
-                <div className="space-y-4 md:space-y-6">
+                <div className="space-y-4 md:space-y-6 min-w-0">
                     <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group">
                         <button
                             onClick={() => setIsEditOpen(true)}
@@ -251,7 +251,7 @@ export function DeveloperDashboard({
                             <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
                                 <AlignLeft size={12} /> О себе
                             </div>
-                            <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words">
+                            <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words [overflow-wrap:anywhere]">
                                 {backendUser?.bio ||
                                     "Добавьте описание своего опыта в настройках профиля."}
                             </p>
@@ -384,7 +384,7 @@ export function DeveloperDashboard({
                 </div>
 
                 {/* ПРАВАЯ КОЛОНКА */}
-                <div className="space-y-4 md:space-y-6">
+                <div className="space-y-4 md:space-y-6 min-w-0">
                     {/* НАВЫКИ И АНАЛИЗ ИИ */}
                     <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4 md:mb-6">

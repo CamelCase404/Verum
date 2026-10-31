@@ -50,7 +50,7 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
 
     prompt = f"Стадия: {stage}. {stage_desc}\nУже заданные вопросы:\n{prev_q_str}\n\n"
     if stage in (2, 4) and prev_code_context:
-        prompt += f"Код с предыдущего этапа:\n{prev_code_context[:4000]}\n\nКандидат написал промпт:\n'{prev_answer}'\n\nПридумай проблему (нагрузка/падение) и спроси, как исправить именно этот код. Верни ТОЛЬКО текст вопроса."
+        prompt += f"Код с предыдущего этапа:\n{prev_code_context[:8000]}\n\nКандидат написал промпт:\n'{prev_answer}'\n\nПридумай проблему из реального продакшена и спроси, как исправить именно этот код. Верни ТОЛЬКО текст вопроса."
     else:
         prompt += "Задай СЛЕДУЮЩИЙ новый вопрос. Верни ТОЛЬКО текст вопроса."
 
@@ -64,11 +64,19 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
 
     prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Верни ТОЛЬКО число. Не додумывай за кандидата!"
     history = _get_history(it)
-    raw = (await ask_chat(sys_prompt, history, prompt)).strip()
-    match = re.search(r"\d+", raw)
-    if match:
-        score = int(match.group())
-        return max(0, min(100, score))
+    raw = (await ask_chat(sys_prompt, history, prompt, temperature=0.0)).strip()
+
+    # Приоритетные паттерны — берём ПОСЛЕДНЕЕ найденное число
+    patterns = [
+        r"(?:оценка|балл|score)\s*[:\-]?\s*(\d{1,3})",
+        r"(\d{1,3})\s*(?:/\s*100|из\s*100|баллов?)",
+        r"\b(\d{1,3})\b",
+    ]
+    for pat in patterns:
+        matches = re.findall(pat, raw, re.IGNORECASE)
+        if matches:
+            score = int(matches[-1])
+            return max(0, min(100, score))
     return 40
 
 async def _generate_code_review_task(it) -> tuple[str, str]:
@@ -224,7 +232,7 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
 
     elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:
         it.stage = 2
-        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10), "")
+        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10 and t.content != "Кандидат пропустил вопрос."), "") or "(кандидат пропустил Code Review)"
         prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
         q = await _generate_pure_question(2, it, past_questions, prev_code, prev_prompt)
         it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
@@ -240,7 +248,7 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
 
     elif it.stage == 3 and answers_on_stage >= STAGE0_QUESTIONS + 3:
         it.stage = 4
-        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10), "")
+        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10 and t.content != "Кандидат пропустил вопрос."), "") or "(кандидат пропустил Code Review)"
         prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
         q = await _generate_pure_question(4, it, past_questions, prev_code, prev_prompt)
         it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
@@ -399,8 +407,17 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
     comp_code = stage_avg([1, 3])
     comp_adapt = stage_avg([2, 4])
     # prompting/soft — оставляем от GigaChat (их из score не вывести)
-    comp_prompt = parsed.competency_prompting if parsed.competency_prompting is not None else total
-    comp_soft = parsed.competency_soft_skills if parsed.competency_soft_skills is not None else total
+    # Валидация: если GigaChat вернул вне 0-100 или None → fallback на total
+    def _valid_or(x, fallback):
+        if x is None: return fallback
+        try:
+            xi = int(x)
+            return xi if 0 <= xi <= 100 else fallback
+        except (TypeError, ValueError):
+            return fallback
+
+    comp_prompt = _valid_or(parsed.competency_prompting, total)
+    comp_soft = _valid_or(parsed.competency_soft_skills, total)
 
     return ReportResponse(
         interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,

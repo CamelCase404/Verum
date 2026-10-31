@@ -135,7 +135,7 @@ export function PublicProfile() {
               <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center justify-center gap-1.5">
                 <AlignLeft size={12} /> О себе
               </div>
-              <p className="text-sm text-ink-2 leading-relaxed">{user.bio}</p>
+              <p className="text-sm text-ink-2 leading-relaxed break-words [overflow-wrap:anywhere]">{user.bio}</p>
             </div>
           )}
 

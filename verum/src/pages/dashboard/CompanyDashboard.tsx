@@ -258,7 +258,7 @@ export function CompanyDashboard({
             </div>
 
             <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
-                <div className="space-y-4 md:space-y-6">
+                <div className="space-y-4 md:space-y-6 min-w-0">
                     <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group">
                         <button
                             onClick={() => setIsEditOpen(true)}
@@ -287,7 +287,7 @@ export function CompanyDashboard({
                                 </p>
                             </div>
                         </div>
-                        <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words mb-4 md:mb-6">
+                        <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words [overflow-wrap:anywhere] mb-4 md:mb-6">
                             {backendUser?.bio ||
                                 "Добавьте описание вашей компании."}
                         </p>
@@ -313,7 +313,7 @@ export function CompanyDashboard({
                     </div>
                 </div>
 
-                <div className="space-y-4 md:space-y-6">
+                <div className="space-y-4 md:space-y-6 min-w-0">
                     <div className="flex bg-surface-2 border border-line rounded-xl p-1">
                         <button
                             onClick={() => setActiveTab("jobs")}
