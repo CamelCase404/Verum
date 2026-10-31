@@ -83,30 +83,17 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
     
     if it.level.lower() == "junior":
-        difficulty = (
-            "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior. "
-            "Подумай, какие типичные ошибки новичков бывают именно в стеке {stack} на языке {langs}. "
-            "Выбирай РАЗНООБРАЗНО: логика, обработка данных, работа с API, память, безопасность или другое."
-        )
+        difficulty = "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior в стеке {stack} на языке {langs}. Разнообразь: логика, API, память, безопасность."
     elif it.level.lower() == "middle":
-        difficulty = (
-            "Добавь ОДНУ-ДВЕ ошибки уровня Middle. "
-            "Подумай, какие проблемы бывают у разработчиков среднего уровня в стеке {stack} на языке {langs}. "
-            "Выбирай РАЗНООБРАЗНО: производительность, архитектура, обработка ошибок, безопасность, кэширование, работа с БД или другое."
-        )
+        difficulty = "Добавь ОДНУ-ДВЕ ошибки уровня Middle в стеке {stack} на языке {langs}. Разнообразь: производительность, архитектура, БД."
     else:
-        difficulty = (
-            "Добавь ОДНУ-ДВЕ СЛОЖНЫЕ ошибки уровня Senior. "
-            "Подумай, какие проблемы характерны для senior-разработчиков в стеке {stack} на языке {langs}. "
-            "Выбирай РАЗНООБРАЗНО: архитектурные ошибки, утечки, гонки, масштабирование, безопасность или другое. "
-            "Не повторяй одни и те же паттерны."
-        )
+        difficulty = "Добавь ОДНУ-ДВЕ СЛОЖНЫЕ ошибки уровня Senior в стеке {stack} на языке {langs}. Разнообразь: архитектура, гонки, масштабирование."
     
     diff_text = difficulty.format(stack=it.stack_id, langs=it.language_id)
 
     prompt = (
         f"Сгенерируй РОВНО ОДИН блок кода СТРОГО на одном из этих языков: {it.language_id}.\n"
-        f"ОБЯЗАТЕЛЬНО используй самые современные и актуальные библиотеки/фреймворки для этого стека.\n"
+        f"ОБЯЗАТЕЛЬНО используй самые современные библиотеки/фреймворки для {it.stack_id}.\n"
         f"{diff_text}\n"
         f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ НИ ОДНОГО КОММЕНТАРИЯ (убери //, #, /* */ и т.д.).\n"
         f"КРИТИЧЕСКОЕ ПРАВИЛО 2: НИКАКИХ подсказок, списков ошибок или пояснений в тексте или коде.\n"
@@ -122,35 +109,40 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt)).strip()
 
-    # Убираем markdown-теги
+    # 1. Убираем markdown-теги
     for tag in ["```typescript", "```javascript", "```python", "```java", "```go", "```html", "```css", "```ts", "```js", "```"]:
         raw = raw.replace(tag, "")
 
-    if "|" in raw:
-        parts = raw.split("|", 1)
-        task_text = parts[0].replace("РАЗДЕЛИТЕЛЬ", "").strip()
+    # 2. Делим на текст задания и код
+    task_text = "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления."
+    
+    if "|РАЗДЕЛИТЕЛЬ|" in raw:
+        parts = raw.split("|РАЗДЕЛИТЕЛЬ|")
+        code = parts[1].strip()
+    elif "|" in raw:
+        # Если ИИ написал просто |
+        parts = raw.split("|")
         code = parts[1].strip()
     else:
-        task_text = "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления."
         code = raw
 
-    # БРОНЕБОЙНАЯ ОЧИСТКА КОДА ОТ КОММЕНТАРИЕВ
-    code = re.sub(r"(?<!http:)(?<!https:)\/\/.*", "", code) # Удаляет // но оставляет http://
-    code = re.sub(r"(?m)^\s*#.*$", "", code) # Удаляет строки, начинающиеся с #
-    code = re.sub(r"(?<=\s)#(?!\w{3,6}\b).*", "", code) # Удаляет инлайн # (но не CSS-цвета типа #fff)
+    # 3. БРОНЕБОЙНАЯ ОЧИСТКА ОТ СПОЙЛЕРОВ
+    # Если ИИ написал: "1. Ошибка... 2. Ошибка..." в конце, отрезаем это
+    code = re.split(r'\n(?=\d+\.)', code)[0].strip()
+    # Если написал "Типовые ошибки" или "Ошибки:" — отрезаем
+    code = re.split(r'(?i)Типовые ошибки|Ошибки:|Проблемы:|Баг:', code)[0].strip()
+
+    # 4. Убираем комментарии
+    code = re.sub(r"(?<!http:)(?<!https:)\/\/.*", "", code)
+    code = re.sub(r"(?m)^\s*#.*$", "", code)
+    code = re.sub(r"(?<=\s)#(?!\w{3,6}\b).*", "", code)
     code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
     code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
-    
-    # Убираем фразы-подсказки (если ИИ их вставил как текст)
-    for hint in ["Ошибка:", "Баг:", "Проблема:", "Потенциальная ошибка:", "Уязвимость:", "Плохо:", "Реалистичная ошибка", "Пример ошибки"]:
-        code = re.sub(rf"(?i){hint}[^\n]*", "", code)
-    
     code = re.sub(r"\n\s*\n", "\n", code)
-    
+
     return task_text, code.strip()
 
 
-@router.post("/start", response_model=StartInterviewResponse)
 async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
     if user.role != "developer":
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
