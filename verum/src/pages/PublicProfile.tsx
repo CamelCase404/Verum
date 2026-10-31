@@ -449,7 +449,7 @@ function ChatHistoryBlock({ messages }: { messages: Array<{ role: string; conten
   if (!messages || messages.length === 0) return null;
 
   return (
-    <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm mt-6">
+    <div className="bg-surface border border-line rounded-2xl p-4 sm:p-6 shadow-sm mt-6 w-full max-w-full overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between text-left"
@@ -474,15 +474,15 @@ function ChatHistoryBlock({ messages }: { messages: Array<{ role: string; conten
             return (
               <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed min-w-0 ${
                     isUser
                       ? "bg-accent text-white"
                       : "bg-surface-2 border border-line text-ink-2"
                   }`}
                 >
-                  <div className="whitespace-pre-wrap break-words">{textPart}</div>
+                  <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{textPart}</div>
                   {codePart && (
-                    <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-3 rounded-lg overflow-x-auto text-[11px] font-mono whitespace-pre">
+                    <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-3 rounded-lg overflow-x-auto text-[11px] font-mono whitespace-pre max-w-full custom-scrollbar">
                       <code>{codePart}</code>
                     </pre>
                   )}

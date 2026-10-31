@@ -489,7 +489,7 @@ export function DeveloperDashboard({
                                 )}
 
                                 {skills.chat_history && skills.chat_history.length > 0 && (
-                                    <details className="mt-4 bg-surface-2 border border-line rounded-xl p-4">
+                                    <details className="mt-4 bg-surface-2 border border-line rounded-xl p-4 w-full max-w-full overflow-hidden">
                                         <summary className="cursor-pointer text-[13px] font-semibold text-ink flex items-center justify-between">
                                             <span className="flex items-center gap-2">
                                                 <Brain size={14} className="text-accent" />
@@ -506,10 +506,10 @@ export function DeveloperDashboard({
                                                 const codePart = codeMatch ? codeMatch[1] : "";
                                                 return (
                                                     <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                                                        <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed ${isUser ? "bg-accent text-white" : "bg-surface border border-line text-ink-2"}`}>
-                                                            <div className="whitespace-pre-wrap break-words">{textPart}</div>
+                                                        <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed min-w-0 ${isUser ? "bg-accent text-white" : "bg-surface border border-line text-ink-2"}`}>
+                                                            <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{textPart}</div>
                                                             {codePart && (
-                                                                <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-2.5 rounded-lg overflow-x-auto text-[10px] font-mono whitespace-pre"><code>{codePart}</code></pre>
+                                                                <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-2.5 rounded-lg overflow-x-auto text-[10px] font-mono whitespace-pre max-w-full custom-scrollbar"><code>{codePart}</code></pre>
                                                             )}
                                                         </div>
                                                     </div>
