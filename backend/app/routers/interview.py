@@ -81,7 +81,7 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
 
 async def _generate_code_review_task(it) -> tuple[str, str]:
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
-
+    
     if it.level.lower() == "junior":
         difficulty = (
             "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior. "
@@ -101,7 +101,7 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
             "Выбирай РАЗНООБРАЗНО: архитектурные ошибки, утечки, гонки, масштабирование, безопасность или другое. "
             "Не повторяй одни и те же паттерны."
         )
-
+    
     diff_text = difficulty.format(stack=it.stack_id, langs=it.language_id)
 
     prompt = (
@@ -111,50 +111,45 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
         f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ НИ ОДНОГО КОММЕНТАРИЯ (убери //, #, /* */ и т.д.).\n"
         f"КРИТИЧЕСКОЕ ПРАВИЛО 2: НИКАКИХ подсказок, списков ошибок или пояснений в тексте или коде.\n"
         f"КРИТИЧЕСКОЕ ПРАВИЛО 3: Выдай ТОЛЬКО ОДИН кусок кода. Никаких двух файлов.\n"
-        f"ВЕРНИ СТРОГО: 'Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления', затем символ '|', затем код."
+        f"ФОРМАТ ОТВЕТА ДОЛЖЕН БЫТЬ СТРОГО ТАКИМ:\n"
+        f"Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления\n"
+        f"|РАЗДЕЛИТЕЛЬ|\n"
+        f"```{it.language_id}\n"
+        f"твой код без комментариев\n"
+        f"```"
     )
-
+    
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt)).strip()
 
+    # Убираем markdown-теги
+    for tag in ["```typescript", "```javascript", "```python", "```java", "```go", "```html", "```css", "```ts", "```js", "```"]:
+        raw = raw.replace(tag, "")
+
     if "|" in raw:
         parts = raw.split("|", 1)
+        task_text = parts[0].replace("РАЗДЕЛИТЕЛЬ", "").strip()
         code = parts[1].strip()
+    else:
+        task_text = "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления."
+        code = raw
 
-        # Очистка от комментариев, НЕ ломая строки и URL.
-        # 1. Блочные /* ... */ и <!-- ... --> — безопасно
-        code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
-        code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
-        # 2. Python/Bash # — только если это начало строки или после пробела
-        #    (не URL-фрагмент, не #!/bin/bash)
-        code = re.sub(r"(?m)^\s*#(?!/).*$", "", code)
-        code = re.sub(r"(?m)(?<=\s)#(?!/)(?![0-9a-fA-F]{3,8}\b).*$", "", code)
-        # 3. JS/CSS // — только если после него пробел/конец строки
-        #    (не https://, не //cdn)
-        code = re.sub(r"(?m)(?<![\w:])//\s.*$", "", code)
-        # 4. SQL -- — только в начале строки или после пробела
-        code = re.sub(r"(?m)^\s*--.*$", "", code)
-        code = re.sub(r"(?m)\s--\s.*$", "", code)
-        code = re.sub(r"\n\s*\n", "\n", code)
+    # БРОНЕБОЙНАЯ ОЧИСТКА КОДА ОТ КОММЕНТАРИЕВ
+    code = re.sub(r"(?<!http:)(?<!https:)\/\/.*", "", code) # Удаляет // но оставляет http://
+    code = re.sub(r"(?m)^\s*#.*$", "", code) # Удаляет строки, начинающиеся с #
+    code = re.sub(r"(?<=\s)#(?!\w{3,6}\b).*", "", code) # Удаляет инлайн # (но не CSS-цвета типа #fff)
+    code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
+    code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
+    
+    # Убираем фразы-подсказки (если ИИ их вставил как текст)
+    for hint in ["Ошибка:", "Баг:", "Проблема:", "Потенциальная ошибка:", "Уязвимость:", "Плохо:", "Реалистичная ошибка", "Пример ошибки"]:
+        code = re.sub(rf"(?i){hint}[^\n]*", "", code)
+    
+    code = re.sub(r"\n\s*\n", "\n", code)
+    
+    return task_text, code.strip()
 
-        # Убираем фразы-подсказки если ИИ их вставил
-        for hint in ["Ошибка:", "Баг:", "Проблема:", "Потенциальная ошибка:", "Уязвимость:", "Плохо:"]:
-            code = code.replace(hint, "")
 
-        # Если ИИ выдал два блока ```, берём только первый
-        if "```" in code:
-            code_blocks = [b for b in code.split("```") if b.strip() and not b.strip().startswith("language")]
-            if code_blocks:
-                code = code_blocks[0].strip()
-
-        if "\n" not in code:
-            code = code.replace("{", "{\n").replace("}", "\n}").replace(";", ";\n")
-
-        return parts[0].strip(), code.strip()
-
-    return "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления.", raw
-
-@router.post("/start", response_model=StartInterviewResponse)
 async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
     if user.role != "developer":
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
@@ -388,11 +383,11 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
 
     # ─── ГРЕЙД — ИЗ ПРОГРАММНОГО БАЛЛА + ОГРАНИЧЕНИЕ ПО ВЫБРАННОМУ УРОВНЮ ───
     initial_level = it.level.lower()
-    if total < 40:
+    if total < 15:
         grade = "Reject"
-    elif total <= 60:
+    elif total <= 50:
         grade = "Junior"
-    elif total <= 80:
+    elif total <= 75:
         grade = "Middle"
     else:
         grade = "Senior"
