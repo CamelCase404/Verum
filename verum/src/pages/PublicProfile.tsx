@@ -29,11 +29,21 @@ export function PublicProfile() {
   };
 
   useEffect(() => {
-    if (!id) return;
+    console.log("[PublicProfile] useEffect id =", JSON.stringify(id), "URL =", window.location.pathname);
+    if (!id || id.trim() === "") {
+      console.warn("[PublicProfile] пустой id — показываю ошибку, не редирект");
+      setLoading(false);
+      setUser(null);
+      return;
+    }
     authApi.getPublicUser(id as string)
       .then(res => { setUser(res.data); setLoading(false); })
-      .catch(() => { setLoading(false); navigate("/"); });
-  }, [id, navigate]);
+      .catch((e: any) => {
+        console.error("[PublicProfile] getPublicUser error:", e);
+        setLoading(false);
+        setUser(null);
+      });
+  }, [id]);
 
   if (loading) return <div className="p-10 text-center text-ink">Загрузка профиля...</div>;
   if (!user) return <div className="p-10 text-center text-ink">Пользователь не найден</div>;
