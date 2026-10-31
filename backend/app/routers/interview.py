@@ -204,9 +204,9 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
     past_questions = [t.content for t in it.turns if t.role == "assistant"]
     last_question = past_questions[-1] if past_questions else ""
 
-    it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent, score=score))
-
     score = await _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
+
+    it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent, score=score))
 
     if not is_skip and score <= 5:
         it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме (бред или спам)."
