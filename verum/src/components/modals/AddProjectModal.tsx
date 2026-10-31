@@ -85,7 +85,7 @@ export function AddProjectModal({
             : p
         );
         await authApi.updateProfile({ projects: updatedProjects });
-        toast("Проект обновлен");
+        toast("Проект обновлен", "success");
       } else {
         // Создание
         const newProject = { 
@@ -96,7 +96,7 @@ export function AddProjectModal({
           images: finalImages
         };
         await authApi.updateProfile({ projects: [...currentProjects, newProject] });
-        toast("Проект добавлен");
+        toast("Проект добавлен", "success");
       }
 
       onRefresh();

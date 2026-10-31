@@ -31,7 +31,7 @@ export function EditCompanyModal({
         finalAvatarUrl = uploadRes.url;
       }
       await authApi.updateProfile({ bio, website, avatar_url: finalAvatarUrl });
-      toast("Профиль обновлен");
+      toast("Профиль обновлен", "success");
       onRefresh();
       onClose();
     } catch (e: any) {

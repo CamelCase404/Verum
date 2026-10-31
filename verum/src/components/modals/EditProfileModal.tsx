@@ -36,7 +36,7 @@ export function EditProfileModal({
       // 2. Сохраняем остальные данные (био)
       await authApi.updateProfile({ bio });
       
-      toast("Профиль обновлен");
+      toast("Профиль обновлен", "success");
       onRefresh();
       onClose();
     } catch (e: any) {
