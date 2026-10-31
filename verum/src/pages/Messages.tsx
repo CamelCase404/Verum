@@ -21,6 +21,8 @@ export function Messages() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!getToken()) { navigate("/login"); return; }
@@ -46,8 +48,8 @@ export function Messages() {
         // Скроллим вниз ТОЛЬКО если пользователь находится внизу
         if (isAtBottomRef.current) {
             setTimeout(() => {
-              if (messagesEndRef.current) {
-                messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              if (messagesContainerRef.current) {
+                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
               }
             }, 100);
         }
@@ -94,7 +96,16 @@ export function Messages() {
       isAtBottomRef.current = true; // Принудительно скроллим при отправке
       const res = await chatApi.getMessages(activeConv.id);
       setMessages(res.data);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
+      
+      // Возвращаем фокус, чтобы клавиатура не закрывалась
+      textareaRef.current?.focus();
+      
+      // Скроллим сам контейнер, а не window
+      setTimeout(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+      }, 100);
     } catch (e: any) { 
       toast(e.message || "Ошибка отправки"); 
     } finally {
@@ -151,6 +162,7 @@ export function Messages() {
             </div>
 
             <div 
+              ref={messagesContainerRef}
               className="flex-1 overflow-y-auto p-4 space-y-4"
               onScroll={(e) => {
                   const target = e.currentTarget;
@@ -201,6 +213,7 @@ export function Messages() {
               <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
               
               <textarea 
+                ref={textareaRef}
                 value={text} 
                 onChange={e => setText(e.target.value)} 
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
