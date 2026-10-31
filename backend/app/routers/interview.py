@@ -150,6 +150,7 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     return task_text, code.strip()
 
 
+@router.post("/start", response_model=StartInterviewResponse)
 async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
     if user.role != "developer":
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
