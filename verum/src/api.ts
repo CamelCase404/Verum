@@ -38,7 +38,7 @@ export const authApi = {
 
   getMe: () => request("/api/auth/me"),
 
-  getPublicUser: (id: number | string) => request(`/api/auth/user/`),
+  getPublicUser: (id: number | string) => request(`/api/auth/user/${id}`),
 
   uploadAvatar: async (file: File) => {
     const formData = new FormData();

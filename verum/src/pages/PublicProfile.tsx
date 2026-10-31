@@ -29,9 +29,7 @@ export function PublicProfile() {
   };
 
   useEffect(() => {
-    console.log("[PublicProfile] useEffect id =", JSON.stringify(id), "URL =", window.location.pathname);
     if (!id || id.trim() === "") {
-      console.warn("[PublicProfile] пустой id — показываю ошибку, не редирект");
       setLoading(false);
       setUser(null);
       return;
@@ -40,7 +38,6 @@ export function PublicProfile() {
     authApi.getPublicUser(id as string)
       .then(res => { setUser(res.data); setLoading(false); })
       .catch((e: any) => {
-        console.error("[PublicProfile] getPublicUser error:", e);
         setLoading(false);
         setUser(null);
       });
