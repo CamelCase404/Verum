@@ -204,7 +204,7 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
     past_questions = [t.content for t in it.turns if t.role == "assistant"]
     last_question = past_questions[-1] if past_questions else ""
 
-    it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent))
+    it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent, score=score))
 
     score = await _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
 
@@ -303,56 +303,136 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
             rejected=True, reject_reason=it.reject_reason
         )
 
+    # ─── ПРОГРАММНЫЙ ПОДСЧЁТ НА ОСНОВЕ РЕАЛЬНЫХ ОТВЕТОВ ───
+    user_turns = [t for t in it.turns if t.role == "user"]
+    total_answers = len(user_turns)
+    skips = sum(1 for t in user_turns if t.content == "Кандидат пропустил вопрос.")
+    
+    # Собираем score по каждому ответу (не считая пропуски)
+    # Но пропуск тоже даёт score=0 — считаем его в average, чтобы он тянул вниз
+    all_scores = [getattr(t, "score", None) for t in user_turns]
+    valid_scores = [sc for sc in all_scores if sc is not None]
+
+    # Считаем средний балл за ВСЕ ответы (включая пропуски как 0)
+    if valid_scores:
+        # заменяем None на 0 (для старых turn'ов без score)
+        scores_normalized = [sc if sc is not None else 0 for sc in all_scores]
+        avg_score = sum(scores_normalized) / len(scores_normalized)
+    else:
+        avg_score = 0
+
+    # ─── ПРОГРАММНЫЕ КОМПЕТЕНЦИИ ПО СТАДИЯМ ───
+    # Собираем score по каждой стадии (для стадий 1,2,3,4 по одному ответу)
+    def stage_avg(stages: list[int]) -> int:
+        stage_scores = [
+            (getattr(t, "score", None) or 0)
+            for i, t in enumerate(it.turns)
+            if t.role == "user" and _turn_stage(it.turns, i) in stages
+        ]
+        if not stage_scores:
+            return 0
+        return int(sum(stage_scores) / len(stage_scores))
+
+    # ─── ПРОГРАММНЫЙ REJECT ───
+    # Если пропущено >= 50% вопросов ИЛИ все — принудительный Reject
+    forced_reject = False
+    reject_reason = None
+    if total_answers > 0:
+        skip_ratio = skips / total_answers
+        if skips == total_answers:
+            forced_reject = True
+            reject_reason = "Все вопросы пропущены."
+        elif skip_ratio >= 0.5:
+            forced_reject = True
+            reject_reason = f"Пропущено {skips} из {total_answers} вопросов ({int(skip_ratio*100)}%)."
+
+    if forced_reject:
+        return ReportResponse(
+            interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
+            summary=reject_reason or "Кандидат пропустил большинство вопросов.",
+            stages=[],
+            strengths=[],
+            gaps=["Кандидат не отвечал на большинство вопросов."],
+            recommendation="no_hire",
+            competency_architecture=0, competency_code_understanding=0, competency_prompting=0,
+            competency_adaptability=0, competency_soft_skills=0,
+            total_score_100=0, final_grade="Reject",
+            rejected=True, reject_reason=reject_reason
+        )
+
+    # ─── ГЕНЕРАЦИЯ ТЕКСТОВОГО ОТЧЁТА ЧЕРЕЗ GIGACHAT (только summary/stages/strengths/gaps) ───
     history = _get_history(it)
-    user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."
+    ai_user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."
 
     try:
-        raw = await ask_chat(SYSTEM_REPORT, history, user)
+        raw = await ask_chat(SYSTEM_REPORT, history, ai_user)
         parsed = _Report.model_validate(_parse_report_json(raw))
-
-        # Считаем средний балл СТРОГО по оценкам навыков, а не берем из ИИ
-        comps = [
-            parsed.competency_architecture,
-            parsed.competency_code_understanding,
-            parsed.competency_prompting,
-            parsed.competency_adaptability,
-            parsed.competency_soft_skills
-        ]
-        valid_comps = [c for c in comps if c is not None]
-        total = int(sum(valid_comps) / len(valid_comps)) if valid_comps else 0
-
-        initial_level = it.level.lower()
-
-        # Если ИИ поставил мало баллов, это Reject, независимо от выбранного уровня
-        if total < 40:
-            grade = "Reject"
-        elif total <= 60:
-            grade = "Junior"
-        elif total <= 80:
-            grade = "Middle"
-        else:
-            grade = "Senior"
-
-        # Ограничение сверху (нельзя прыгнуть выше выбранного уровня)
-        if initial_level == "junior" and grade in ("Middle", "Senior"):
-            grade = "Junior"
-        elif initial_level == "middle" and grade == "Senior":
-            grade = "Middle"
-
-        return ReportResponse(
-            interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
-            summary=parsed.summary, stages=parsed.stages, strengths=parsed.strengths, gaps=parsed.gaps,
-            recommendation=parsed.recommendation if parsed.recommendation in ("hire", "no_hire", "insufficient_evidence") else "insufficient_evidence",
-            competency_architecture=parsed.competency_architecture, competency_code_understanding=parsed.competency_code_understanding,
-            competency_prompting=parsed.competency_prompting, competency_adaptability=parsed.competency_adaptability,
-            competency_soft_skills=parsed.competency_soft_skills, total_score_100=total, final_grade=grade,
-            rejected=False, reject_reason=None
-        )
     except Exception as e:
-        return ReportResponse(
-            interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
-            summary=f"Ошибка генерации отчёта: {str(e)}", stages=[], strengths=[], gaps=[],
-            recommendation="insufficient_evidence", competency_architecture=30, competency_code_understanding=30,
-            competency_prompting=30, competency_adaptability=30, competency_soft_skills=30, total_score_100=30,
-            final_grade="Reject", rejected=False, reject_reason=None
+        # если GigaChat упал — отдаём программный отчёт
+        parsed = _Report(
+            summary="Отчёт сформирован на основе ответов кандидата.",
+            stages=[], strengths=[], gaps=[],
+            recommendation="insufficient_evidence",
         )
+
+    # ─── ИТОГОВЫЙ БАЛЛ — ИЗ РЕАЛЬНЫХ ОТВЕТОВ ───
+    total = int(round(avg_score))
+
+    # ─── ГРЕЙД — ИЗ ПРОГРАММНОГО БАЛЛА + ОГРАНИЧЕНИЕ ПО ВЫБРАННОМУ УРОВНЮ ───
+    initial_level = it.level.lower()
+    if total < 40:
+        grade = "Reject"
+    elif total <= 60:
+        grade = "Junior"
+    elif total <= 80:
+        grade = "Middle"
+    else:
+        grade = "Senior"
+
+    if initial_level == "junior" and grade in ("Middle", "Senior"):
+        grade = "Junior"
+    elif initial_level == "middle" and grade == "Senior":
+        grade = "Middle"
+
+    # ─── КОМПЕТЕНЦИИ — ПРОГРАММНЫЕ (по стадиям) ───
+    comp_arch = stage_avg([0])
+    comp_code = stage_avg([1, 3])
+    comp_adapt = stage_avg([2, 4])
+    # prompting/soft — оставляем от GigaChat (их из score не вывести)
+    comp_prompt = parsed.competency_prompting if parsed.competency_prompting is not None else total
+    comp_soft = parsed.competency_soft_skills if parsed.competency_soft_skills is not None else total
+
+    return ReportResponse(
+        interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
+        summary=parsed.summary, stages=parsed.stages, strengths=parsed.strengths, gaps=parsed.gaps,
+        recommendation=parsed.recommendation if parsed.recommendation in ("hire", "no_hire", "insufficient_evidence") else "insufficient_evidence",
+        competency_architecture=comp_arch,
+        competency_code_understanding=comp_code,
+        competency_prompting=comp_prompt,
+        competency_adaptability=comp_adapt,
+        competency_soft_skills=comp_soft,
+        total_score_100=total,
+        final_grade=grade,
+        rejected=False, reject_reason=None
+    )
+
+
+def _turn_stage(turns: list, user_turn_index: int) -> int:
+    """Определяет стадию turn'а по позиции: считаем assistant-вопросы ДО него."""
+    stage = 0
+    assistant_count = 0
+    for i, t in enumerate(turns):
+        if i == user_turn_index:
+            return stage
+        if t.role == "assistant":
+            assistant_count += 1
+            if assistant_count > STAGE0_QUESTIONS:
+                stage = 1
+            if assistant_count > STAGE0_QUESTIONS + 1:
+                stage = 2
+            if assistant_count > STAGE0_QUESTIONS + 2:
+                stage = 3
+            if assistant_count > STAGE0_QUESTIONS + 3:
+                stage = 4
+    return stage
+

@@ -45,6 +45,7 @@ class DBTurn(Base):
     role = Column(String)
     content = Column(Text)
     seconds_spent = Column(Integer, default=0)
+    score = Column(Integer, nullable=True)
     interview = relationship("DBInterview", back_populates="turns")
 
 
@@ -54,6 +55,7 @@ class TurnData:
     role: str
     content: str
     seconds_spent: int = 0
+    score: Optional[int] = None
 
 
 @dataclass
@@ -95,7 +97,7 @@ async def get(interview_id: str) -> Optional[Interview]:
         turns_db = turns_result.scalars().all()
 
         turns = [
-            TurnData(role=t.role, content=t.content, seconds_spent=t.seconds_spent)
+            TurnData(role=t.role, content=t.content, seconds_spent=t.seconds_spent, score=getattr(t, "score", None))
             for t in turns_db
         ]
         return Interview(
@@ -131,6 +133,7 @@ async def save(interview: Interview):
                         role=t.role,
                         content=t.content,
                         seconds_spent=t.seconds_spent,
+                        score=getattr(t, "score", None),
                     )
                 )
             await db.commit()

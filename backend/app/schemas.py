@@ -28,6 +28,7 @@ class Turn(BaseModel):
     role: Literal["assistant", "user"]
     content: str
     seconds_spent: int = 0
+    score: Optional[int] = None
 
 class StartInterviewResponse(BaseModel):
     interview_id: str
