@@ -114,38 +114,7 @@ export default function Interview({
         };
     }, []);
 
-    // ---------- Загрузка видео на сервер (срабатывает по событию onstop) ----------
-    useEffect(() => {
-        if (!mediaRecorder) return;
 
-        const handleStop = async () => {
-            if (isRejectedRef.current) {
-                console.log("Interview rejected early. Skipping video upload.");
-                return;
-            }
-            if (chunksRef.current.length === 0) {
-                console.log("No video chunks recorded. Skipping upload.");
-                return;
-            }
-
-            const blob = new Blob(chunksRef.current, { type: "video/webm" });
-            const formData = new FormData();
-            formData.append("file", blob, "interview.webm");
-            const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
-            const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
-
-            try {
-                const r = await fetch(uploadUrl, { method: "POST", body: formData });
-                if (!r.ok) console.error("[video] upload failed", r.status);
-                else console.log("[video] upload ok");
-            } catch (e) {
-                console.error("[video] error", e);
-            }
-        };
-
-        mediaRecorder.addEventListener("stop", handleStop);
-        return () => mediaRecorder.removeEventListener("stop", handleStop);
-    }, [mediaRecorder, payload.interviewId]);
 
     // Останавливаем камеру при завершении
     useEffect(() => {
@@ -359,12 +328,37 @@ export default function Interview({
                 setFinished(true);
                 setMsgs((m) => [
                     ...m,
-                    { role: "ai", text: "Интервью завершено." },
+                    { role: "ai", text: "Интервью завершено. Загружаем видео..." },
                 ]);
-                setTimeout(
-                    () => onFinished(payload.interviewId, payload.level),
-                    1000,
-                );
+                
+                // Ждем полной остановки и загрузки видео перед переходом
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                    
+                    await new Promise<void>((resolve) => {
+                        const onStop = async () => {
+                            mediaRecorder.removeEventListener("stop", onStop);
+                            
+                            if (!isRejectedRef.current && chunksRef.current.length > 0) {
+                                const blob = new Blob(chunksRef.current, { type: "video/webm" });
+                                const formData = new FormData();
+                                formData.append("file", blob, "interview.webm");
+                                const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
+                                const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
+                                
+                                try {
+                                    await fetch(uploadUrl, { method: "POST", body: formData });
+                                } catch (e) {
+                                    console.error("[video] upload error", e);
+                                }
+                            }
+                            resolve();
+                        };
+                        mediaRecorder.addEventListener("stop", onStop);
+                    });
+                }
+                
+                onFinished(payload.interviewId, payload.level);
                 return;
             }
 
