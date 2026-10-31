@@ -30,13 +30,25 @@ def _clean_text(raw: str) -> str:
     if raw.startswith("```json"): raw = raw[7:]
     elif raw.startswith("```"): raw = raw[3:]
     if raw.endswith("```"): raw = raw[:-3]
+    
+    # Пытаемся вытащить вопрос из JSON, если ИИ его прислал
     if raw.startswith("{"):
         try:
             data = json.loads(raw)
             raw = str(data.get("next_question", data.get("question", raw)))
         except: pass
+    
+    # Убираем фигурные скобки, кавычки
     clean = re.sub(r'[{}"]', "", raw).strip()
-    return re.sub(r"^(score|feedback|next_question)\s*:\s*", "", clean, flags=re.IGNORECASE).strip()
+    
+    # Вырезаем мусор вроде "0, feedback: ...", "score: 80"
+    clean = re.sub(r'(?i)^(score|feedback|next_question|оценка|балл|0)[:\s,.-]*', '', clean).strip()
+    clean = re.sub(r'(?i)^\d+[,.]?\s*', '', clean).strip() # убираем цифры в начале
+    
+    # Убираем оставшиеся служебные слова
+    clean = re.sub(r'(?i)(feedback|next_question|score)\s*:', '', clean).strip()
+    
+    return clean
 
 def _get_history(it) -> list[dict]:
     return [{"role": t.role, "content": t.content} for t in it.turns]
@@ -49,10 +61,19 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
 
     prompt = f"Стадия: {stage}. {stage_desc}\nУже заданные вопросы:\n{prev_q_str}\n\n"
+    
     if stage in (2, 4) and prev_code_context:
-        prompt += f"Код с предыдущего этапа:\n{prev_code_context[:8000]}\n\nКандидат написал промпт:\n'{prev_answer}'\n\nПридумай проблему из реального продакшена и спроси, как исправить именно этот код. Верни ТОЛЬКО текст вопроса."
+        # ЖЕСТКО напоминаем про стек, чтобы ИИ не ушел в Unity/C# на ML-задаче
+        prompt += (
+            f"Код с предыдущего этапа:\n{prev_code_context[:8000]}\n\n"
+            f"Кандидат написал промпт:\n'{prev_answer}'\n\n"
+            f"ВАЖНО: Стек кандидата: {it.stack_id} (языки: {it.language_id}). "
+            f"Придумай проблему из продакшена ИМЕННО для этого стека и этого кода. "
+            f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО придумывать проблемы для других языков (например, GameDev, если стек Frontend/Data). "
+            f"Верни ТОЛЬКО текст вопроса. Никакого JSON, никаких оценок, никаких 'feedback:'."
+        )
     else:
-        prompt += "Задай СЛЕДУЮЩИЙ новый вопрос. Верни ТОЛЬКО текст вопроса."
+        prompt += f"Задай СЛЕДУЮЩИЙ новый вопрос строго для стека {it.stack_id}. Верни ТОЛЬКО текст вопроса. Никакого JSON."
 
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt)).strip()
