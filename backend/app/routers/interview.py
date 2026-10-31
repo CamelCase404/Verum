@@ -6,7 +6,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from ..auth import UserDB, get_current_user
+from ..auth import UserDB, get_current_user, utcnow_naive
 from ..gigachat_client import ask_chat, ask_text
 from ..interview_store import create, get, save
 from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_INTERVIEWER, SYSTEM_REPORT
@@ -151,7 +151,7 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
     if user.role != "developer":
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
     from datetime import datetime
-    now = datetime.utcnow()
+    now = utcnow_naive()
     if user.blocked_until:
         blocked = user.blocked_until
         # Если дата с часовым поясом, убираем его для сравнения

@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..auth import get_db, get_current_user, UserDB
+from ..auth import get_db, get_current_user, UserDB, utcnow_naive
 from ..interview_store import get as get_interview
 
 
@@ -67,7 +67,7 @@ async def approve(user_id: int, admin: UserDB = Depends(require_admin), db: Asyn
     user.skills_data = user.pending_skills_data
     user.test_status = "approved"
     user.pending_skills_data = None
-    user.blocked_until = datetime.now(timezone.utc) + timedelta(days=180)
+    user.blocked_until = utcnow_naive() + timedelta(days=180)
     user.attempts_used = 0
     
     # Удаляем видео после модерации (больше не нужно)
@@ -92,7 +92,7 @@ async def reject(user_id: int, admin: UserDB = Depends(require_admin), db: Async
     
     # Если это была 3-я попытка - блокируем на 6 месяцев
     if (user.attempts_used or 0) >= 3:
-        user.blocked_until = datetime.now(timezone.utc) + timedelta(days=180)
+        user.blocked_until = utcnow_naive() + timedelta(days=180)
         user.attempts_used = 0
     # Если у юзера был предыдущий одобренный грейд - оставляем approved
     user.test_status = "approved" if user.skills_data else "rejected"

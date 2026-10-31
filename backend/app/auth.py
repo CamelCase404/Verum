@@ -90,6 +90,11 @@ def get_password_hash(password: str) -> str:
     return password_hash.hash(password)
 
 
+def utcnow_naive() -> datetime:
+    """Naive UTC now — совместимо с колонками TIMESTAMP WITHOUT TIME ZONE."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
