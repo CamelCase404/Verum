@@ -2,16 +2,22 @@ from __future__ import annotations
 
 import json
 import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from ..auth import UserDB, get_current_user
 from ..gigachat_client import ask_chat, ask_text
 from ..interview_store import create, get, save
 from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_INTERVIEWER, SYSTEM_REPORT
-from ..auth import get_current_user, UserDB
 from ..schemas import (
-    AnswerRequest, AnswerResponse, ReportResponse, StageScore,
-    StartInterviewRequest, StartInterviewResponse, Turn,
+    AnswerRequest,
+    AnswerResponse,
+    ReportResponse,
+    StageScore,
+    StartInterviewRequest,
+    StartInterviewResponse,
+    Turn,
 )
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
@@ -37,7 +43,7 @@ def _get_history(it) -> list[dict]:
 
 async def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code_context: str = "", prev_answer: str = "") -> str:
     prev_q_str = "\n".join(f"- {q[:50]}..." for q in past_questions[-5:]) if past_questions else "Нет"
-    
+
     # Передаем stack везде
     stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id, prev_code="(см. ниже)")
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
@@ -55,7 +61,7 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
 async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
     if is_skip: return 0
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
-    
+
     prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Верни ТОЛЬКО число. Не додумывай за кандидата!"
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt)).strip()
@@ -67,8 +73,7 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
 
 async def _generate_code_review_task(it) -> tuple[str, str]:
     sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
-    
-    # Абстрактные описания — без конкретных примеров (N+1, race condition и т.д.)
+
     if it.level.lower() == "junior":
         difficulty = (
             "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior. "
@@ -88,7 +93,7 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
             "Выбирай РАЗНООБРАЗНО: архитектурные ошибки, утечки, гонки, масштабирование, безопасность или другое. "
             "Не повторяй одни и те же паттерны."
         )
-    
+
     diff_text = difficulty.format(stack=it.stack_id, langs=it.language_id)
 
     prompt = (
@@ -100,41 +105,51 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
         f"КРИТИЧЕСКОЕ ПРАВИЛО 3: Выдай ТОЛЬКО ОДИН кусок кода. Никаких двух файлов.\n"
         f"ВЕРНИ СТРОГО: 'Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления', затем символ '|', затем код."
     )
-    
+
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt)).strip()
 
     if "|" in raw:
         parts = raw.split("|", 1)
         code = parts[1].strip()
-        
-        # Экстремальная очистка от любых комментариев
-        code = re.sub(r"#.*", "", code)
-        code = re.sub(r"//.*", "", code)
+
+        # Очистка от комментариев, НЕ ломая строки и URL.
+        # 1. Блочные /* ... */ и <!-- ... --> — безопасно
         code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
         code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
-        code = re.sub(r"--.*", "", code)
+        # 2. Python/Bash # — только если это начало строки или после пробела
+        #    (не URL-фрагмент, не #!/bin/bash)
+        code = re.sub(r"(?m)^\s*#(?!/).*$", "", code)
+        code = re.sub(r"(?m)(?<=\s)#(?!/)(?![0-9a-fA-F]{3,8}\b).*$", "", code)
+        # 3. JS/CSS // — только если после него пробел/конец строки
+        #    (не https://, не //cdn)
+        code = re.sub(r"(?m)(?<![\w:])//\s.*$", "", code)
+        # 4. SQL -- — только в начале строки или после пробела
+        code = re.sub(r"(?m)^\s*--.*$", "", code)
+        code = re.sub(r"(?m)\s--\s.*$", "", code)
         code = re.sub(r"\n\s*\n", "\n", code)
-        
+
         # Убираем фразы-подсказки если ИИ их вставил
         for hint in ["Ошибка:", "Баг:", "Проблема:", "Потенциальная ошибка:", "Уязвимость:", "Плохо:"]:
             code = code.replace(hint, "")
-        
+
         # Если ИИ выдал два блока ```, берём только первый
         if "```" in code:
             code_blocks = [b for b in code.split("```") if b.strip() and not b.strip().startswith("language")]
             if code_blocks:
                 code = code_blocks[0].strip()
-        
+
         if "\n" not in code:
             code = code.replace("{", "{\n").replace("}", "\n}").replace(";", ";\n")
-        
+
         return parts[0].strip(), code.strip()
-    
+
     return "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления.", raw
 
 @router.post("/start", response_model=StartInterviewResponse)
 async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
+    if user.role != "developer":
+        raise HTTPException(403, "Собеседование доступно только для разработчиков")
     from datetime import datetime
     now = datetime.utcnow()
     if user.blocked_until:
@@ -157,22 +172,25 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
         await db.commit()
 
     langs_str = ", ".join(req.language_ids)
-    it = await create(req.level, req.stack_id, langs_str)
+    it = await create(req.level, req.stack_id, langs_str, user_id=user.id)
     try:
         q = await _generate_pure_question(0, it, [])
     except Exception as e:
         import traceback
         traceback.print_exc()
         raise HTTPException(500, f"Ошибка генерации вопроса: {str(e)}")
-        
+
     it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
     await save(it)
     return StartInterviewResponse(interview_id=it.id, stage=0, stage_name=STAGE_NAMES[0], question=q)
 
 @router.post("/answer", response_model=AnswerResponse)
-async def answer(req: AnswerRequest) -> AnswerResponse:
+async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -> AnswerResponse:
     it = await get(req.interview_id)
-    if not it: raise HTTPException(404, "interview not found")
+    if not it:
+        raise HTTPException(404, "interview not found")
+    if it.user_id is not None and it.user_id != user.id:
+        raise HTTPException(403, "Это интервью принадлежит другому пользователю")
 
     if req.answer == "___TAB_SWITCH_FAIL___":
         it.finished, it.rejected, it.reject_reason = True, True, "Выход из окна."
@@ -180,14 +198,14 @@ async def answer(req: AnswerRequest) -> AnswerResponse:
         return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     is_skip = req.answer == "___SKIP___"
-    if is_skip: 
+    if is_skip:
         req.answer = "Кандидат пропустил вопрос."
 
     past_questions = [t.content for t in it.turns if t.role == "assistant"]
     last_question = past_questions[-1] if past_questions else ""
-    
+
     it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent))
-    
+
     score = await _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
 
     if not is_skip and score <= 5:
@@ -267,10 +285,14 @@ def _parse_report_json(content: str) -> dict:
     return {}
 
 @router.get("/{interview_id}/report", response_model=ReportResponse)
-async def report(interview_id: str) -> ReportResponse:
+async def report(interview_id: str, user: UserDB = Depends(get_current_user)) -> ReportResponse:
     it = await get(interview_id)
-    if not it: raise HTTPException(404, "interview not found")
-    if not it.finished: raise HTTPException(409, "interview is not finished")
+    if not it:
+        raise HTTPException(404, "interview not found")
+    if it.user_id is not None and it.user_id != user.id:
+        raise HTTPException(403, "Это интервью принадлежит другому пользователю")
+    if not it.finished:
+        raise HTTPException(409, "interview is not finished")
 
     if it.rejected:
         return ReportResponse(
@@ -287,13 +309,13 @@ async def report(interview_id: str) -> ReportResponse:
     try:
         raw = await ask_chat(SYSTEM_REPORT, history, user)
         parsed = _Report.model_validate(_parse_report_json(raw))
-        
+
         # Считаем средний балл СТРОГО по оценкам навыков, а не берем из ИИ
         comps = [
-            parsed.competency_architecture, 
-            parsed.competency_code_understanding, 
-            parsed.competency_prompting, 
-            parsed.competency_adaptability, 
+            parsed.competency_architecture,
+            parsed.competency_code_understanding,
+            parsed.competency_prompting,
+            parsed.competency_adaptability,
             parsed.competency_soft_skills
         ]
         valid_comps = [c for c in comps if c is not None]
@@ -302,19 +324,19 @@ async def report(interview_id: str) -> ReportResponse:
         initial_level = it.level.lower()
 
         # Если ИИ поставил мало баллов, это Reject, независимо от выбранного уровня
-        if total < 40: 
+        if total < 40:
             grade = "Reject"
-        elif total <= 60: 
+        elif total <= 60:
             grade = "Junior"
-        elif total <= 80: 
+        elif total <= 80:
             grade = "Middle"
-        else: 
+        else:
             grade = "Senior"
 
         # Ограничение сверху (нельзя прыгнуть выше выбранного уровня)
-        if initial_level == "junior" and grade in ("Middle", "Senior"): 
+        if initial_level == "junior" and grade in ("Middle", "Senior"):
             grade = "Junior"
-        elif initial_level == "middle" and grade == "Senior": 
+        elif initial_level == "middle" and grade == "Senior":
             grade = "Middle"
 
         return ReportResponse(

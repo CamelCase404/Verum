@@ -30,7 +30,7 @@ export function EditCompanyModal({
         const uploadRes = await authApi.uploadAvatar(selectedFile);
         finalAvatarUrl = uploadRes.url;
       }
-      await authApi.updateProfile({ bio, website });
+      await authApi.updateProfile({ bio, website, avatar_url: finalAvatarUrl });
       toast("Профиль обновлен");
       onRefresh();
       onClose();

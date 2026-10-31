@@ -22,6 +22,7 @@ Base = declarative_base()
 class DBInterview(Base):
     __tablename__ = "interviews"
     id = Column(String, primary_key=True, index=True)
+    user_id = Column(Integer, index=True, nullable=True)
     level = Column(String)
     stack_id = Column(String)
     language_id = Column(String)
@@ -61,6 +62,7 @@ class Interview:
     level: Level
     stack_id: str
     language_id: str
+    user_id: int | None = None
     stage: int = 0
     finished: bool = False
     rejected: bool = False
@@ -68,10 +70,10 @@ class Interview:
     turns: list[TurnData] = field(default_factory=list)
 
 
-async def create(level: Level, stack_id: str, language_id: str) -> Interview:
+async def create(level: Level, stack_id: str, language_id: str, user_id: int | None = None) -> Interview:
     async with SessionLocal() as db:
         new_it = DBInterview(
-            id=str(uuid.uuid4()), level=level, stack_id=stack_id, language_id=language_id
+            id=str(uuid.uuid4()), user_id=user_id, level=level, stack_id=stack_id, language_id=language_id
         )
         db.add(new_it)
         await db.commit()
@@ -98,6 +100,7 @@ async def get(interview_id: str) -> Optional[Interview]:
         ]
         return Interview(
             id=db_it.id,
+            user_id=getattr(db_it, "user_id", None),
             level=db_it.level,
             stack_id=db_it.stack_id,
             language_id=db_it.language_id,

@@ -1,6 +1,6 @@
 import re
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -187,7 +187,7 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
     if current_id != new_id:
         user.attempts_used = (user.attempts_used or 0) + 1
 
-    user.last_test_at = datetime.utcnow()
+    user.last_test_at = datetime.now(timezone.utc)
 
     # Подтягиваем историю чата из интервью (для профиля и модерации)
     chat_history = []
@@ -227,7 +227,7 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
 
         # Если это была 3-я попытка — блокируем на полгода
         if (user.attempts_used or 0) >= 3:
-            user.blocked_until = datetime.utcnow() + timedelta(days=180)
+            user.blocked_until = datetime.now(timezone.utc) + timedelta(days=180)
     else:
         # Если прошел успешно — отправляем на модерацию
         user.pending_skills_data = report.model_dump()

@@ -92,7 +92,7 @@ export default function Interview({
                 recorder.ondataavailable = (e) => {
                     if (e.data.size > 0) chunksRef.current.push(e.data);
                 };
-                recorder.start();
+                recorder.start(1000); // чанки каждую секунду — падение вкладки не убьёт всё видео
                 setMediaRecorder(recorder);
                 setIsCameraReady(true);
             } catch (err: any) {
@@ -136,16 +136,21 @@ export default function Interview({
                 });
                 const formData = new FormData();
                 formData.append("file", blob, "interview.webm");
+                const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
+                const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
+
                 const doUpload = async (attempt = 1) => {
-
                     try {
-
-                        const r = await fetch(`/api/media/upload?interview_id=`, { method: "POST", body: formData });
-
-                        if (!r.ok) console.error("[video] upload failed", r.status); else console.log("[video] upload ok");
-
-                    } catch (e) { console.error("[video] error", e); if (attempt < 2) { await new Promise(x => setTimeout(x, 1500)); return doUpload(attempt + 1); } }
-
+                        const r = await fetch(uploadUrl, { method: "POST", body: formData });
+                        if (!r.ok) console.error("[video] upload failed", r.status);
+                        else console.log("[video] upload ok");
+                    } catch (e) {
+                        console.error("[video] error", e);
+                        if (attempt < 3) {
+                            await new Promise((x) => setTimeout(x, 1500));
+                            return doUpload(attempt + 1);
+                        }
+                    }
                 };
 
                 void doUpload(1);
