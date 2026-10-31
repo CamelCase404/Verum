@@ -155,7 +155,7 @@ export function Messages() {
         {activeConv ? (
           <>
             <div className="p-3 border-b border-line bg-surface flex items-center gap-3 shadow-sm z-10">
-              <button onClick={() => setActiveConv(null)} className="md:hidden text-ink-3 hover:text-ink"><ArrowLeft size={20} /></button>
+              <button onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={() => setActiveConv(null)} className="md:hidden text-ink-3 hover:text-ink"><ArrowLeft size={20} /></button>
               <button onClick={() => navigate(`/profile/${activeConv.other_id}`)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center overflow-hidden">
                   {activeConv.other_avatar ? <img src={activeConv.other_avatar} className="w-full h-full object-cover" /> : activeConv.other_name.substring(0, 2).toUpperCase()}
@@ -202,7 +202,7 @@ export function Messages() {
               <div className="px-3 pt-3 bg-surface flex items-center gap-2">
                 <div className="relative">
                   <img src={imagePreview} className="h-16 w-16 object-cover rounded-lg border border-line" />
-                  <button onClick={clearImage} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={12} /></button>
+                  <button onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={clearImage} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={12} /></button>
                 </div>
                 <span className="text-sm text-ink-3">Фото готово к отправке</span>
               </div>
@@ -211,7 +211,7 @@ export function Messages() {
             <div className="p-2 sm:p-3 bg-surface border-t border-line flex gap-2 items-end shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
               <button 
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => fileInputRef.current?.click()} 
+                onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={() => fileInputRef.current?.click()} 
                 tabIndex={-1}
                 className="p-2.5 text-ink-3 hover:text-accent transition-colors bg-bg-2 rounded-xl"
                 title="Прикрепить фото"
@@ -232,7 +232,7 @@ export function Messages() {
               
               <button 
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={sendMessage} 
+                onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={sendMessage} 
                 disabled={isUploading || (!text.trim() && !selectedImage)} 
                 tabIndex={-1}
                 className="p-2.5 bg-accent text-white rounded-xl hover:bg-accent-2 transition-colors disabled:opacity-50 flex-shrink-0"
