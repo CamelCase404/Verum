@@ -43,16 +43,24 @@ export function Messages() {
     
     const fetchMessages = () => {
       chatApi.getMessages(activeConv.id).then(res => {
-        setMessages(res.data);
-        
-        // Скроллим вниз ТОЛЬКО если пользователь находится внизу
-        if (isAtBottomRef.current) {
+        setMessages(prev => {
+          // Если данные не изменились — не перерендериваем список
+          if (
+            prev.length === res.data.length &&
+            prev[prev.length - 1]?.id === res.data[res.data.length - 1]?.id
+          ) {
+            return prev;
+          }
+          // Скроллим вниз ТОЛЬКО если пользователь находится внизу
+          if (isAtBottomRef.current) {
             setTimeout(() => {
               if (messagesContainerRef.current) {
                 messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
               }
             }, 100);
-        }
+          }
+          return res.data;
+        });
       }).catch(console.error);
     };
     
@@ -97,9 +105,7 @@ export function Messages() {
       const res = await chatApi.getMessages(activeConv.id);
       setMessages(res.data);
       
-      // Возвращаем фокус, чтобы клавиатура не закрывалась
-      textareaRef.current?.focus();
-      
+      // Не трогаем focus — на мобильных принудительный focus() после await "мигает" клавиатурой
       // Скроллим сам контейнер, а не window
       setTimeout(() => {
         if (messagesContainerRef.current) {
