@@ -114,47 +114,43 @@ export default function Interview({
         };
     }, []);
 
-    // ---------- Загрузка видео на сервер ----------
+    // ---------- Загрузка видео на сервер (срабатывает по событию onstop) ----------
     useEffect(() => {
-        if (
-            (finished || failed) &&
-            mediaRecorder &&
-            mediaRecorder.state !== "inactive"
-        ) {
-            mediaRecorder.stop();
+        if (!mediaRecorder) return;
 
-            // Если это ранний Reject (спам или выход из окна) - НЕ загружаем видео вообще
+        const handleStop = async () => {
             if (isRejectedRef.current) {
                 console.log("Interview rejected early. Skipping video upload.");
                 return;
             }
+            if (chunksRef.current.length === 0) {
+                console.log("No video chunks recorded. Skipping upload.");
+                return;
+            }
 
-            setTimeout(() => {
-                if (chunksRef.current.length === 0) return;
-                const blob = new Blob(chunksRef.current, {
-                    type: "video/webm",
-                });
-                const formData = new FormData();
-                formData.append("file", blob, "interview.webm");
-                const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
-                const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
+            const blob = new Blob(chunksRef.current, { type: "video/webm" });
+            const formData = new FormData();
+            formData.append("file", blob, "interview.webm");
+            const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
+            const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
 
-                const doUpload = async (attempt = 1) => {
-                    try {
-                        const r = await fetch(uploadUrl, { method: "POST", body: formData });
-                        if (!r.ok) console.error("[video] upload failed", r.status);
-                        else console.log("[video] upload ok");
-                    } catch (e) {
-                        console.error("[video] error", e);
-                        if (attempt < 3) {
-                            await new Promise((x) => setTimeout(x, 1500));
-                            return doUpload(attempt + 1);
-                        }
-                    }
-                };
+            try {
+                const r = await fetch(uploadUrl, { method: "POST", body: formData });
+                if (!r.ok) console.error("[video] upload failed", r.status);
+                else console.log("[video] upload ok");
+            } catch (e) {
+                console.error("[video] error", e);
+            }
+        };
 
-                void doUpload(1);
-            }, 1000);
+        mediaRecorder.addEventListener("stop", handleStop);
+        return () => mediaRecorder.removeEventListener("stop", handleStop);
+    }, [mediaRecorder, payload.interviewId]);
+
+    // Останавливаем камеру при завершении
+    useEffect(() => {
+        if ((finished || failed) && mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
         }
     }, [finished, failed, mediaRecorder]);
 

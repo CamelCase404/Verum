@@ -109,30 +109,29 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt)).strip()
 
-    # 1. Убираем markdown-теги
-    for tag in ["```typescript", "```javascript", "```python", "```java", "```go", "```html", "```css", "```ts", "```js", "```"]:
-        raw = raw.replace(tag, "")
-
-    # 2. Делим на текст задания и код
-    task_text = "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления."
-    
-    if "|РАЗДЕЛИТЕЛЬ|" in raw:
-        parts = raw.split("|РАЗДЕЛИТЕЛЬ|")
-        code = parts[1].strip()
-    elif "|" in raw:
-        # Если ИИ написал просто |
-        parts = raw.split("|")
-        code = parts[1].strip()
+    # 1. Ищем код в markdown-блоках ```lang```
+    code = ""
+    md_matches = re.findall(r'```(?:[a-zA-Z0-9+#.-]*)\n([\s\S]*?)```', raw)
+    if md_matches:
+        code = md_matches[0].strip()
     else:
-        code = raw
+        # Fallback: если ИИ не сделал ```, пытаемся найти разделитель
+        if "РАЗДЕЛИТЕЛЬ" in raw:
+            parts = raw.split("РАЗДЕЛИТЕЛЬ")
+            if any(k in parts[0] for k in ["import", "const ", "def ", "function", "class "]):
+                code = parts[0].strip()
+            else:
+                code = parts[1].strip()
+        else:
+            code = raw
 
-    # 3. БРОНЕБОЙНАЯ ОЧИСТКА ОТ СПОЙЛЕРОВ
-    # Если ИИ написал: "1. Ошибка... 2. Ошибка..." в конце, отрезаем это
+    # 2. БРОНЕБОЙНАЯ ОЧИСТКА ОТ СПОЙЛЕРОВ
     code = re.split(r'\n(?=\d+\.)', code)[0].strip()
-    # Если написал "Типовые ошибки" или "Ошибки:" — отрезаем
     code = re.split(r'(?i)Типовые ошибки|Ошибки:|Проблемы:|Баг:', code)[0].strip()
+    code = re.sub(r'(?i)^\s*Код:\s*', '', code, flags=re.MULTILINE)
+    code = re.sub(r'(?i)^\s*\|?РАЗДЕЛИТЕЛЬ\|?\s*$', '', code, flags=re.MULTILINE)
 
-    # 4. Убираем комментарии
+    # 3. Убираем комментарии
     code = re.sub(r"(?<!http:)(?<!https:)\/\/.*", "", code)
     code = re.sub(r"(?m)^\s*#.*$", "", code)
     code = re.sub(r"(?<=\s)#(?!\w{3,6}\b).*", "", code)
@@ -140,6 +139,7 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
     code = re.sub(r"\n\s*\n", "\n", code)
 
+    task_text = "Найдите неоптимизированные участки и баги в коде и напишите промпт для их исправления."
     return task_text, code.strip()
 
 
