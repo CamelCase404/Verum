@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
 import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
 import { ViewJobModal } from "@/components/modals/ViewJobModal";
+import { Modal } from "@/components/ui/Modal";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -34,43 +35,14 @@ export function PublicProfile() {
       setUser(null);
       return;
     }
-    console.log("[PublicProfile] CALLING getPublicUser with id =", id, "type =", typeof id);
     authApi.getPublicUser(id as string)
       .then(res => { setUser(res.data); setLoading(false); })
-      .catch((e: any) => {
+      .catch(() => {
         setLoading(false);
         setUser(null);
       });
   }, [id]);
 
-
-  // Скролл-лок для модалок (проект, вакансия)
-  useEffect(() => {
-    const isOpen = !!selectedProject || !!selectedJob;
-    if (!isOpen) return;
-
-    const scrollY = window.scrollY;
-    const origPos = document.body.style.position;
-    const origTop = document.body.style.top;
-    const origWidth = document.body.style.width;
-    const origOverflow = document.body.style.overflow;
-
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.position = origPos;
-      document.body.style.top = origTop;
-      document.body.style.width = origWidth;
-      document.body.style.overflow = origOverflow;
-      requestAnimationFrame(() => {
-        window.scrollTo(0, scrollY);
-        requestAnimationFrame(() => window.scrollTo(0, scrollY));
-      });
-    };
-  }, [selectedProject, selectedJob]);
   if (loading) return <div className="p-10 text-center text-ink">Загрузка профиля...</div>;
   if (!user) return <div className="p-10 text-center text-ink">Пользователь не найден</div>;
 
@@ -78,12 +50,6 @@ export function PublicProfile() {
   const skills = user?.skills;
   const isTested = !!skills && skills.final_grade && skills.final_grade !== "Reject";
   const githubData = user?.github_stats;
-
-  const getLangColor = (langName: string) => {
-    if (!githubData?.languages) return "bg-accent/60";
-    const index = githubData.languages.findIndex((l: any) => l.name === langName);
-    return index !== -1 ? LANG_COLORS[index % LANG_COLORS.length] : "bg-accent/60";
-  };
 
   const handleStartChat = async () => {
     try {
@@ -118,29 +84,15 @@ export function PublicProfile() {
     </div>
   );
 
-
   const STACK_ICONS: Record<string, any> = {
-    "frontend": Monitor,
-    "backend": Server,
-    "fullstack": Layers,
-    "mobile": Smartphone,
-    "devops": Cloud,
-    "data / ml": Database,
+    "frontend": Monitor, "backend": Server, "fullstack": Layers,
+    "mobile": Smartphone, "devops": Cloud, "data / ml": Database,
   };
 
   const LANG_ICONS: Record<string, any> = {
-    "html": FileCode2,
-    "css": Palette,
-    "js": Braces,
-    "ts": FileCode2,
-    "react": Atom,
-    "vue": Hexagon,
-    "python": Terminal,
-    "go": Rabbit,
-    "java": Coffee,
-    "csharp": Hash,
-    "kotlin": Code2,
-    "swift": Code2,
+    "html": FileCode2, "css": Palette, "js": Braces, "ts": FileCode2,
+    "react": Atom, "vue": Hexagon, "python": Terminal, "go": Rabbit,
+    "java": Coffee, "csharp": Hash, "kotlin": Code2, "swift": Code2,
   };
 
   return (
@@ -157,7 +109,7 @@ export function PublicProfile() {
           </div>
           <h1 className="text-xl font-bold text-center mb-1">{user.full_name}</h1>
           <p className="text-sm text-center text-ink-3 mb-4">{user.role === "company" ? "Компания" : "Разработчик"}</p>
-          
+
           {user.bio && (
             <div className="mb-6 text-center">
               <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center justify-center gap-1.5">
@@ -178,7 +130,6 @@ export function PublicProfile() {
             </a>
           )}
 
-          {/* ЕДИНАЯ КРАСИВАЯ КАРТОЧКА */}
           {isTested && (
             <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
               <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
@@ -202,10 +153,7 @@ export function PublicProfile() {
                       <Layers size={12} /> Стек
                     </div>
                     <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-surface border border-line rounded text-[12px] font-medium text-ink capitalize">
-                      {(() => {
-                        const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers;
-                        return <Icon size={12} className="text-accent" />;
-                      })()}
+                      {(() => { const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers; return <Icon size={12} className="text-accent" />; })()}
                       {skills.stack_id}
                     </div>
                   </div>
@@ -218,10 +166,7 @@ export function PublicProfile() {
                     <div className="flex flex-wrap gap-1">
                       {skills.language_id.split(',').map((lang: string) => (
                         <span key={lang} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-surface border border-line rounded text-[10px] font-medium text-ink-2 uppercase">
-                          {(() => {
-                            const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2;
-                            return <LIcon size={10} className="text-ink-3" />;
-                          })()}
+                          {(() => { const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2; return <LIcon size={10} className="text-ink-3" />; })()}
                           {lang.trim()}
                         </span>
                       ))}
@@ -239,61 +184,57 @@ export function PublicProfile() {
 
         {/* ПРАВАЯ КОЛОНКА */}
         <div className="space-y-6">
-          
-          {/* НАВЫКИ И АНАЛИЗ ИИ */}
           {user.role === "developer" && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-semibold flex items-center gap-2">
-                <ShieldCheck size={18} className="text-accent" /> Навыки и ИИ-Анализ
-              </h2>
-            </div>
-            
-            {isTested ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                  <SkillBar label="Архитектурное мышление" score={skills.competency_architecture || 0} />
-                  <SkillBar label="Ревью кода ИИ" score={skills.competency_code_understanding || 0} />
-                  <SkillBar label="Работа с ИИ" score={skills.competency_prompting || 0} />
-                  <SkillBar label="Адаптация" score={skills.competency_adaptability || 0} />
-                  <SkillBar label="Soft Skills" score={skills.competency_soft_skills || 0} />
-                </div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-semibold flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-accent" /> Навыки и ИИ-Анализ
+                </h2>
+              </div>
 
-                {skills.summary && (
-                  <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4 mt-6">
-                    <div>
-                      <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2"><Brain size={16}/> Вердикт ИИ</h4>
-                      <p className="text-[14px] leading-relaxed text-ink-2">{skills.summary}</p>
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-line">
-                      <div>
-                        <h4 className="text-[12px] font-bold text-accent mb-2 flex items-center gap-1"><CheckCircle2 size={14}/> Сильные стороны</h4>
-                        <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
-                          {skills.strengths?.map((s: string, i: number) => <li key={i}>{s}</li>)}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="text-[12px] font-bold text-warn mb-2 flex items-center gap-1"><AlertCircle size={14}/> Зоны роста</h4>
-                        <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
-                          {skills.gaps?.map((s: string, i: number) => <li key={i}>{s}</li>)}
-                        </ul>
-                      </div>
-                    </div>
+              {isTested ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                    <SkillBar label="Архитектурное мышление" score={skills.competency_architecture || 0} />
+                    <SkillBar label="Ревью кода ИИ" score={skills.competency_code_understanding || 0} />
+                    <SkillBar label="Работа с ИИ" score={skills.competency_prompting || 0} />
+                    <SkillBar label="Адаптация" score={skills.competency_adaptability || 0} />
+                    <SkillBar label="Soft Skills" score={skills.competency_soft_skills || 0} />
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
-                <AlertCircle size={32} className="mx-auto text-amber-500 mb-2 opacity-80" />
-                <div className="text-[15px] font-medium text-ink mb-1">Навыки не проверены</div>
-                <p className="text-[13px] text-ink-3">Пользователь еще не проходил собеседование.</p>
-              </div>
-            )}
-          </div>
+
+                  {skills.summary && (
+                    <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4 mt-6">
+                      <div>
+                        <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2"><Brain size={16}/> Вердикт ИИ</h4>
+                        <p className="text-[14px] leading-relaxed text-ink-2">{skills.summary}</p>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-line">
+                        <div>
+                          <h4 className="text-[12px] font-bold text-accent mb-2 flex items-center gap-1"><CheckCircle2 size={14}/> Сильные стороны</h4>
+                          <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
+                            {skills.strengths?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="text-[12px] font-bold text-warn mb-2 flex items-center gap-1"><AlertCircle size={14}/> Зоны роста</h4>
+                          <ul className="list-disc pl-4 text-[13px] text-ink-2 space-y-1">
+                            {skills.gaps?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line-2">
+                  <AlertCircle size={32} className="mx-auto text-amber-500 mb-2 opacity-80" />
+                  <div className="text-[15px] font-medium text-ink mb-1">Навыки не проверены</div>
+                  <p className="text-[13px] text-ink-3">Пользователь еще не проходил собеседование.</p>
+                </div>
+              )}
+            </div>
           )}
 
-          {/* ВАКАНСИИ КОМПАНИИ */}
           {user.role === "company" && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
               <h2 className="font-semibold flex items-center gap-2 mb-4">
@@ -306,9 +247,7 @@ export function PublicProfile() {
                       <div className="flex justify-between items-start">
                         <h3 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">{job.title}</h3>
                         {job.salary && (
-                          <span className="text-[13px] font-bold text-accent whitespace-nowrap ml-2">
-                            {formatSalaryText(job.salary)}
-                          </span>
+                          <span className="text-[13px] font-bold text-accent whitespace-nowrap ml-2">{formatSalaryText(job.salary)}</span>
                         )}
                       </div>
                       <p className="text-[13px] text-ink-3 line-clamp-2">{job.description}</p>
@@ -330,7 +269,6 @@ export function PublicProfile() {
 
           <ChatHistoryBlock messages={skills?.chat_history || []} />
 
-          {/* ПОРТФОЛИО (ПЕРЕМЕЩЕНО ВЫШЕ GITHUB) */}
           {user.projects && user.projects.length > 0 && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
               <h2 className="font-semibold flex items-center gap-2 mb-4"><ImageIcon size={18} className="text-accent" /> Портфолио</h2>
@@ -350,14 +288,13 @@ export function PublicProfile() {
             </div>
           )}
 
-          {/* GITHUB СТАТИСТИКА (ПЕРЕМЕЩЕНО НИЖЕ) */}
           {githubData && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold flex items-center gap-2"><Github size={18} className="text-accent" /> GitHub Статистика</h2>
                 <span className="text-[13px] text-ink-3">@{githubData.username}</span>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <div className="bg-surface-2 p-3 rounded-xl text-center border border-line">
                   <div className="text-xl font-bold">{githubData.public_repos}</div>
@@ -420,37 +357,28 @@ export function PublicProfile() {
               </div>
             </div>
           )}
-
         </div>
       </div>
-    
+
       {/* МОДАЛКА ПРОСМОТРА ВАКАНСИИ */}
       {selectedJob && (
-        <ViewJobModal 
-            job={selectedJob} 
-            companyName={user.full_name} 
-            onClose={() => setSelectedJob(null)} 
-        />
+        <ViewJobModal job={selectedJob} companyName={user.full_name} onClose={() => setSelectedJob(null)} />
       )}
 
-      {/* МОДАЛКА ПРОСМОТРА ПРОЕКТА */}
+      {/* МОДАЛКА ПРОСМОТРА ПРОЕКТА (через Modal — с правильным scroll-lock) */}
       {selectedProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-surface border border-line rounded-2xl w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
-            <div className="p-4 border-b border-line flex justify-between items-center bg-surface-2">
-              <h2 className="font-bold text-lg">{selectedProject.title}</h2>
-              <button onClick={() => setSelectedProject(null)} className="text-ink-3 hover:text-ink p-1"><X size={20} /></button>
+        <Modal onClose={() => setSelectedProject(null)} size="lg">
+          <div className="flex flex-col max-h-[85vh]">
+            <div className="p-4 border-b border-line bg-surface-2 rounded-t-2xl">
+              <h2 className="font-bold text-lg pr-8">{selectedProject.title}</h2>
             </div>
-            
-            <div className="p-6 overflow-y-auto space-y-6">
-              <p className="text-ink-2 text-sm whitespace-pre-line">{selectedProject.description}</p>
-              
+            <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+              <p className="text-ink-2 text-sm whitespace-pre-line [overflow-wrap:anywhere]">{selectedProject.description}</p>
               {selectedProject.cover && (
                 <div className="rounded-xl overflow-hidden border border-line bg-bg-2">
                   <img src={selectedProject.cover} alt="Cover" className="w-full h-auto max-h-[400px] object-contain" />
                 </div>
               )}
-              
               {selectedProject.images && selectedProject.images.length > 1 && (
                 <div>
                   <h3 className="text-sm font-semibold mb-3">Дополнительные фото</h3>
@@ -465,31 +393,25 @@ export function PublicProfile() {
               )}
             </div>
           </div>
-        </div>
+        </Modal>
       )}
-</div>
+    </div>
   );
 }
 
-// ─── История собеседования (свёрнуто по умолчанию) ───
 function ChatHistoryBlock({ messages }: { messages: Array<{ role: string; content: string }> }) {
   const [open, setOpen] = useState(false);
   if (!messages || messages.length === 0) return null;
 
   return (
     <div className="bg-surface border border-line rounded-2xl p-4 sm:p-6 shadow-sm mt-6 w-full max-w-full overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between text-left"
-      >
+      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between text-left">
         <h2 className="font-semibold flex items-center gap-2">
           <MessageSquare size={18} className="text-accent" />
           История собеседования
           <span className="text-[11px] font-normal text-ink-3">({messages.length} сообщ.)</span>
         </h2>
-        <span className="text-[13px] text-accent font-medium">
-          {open ? "Свернуть ▲" : "Развернуть ▼"}
-        </span>
+        <span className="text-[13px] text-accent font-medium">{open ? "Свернуть ▲" : "Развернуть ▼"}</span>
       </button>
 
       {open && (
@@ -501,13 +423,7 @@ function ChatHistoryBlock({ messages }: { messages: Array<{ role: string; conten
             const codePart = codeMatch ? codeMatch[1] : "";
             return (
               <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed min-w-0 ${
-                    isUser
-                      ? "bg-accent text-white"
-                      : "bg-surface-2 border border-line text-ink-2"
-                  }`}
-                >
+                <div className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed min-w-0 ${isUser ? "bg-accent text-white" : "bg-surface-2 border border-line text-ink-2"}`}>
                   <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{textPart}</div>
                   {codePart && (
                     <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-3 rounded-lg overflow-x-auto text-[11px] font-mono whitespace-pre max-w-full custom-scrollbar">
