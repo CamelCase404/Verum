@@ -63,7 +63,6 @@ export function Hero() {
             />
 
             <div className="max-w-[1280px] mx-auto px-4 md:px-6 relative flex flex-col items-center">
-                
                 {/* 1. ПОИСК СВЕРХУ ПО ЦЕНТРУ */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -76,7 +75,6 @@ export function Hero() {
 
                 {/* 2. СЕТКА (Текст + Карточка) */}
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-4 md:gap-12 lg:gap-[72px] items-center w-full">
-                    
                     {/* Левая колонка (Текст) */}
                     <div className="text-center lg:text-left px-2 md:px-0">
                         <motion.h2
@@ -142,21 +140,33 @@ export function Hero() {
                         >
                             <motion.div
                                 animate={{ y: [-10, 10, -10] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                transition={{
+                                    duration: 4,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                }}
                                 className="absolute -top-6 -left-6 z-20 text-accent bg-surface p-3 rounded-xl shadow-lg shadow-black/20 border border-line hidden md:block"
                             >
                                 <Code size={24} />
                             </motion.div>
                             <motion.div
                                 animate={{ y: [10, -10, 10] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                                transition={{
+                                    duration: 5,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                }}
                                 className="absolute -bottom-6 -right-6 z-20 text-accent bg-surface p-3 rounded-xl shadow-lg shadow-black/20 border border-line hidden md:block"
                             >
                                 <Terminal size={24} />
                             </motion.div>
                             <motion.div
                                 animate={{ x: [-10, 10, -10], y: [0, 5, 0] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                transition={{
+                                    duration: 6,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                }}
                                 className="absolute top-1/2 -right-10 z-20 text-accent bg-surface p-2.5 rounded-xl shadow-lg shadow-black/20 border border-line hidden lg:block"
                             >
                                 <Cpu size={20} />
@@ -166,15 +176,32 @@ export function Hero() {
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={spec.id}
-                                        initial={{ opacity: 0, filter: "blur(4px)", y: 10 }}
-                                        animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                                        exit={{ opacity: 0, filter: "blur(4px)", y: -10 }}
-                                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                                        initial={{
+                                            opacity: 0,
+                                            filter: "blur(4px)",
+                                            y: 10,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            filter: "blur(0px)",
+                                            y: 0,
+                                        }}
+                                        exit={{
+                                            opacity: 0,
+                                            filter: "blur(4px)",
+                                            y: -10,
+                                        }}
+                                        transition={{
+                                            duration: 0.5,
+                                            ease: "easeInOut",
+                                        }}
                                         className="flex-1 flex flex-col"
                                     >
                                         <div className="p-4 md:p-5 border-b border-line flex items-center gap-3 relative overflow-hidden">
                                             <div className="w-[44px] h-[44px] md:w-[56px] md:h-[56px] rounded-full bg-accent-soft text-accent flex items-center justify-center font-semibold text-sm md:text-lg shrink-0">
-                                                {spec.name.substring(0, 2).toUpperCase()}
+                                                {spec.name
+                                                    .substring(0, 2)
+                                                    .toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="text-[13px] md:text-[15.5px] font-semibold mb-0.5 truncate flex items-center gap-1.5 max-w-[200px]">
@@ -184,24 +211,53 @@ export function Hero() {
                                                     {spec.handle} · {spec.role}
                                                 </div>
                                             </div>
-                                            <Badge variant={spec.level} className="min-w-[64px] justify-center">
+                                            <Badge
+                                                variant={spec.level}
+                                                className="min-w-[64px] justify-center"
+                                            >
                                                 {levelText}
                                             </Badge>
                                         </div>
 
                                         <div className="p-4 md:p-5 pb-2 flex-1">
-                                            <ScoreRow label="Архитектурное мышление" value={spec.scores.arch} delay={0} />
-                                            <ScoreRow label="Ревью кода ИИ" value={spec.scores.code} delay={1} />
-                                            <ScoreRow label="Работа с ИИ" value={spec.scores.ai} delay={2} />
-                                            <ScoreRow label="Адаптация" value={spec.scores.adapt} warn={spec.scores.adapt < 80} delay={3} />
+                                            <ScoreRow
+                                                label="Архитектурное мышление"
+                                                value={spec.scores.arch}
+                                                delay={0}
+                                            />
+                                            <ScoreRow
+                                                label="Ревью кода ИИ"
+                                                value={spec.scores.code}
+                                                delay={1}
+                                            />
+                                            <ScoreRow
+                                                label="Работа с ИИ"
+                                                value={spec.scores.ai}
+                                                delay={2}
+                                            />
+                                            <ScoreRow
+                                                label="Адаптация"
+                                                value={spec.scores.adapt}
+                                                warn={spec.scores.adapt < 80}
+                                                delay={3}
+                                            />
                                         </div>
 
                                         <div className="px-4 md:px-5 pb-4 md:pb-5 pt-2 flex flex-wrap gap-1.5">
-                                            {spec.skills.slice(0, 4).map((skill, idx) => (
-                                                <Chip key={idx} variant={idx < 3 ? "accent" : "default"}>
-                                                    {skill}
-                                                </Chip>
-                                            ))}
+                                            {spec.skills
+                                                .slice(0, 4)
+                                                .map((skill, idx) => (
+                                                    <Chip
+                                                        key={idx}
+                                                        variant={
+                                                            idx < 3
+                                                                ? "accent"
+                                                                : "default"
+                                                        }
+                                                    >
+                                                        {skill}
+                                                    </Chip>
+                                                ))}
                                         </div>
                                     </motion.div>
                                 </AnimatePresence>

@@ -39,7 +39,7 @@ export function Nav() {
 
   return (
     // Убрали max-w-[1280px], чтобы шапка растянулась на всю ширину, и добавили px-6
-    <header className="sticky top-0 z-40 w-full border-b border-line bg-bg/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-line bg-bg shadow-sm">
       <div className="w-full px-2 sm:px-4 md:px-8 h-14 md:h-16 flex items-center justify-between gap-2">
         
         {/* ЛЕВАЯ СТОРОНА: Бургер и Лого */}
