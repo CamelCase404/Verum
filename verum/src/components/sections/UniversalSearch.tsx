@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Building2, Code2, X, ChevronDown } from "lucide-react";
@@ -99,9 +100,10 @@ export function UniversalSearch() {
                 </button>
             </div>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            {createPortal(
+                <AnimatePresence>
+                    {isOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface border border-line rounded-[22px] p-6 sm:p-8 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                             <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
                             
@@ -223,8 +225,10 @@ export function UniversalSearch() {
                             </div>
                         </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </>
     );
 }
