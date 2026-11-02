@@ -28,11 +28,12 @@ import { authApi, chatApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
 const STACKS = [
+    "Mobile (iOS)",
+    "Mobile (Android)",
     "Frontend",
     "Backend",
-    "Fullstack",
-    "Mobile",
-    "DevOps",
+    "GameDev",
+    "DevOps / SRE",
     "Data / ML",
 ];
 const LANGS = [
