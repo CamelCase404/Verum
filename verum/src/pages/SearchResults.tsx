@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STACKS = ["Frontend", "Backend", "Mobile", "DevOps", "Data / ML", "GameDev"];
+const STACKS = ["Mobile (iOS)", "Mobile (Android)", "Frontend", "Backend", "GameDev", "DevOps / SRE", "Data / ML"];
 const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 const STACK_LANGS: Record<string, string[]> = {
@@ -277,9 +277,7 @@ export function SearchResults() {
                                             <div className="text-[13px] text-ink-3 mb-2 truncate">{cand.stack} • {cand.language}</div>
                                             <div className="flex items-center gap-4 text-[12px]">
                                                 {/* Показываем "Совпадение" только если ищет компания */}
-                                            {user?.role === "company" && (
-                                                <span className="text-ink-2">Совпадение: <b className="text-accent">{cand.match_score}%</b></span>
-                                            )}
+                                            
                                             <span className="text-ink-3">Балл теста: <b className="text-ink-2">{cand.total_score}/100</b></span>
                                             </div>
                                         </div>

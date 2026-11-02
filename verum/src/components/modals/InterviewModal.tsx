@@ -8,7 +8,7 @@ import { toast } from "@/components/layout/ToastContainer";
 export function InterviewModal({
  onClose }: { onClose: () => void }) {
 
-  const { updateProfile } = useAppStore();
+  const { updateProfile, theme } = useAppStore();
   const [step, setStep] = useState<"start" | "loading">("start");
 
   const startTest = () => {
@@ -19,7 +19,7 @@ export function InterviewModal({
         }
         // Перекидываем на боевой домен (или на localhost, если мы в режиме разработки)
         const testAppUrl = import.meta.env.VITE_TEST_APP_URL || "https://test.verumskills.ru";
-        window.location.href = `${testAppUrl}/?token=${token}`;
+        window.location.href = `${testAppUrl}/?token=${token}&theme=${theme}`;
     };
 
   return (

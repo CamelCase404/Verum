@@ -5,20 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Building2, Code2, X, ChevronDown } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
-const STACKS = ["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data / ML"];
+const STACKS = ["Mobile (iOS)", "Mobile (Android)", "Frontend", "Backend", "GameDev", "DevOps / SRE", "Data / ML"];
 const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 
 // Умный словарь языков под каждый стек
 const STACK_LANGS: Record<string, string[]> = {
-    "Frontend": ["html", "css", "js", "ts", "react", "vue"],
-    "Backend": ["python", "go", "java", "csharp", "node"],
-    "Fullstack": ["html", "css", "js", "ts", "react", "vue", "python", "go", "java", "csharp", "node"],
-    "Mobile": ["kotlin", "swift", "java", "ts"],
-    "DevOps": ["bash", "python", "go"],
-    "Data / ML": ["python", "sql", "go"]
+    "Mobile (iOS)": ["swift", "objc", "swiftui", "uikit", "combine"],
+    "Mobile (Android)": ["kotlin", "java", "compose", "coroutines"],
+    "Frontend": ["html", "css", "js", "ts", "react", "vue", "svelte"],
+    "Backend": ["next", "python", "fastapi", "django", "go", "node", "java", "csharp"],
+    "GameDev": ["unity", "unreal", "godot"],
+    "DevOps / SRE": ["docker", "k8s", "terraform", "ansible", "bash"],
+    "Data / ML": ["python", "pandas", "pytorch", "tensorflow", "sql"]
 };
-const ALL_LANGS = ["html", "css", "js", "ts", "react", "vue", "python", "go", "java", "csharp", "kotlin", "swift", "bash", "sql", "node"];
+const ALL_LANGS = Array.from(new Set(Object.values(STACK_LANGS).flat()));
 
 export function UniversalSearch() {
     const user = useAppStore((s) => s.user);
