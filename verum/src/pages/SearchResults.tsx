@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STACKS = ["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data / ML"];
+const STACKS = ["Frontend", "Backend", "Mobile", "DevOps", "Data / ML", "GameDev"];
 const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 const STACK_LANGS: Record<string, string[]> = {

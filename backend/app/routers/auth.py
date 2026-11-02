@@ -96,9 +96,12 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
         # Уровень (грейд) должен совпадать точно (junior != middle)
         if req.grade and data.get("final_grade", "").lower() != req.grade.lower(): 
             match = False
-        # Стек ищем по вхождению (Frontend найдет Frontend developer)
-        if req.stack and req.stack.lower() not in data.get("stack_id", "").lower(): 
-            match = False
+        # Стек ищем по вхождению, разбивая фильтр на части (чтобы Data / ML находило data)
+        if req.stack:
+            req_stack_parts = [p.strip().lower() for p in req.stack.replace("/", " ").split() if p.strip()]
+            cand_stack = data.get("stack_id", "").lower()
+            if not any(part in cand_stack or cand_stack in part for part in req_stack_parts):
+                match = False
         # Язык ищем в списке языков кандидата
         if req.language:
             cand_langs = [l.strip().lower() for l in data.get("language_id", "").split(",")]
