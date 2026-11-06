@@ -24,6 +24,7 @@ import {
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
+import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
 import { authApi, chatApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
@@ -63,6 +64,8 @@ export function CompanyDashboard({
     const [isJobOpen, setIsJobOpen] = useState(false);
     const [editingJob, setEditingJob] = useState<any>(null);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
+    const [hireCandidate, setHireCandidate] = useState<any>(null);
+    const [isHiring, setIsHiring] = useState(false);
 
     const [activeTab, setActiveTab] = useState<"jobs" | "candidates">("jobs");
 
@@ -144,12 +147,21 @@ export function CompanyDashboard({
         selectedCandidates.includes(c.id),
     );
 
-    const handleHire = async (candidateId: number) => {
+    const handleHireClick = (cand: any) => {
+        setHireCandidate(cand);
+    };
+
+    const confirmHire = async () => {
+        if (!hireCandidate) return;
+        setIsHiring(true);
         try {
-            const res = await chatApi.startChat(candidateId);
+            const res = await chatApi.startChat(hireCandidate.id);
             navigate(`/messages?chat=${res.data.conversation_id}`);
         } catch (e) {
             toast("Ошибка при создании чата");
+        } finally {
+            setIsHiring(false);
+            setHireCandidate(null);
         }
     };
 
@@ -705,7 +717,7 @@ export function CompanyDashboard({
                                                     </div>
 
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); handleHire(cand.id); }}
+                                                        onClick={(e) => { e.stopPropagation(); handleHireClick(cand); }}
                                                         className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
                                                     >
                                                         Нанять
@@ -756,6 +768,15 @@ export function CompanyDashboard({
                         key="compare-candidates"
                         candidates={candidatesToCompare}
                         onClose={() => setIsCompareOpen(false)}
+                    />
+                )}
+                {hireCandidate && (
+                    <HireConfirmModal
+                        key="hire-confirm"
+                        candidate={hireCandidate}
+                        onClose={() => setHireCandidate(null)}
+                        onConfirm={confirmHire}
+                        loading={isHiring}
                     />
                 )}
             </AnimatePresence>
