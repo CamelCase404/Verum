@@ -221,3 +221,6 @@ backend/uploads/
 
 # Локальные бэкапы
 *.bak
+*.bak
+*.bak2
+*.bak3
