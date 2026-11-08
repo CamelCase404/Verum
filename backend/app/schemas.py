@@ -119,6 +119,8 @@ class UserProfile(BaseModel):
     interview_video_url: str | None = None
     attempts_used: int = 0
     blocked_until: datetime | None = None
+    profile_views: int = 0
+    top_rank: int = 0
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None

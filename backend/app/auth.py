@@ -53,6 +53,7 @@ class UserDB(Base):
     test_status = Column(String, default="none")
     pending_skills_data = Column(JSON, nullable=True)
     interview_video_url = Column(String, nullable=True)
+    profile_views = Column(Integer, default=0)
 
 
 

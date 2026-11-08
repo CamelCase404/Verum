@@ -638,13 +638,13 @@ export function DeveloperDashboard({
                                 <div className="flex items-center gap-2 text-ink-3 mb-1">
                                     <Eye size={14} /> <span className="text-[12px]">Просмотры</span>
                                 </div>
-                                <div className="text-xl font-bold text-ink">{isTested ? Math.floor(Math.random() * 20) + 5 : 0}</div>
+                                <div className="text-xl font-bold text-ink">{backendUser?.profile_views || 0}</div>
                             </div>
                             <div className="bg-surface-2 p-3 rounded-xl border border-line">
                                 <div className="flex items-center gap-2 text-ink-3 mb-1">
                                     <TrendingUp size={14} /> <span className="text-[12px]">В топе</span>
                                 </div>
-                                <div className="text-xl font-bold text-ink">{isTested ? Math.floor(Math.random() * 10) + 1 : 0}</div>
+                                <div className="text-xl font-bold text-ink">#{backendUser?.top_rank || "—"}</div>
                             </div>
                         </div>
 

@@ -2,7 +2,7 @@ import re
 from typing import Optional
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 import shutil
 import uuid
@@ -57,7 +57,9 @@ async def me(user: UserDB = Depends(get_current_user)):
         test_status=user.test_status,
         interview_video_url=user.interview_video_url,
         attempts_used=user.attempts_used or 0,
-        blocked_until=user.blocked_until
+        blocked_until=user.blocked_until,
+        profile_views=user.profile_views or 0,
+        top_rank=rank
     )
 
 
@@ -335,10 +337,27 @@ async def search_jobs(req: SearchJobReq, user: UserDB | None = Depends(get_curre
     return matched_jobs
 
 @router.get("/user/{user_id}", response_model=UserProfile)
-async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), current_user: UserDB | None = Depends(get_current_user_optional)):
     result = await db.execute(select(UserDB).where(UserDB.id == user_id))
     user = result.scalars().first()
     if not user: raise HTTPException(404, "User not found")
+    
+    # Если зашел не сам разработчик, а кто-то другой (компания), считаем просмотр
+    if current_user and current_user.id != user.id and current_user.role == "company":
+        user.profile_views = (user.profile_views or 0) + 1
+        await db.commit()
+        await db.refresh(user)
+
+    # Считаем место в топе (сколько людей имеют балл выше + 1)
+    rank = 1
+    if user.skills_data and user.skills_data.get("total_score_100"):
+        my_score = user.skills_data.get("total_score_100")
+        rank_res = await db.execute(select(func.count(UserDB.id)).where(UserDB.skills_data.isnot(None)))
+        # Упрощенный подсчет: реальный ранг считаем через SQL, но для простоты сделаем так:
+        all_users = await db.execute(select(UserDB).where(UserDB.skills_data.isnot(None)))
+        better_users = [u for u in all_users.scalars().all() if u.skills_data.get("total_score_100", 0) > my_score]
+        rank = len(better_users) + 1
+
     return UserProfile(
         id=user.id, email=user.email, role=user.role, full_name=user.full_name,
         skills=user.skills_data, company_name=user.company_name, website=user.website,
@@ -346,7 +365,9 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db)):
         avatar_url=user.avatar_url, projects=user.projects, job_postings=user.job_postings,
         last_test_at=user.last_test_at, test_status=user.test_status, interview_video_url=user.interview_video_url,
         attempts_used=user.attempts_used or 0,
-        blocked_until=user.blocked_until
+        blocked_until=user.blocked_until,
+        profile_views=user.profile_views or 0,
+        top_rank=rank
     )
 
 # ... (search_candidates оставляем как было, я его опустил для краткости, ты его не удаляй)
