@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { X, Loader2, UploadCloud } from "lucide-react";
+import { X, Loader2, UploadCloud, Banknote, Briefcase } from "lucide-react";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
@@ -10,6 +10,8 @@ export function EditProfileModal({
   const [bio, setBio] = useState(backendUser?.bio || "");
   const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [expectedSalary, setExpectedSalary] = useState(backendUser?.expected_salary ? backendUser.expected_salary.toLocaleString("ru-RU") : "");
+  const [projectRate, setProjectRate] = useState(backendUser?.project_rate ? backendUser.project_rate.toLocaleString("ru-RU") : "");
   const [loading, setLoading] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,7 +24,68 @@ export function EditProfileModal({
     }
   };
 
+  const getMaxSalary = () => {
+    const grade = backendUser?.skills?.final_grade;
+    if (grade === "Junior") return 90000;
+    if (grade === "Middle") return 220000;
+    if (grade === "Senior") return 350000;
+    return 0;
+  };
+  const getMaxProjectRate = () => {
+    const grade = backendUser?.skills?.final_grade;
+    if (grade === "Junior") return 30000;
+    if (grade === "Middle") return 80000;
+    if (grade === "Senior") return 150000;
+    return 0;
+  };
+
+  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    setExpectedSalary(raw ? parseInt(raw).toLocaleString("ru-RU") : "");
+  };
+
+  const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    setProjectRate(raw ? parseInt(raw).toLocaleString("ru-RU") : "");
+  };
+
   const handleSave = async () => {
+    const rawSalary = expectedSalary.replace(/\D/g, "");
+    const valSalary = rawSalary ? parseInt(rawSalary) : null;
+    if (valSalary && valSalary > getMaxSalary()) {
+      toast(`Максимальная зарплата для ${backendUser?.skills?.final_grade || "вашего грейда"} — ${getMaxSalary().toLocaleString('ru-RU')} ₽`, "error");
+      return;
+    }
+
+    const rawRate = projectRate.replace(/\D/g, "");
+    const valRate = rawRate ? parseInt(rawRate) : null;
+    if (valRate && valRate > getMaxProjectRate()) {
+      toast(`Максимальная цена кейса для ${backendUser?.skills?.final_grade || "вашего грейда"} — ${getMaxProjectRate().toLocaleString('ru-RU')} ₽`, "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let finalAvatarUrl = avatarPreview;
+      if (selectedFile) {
+        const uploadRes = await authApi.uploadAvatar(selectedFile);
+        finalAvatarUrl = uploadRes.url;
+      }
+      await authApi.updateProfile({ 
+        bio, 
+        avatar_url: finalAvatarUrl,
+        expected_salary: valSalary,
+        project_rate: valRate
+      });
+      toast("Профиль обновлен", "success");
+      onRefresh();
+      onClose();
+    } catch (e: any) {
+      toast(e.message || "Ошибка сохранения");
+    } finally {
+      setLoading(false);
+    }
+  };
     setLoading(true);
     try {
       let finalAvatarUrl = avatarPreview;
@@ -75,6 +138,43 @@ export function EditProfileModal({
             <label className="text-sm font-medium mb-1 block">О себе</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-ink-4" placeholder="Расскажите о своем опыте..." />
           </div>
+
+          {/* Цены (только если есть навыки) */}
+          {backendUser?.skills?.final_grade && backendUser.skills.final_grade !== "Reject" && (
+            <div className="bg-surface-2 border border-line rounded-xl p-4 space-y-4">
+              <div className="text-[12px] font-semibold text-ink-3 uppercase tracking-wider mb-2">Ваши ставки</div>
+              <div>
+                <label className="text-sm font-medium mb-1 flex items-center gap-2 text-ink-2">
+                  <Banknote size={14} className="text-accent"/> Желаемая зарплата (в месяц)
+                </label>
+                <div className="flex items-center bg-bg-2 border border-line rounded-lg px-3 py-2 focus-within:border-accent transition-colors">
+                  <input 
+                    type="text" 
+                    value={expectedSalary} 
+                    onChange={handleSalaryChange} 
+                    className="w-full bg-transparent outline-none text-sm font-semibold"
+                    placeholder={`Авто (макс. ${getMaxSalary().toLocaleString('ru-RU')} ₽)`}
+                  />
+                  <span className="text-ink-3 ml-2 font-medium">₽</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 flex items-center gap-2 text-ink-2">
+                  <Briefcase size={14} className="text-accent"/> Стоимость кейса (за проект)
+                </label>
+                <div className="flex items-center bg-bg-2 border border-line rounded-lg px-3 py-2 focus-within:border-accent transition-colors">
+                  <input 
+                    type="text" 
+                    value={projectRate} 
+                    onChange={handleRateChange} 
+                    className="w-full bg-transparent outline-none text-sm font-semibold"
+                    placeholder={`Авто (макс. ${getMaxProjectRate().toLocaleString('ru-RU')} ₽)`}
+                  />
+                  <span className="text-ink-3 ml-2 font-medium">₽</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 justify-end">

@@ -69,6 +69,8 @@ export function DeveloperDashboard({
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [showAllRepos, setShowAllRepos] = useState(false);
     const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+    
+    
 
     const initials =
         backendUser?.full_name?.substring(0, 2).toUpperCase() || "??";
@@ -114,6 +116,9 @@ export function DeveloperDashboard({
             .catch(console.error);
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
 
+    
+
+    
     // Заполненность профиля (геймификация)
     let profileScore = 0;
     if (backendUser?.bio) profileScore += 25;
@@ -454,139 +459,80 @@ export function DeveloperDashboard({
                         {/* ЕДИНАЯ КРАСИВАЯ КАРТОЧКА НАВЫКОВ */}
                         {isTested && (
                             <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-line border-b border-line">
-                                    <div className="p-4 flex flex-col justify-center">
-                                        <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1.5">
-                                            <ShieldCheck
-                                                size={14}
-                                                className="text-accent"
-                                            />{" "}
-                                            Уровень
+                                <div className="p-4 space-y-4">
+                                    
+                                    {/* Уровень */}
+                                    <div className="flex justify-between items-center pb-3 border-b border-line">
+                                        <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
+                                            <ShieldCheck size={14} className="text-accent" /> Уровень
                                         </div>
-                                        <div className="text-2xl font-bold text-accent">
-                                            {skills.final_grade}
-                                        </div>
+                                        <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
                                     </div>
-                                    <div className="p-4 flex flex-col justify-center">
-                                        <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1.5">
-                                            <Banknote
-                                                size={14}
-                                                className="text-accent"
-                                            />{" "}
-                                            Доход
+
+                                    {/* Зарплата (для найма) */}
+                                    <div className="flex justify-between items-center pb-3 border-b border-line">
+                                        <div>
+                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5 mb-1">
+                                                <Banknote size={14} className="text-accent" /> Зарплата (найм)
+                                            </div>
+                                            <div className="text-[11px] text-ink-3">Системная: ~ {estimatedSalary.toLocaleString("ru-RU")} ₽</div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[11px] text-ink-3 mb-1">Системная: ~ {estimatedSalary.toLocaleString("ru-RU")} ₽</div>
-                                            <div className="flex items-center justify-end gap-1">
-                                                <input 
-                                                    type="number" 
-                                                    value={backendUser?.expected_salary || ""} 
-                                                    onChange={(e) => {
-                                                        const val = parseInt(e.target.value);
-                                                        const maxPrice = getMaxSalary();
-                                                        if (val > maxPrice) {
-                                                            toast(`Максимальная зарплата для ${skills.final_grade} — ${maxPrice.toLocaleString('ru-RU')} ₽`, "error");
-                                                            return;
-                                                        }
-                                                        authApi.updateProfile({ expected_salary: val || null }).then(() => onRefresh());
-                                                    }}
-                                                    placeholder="Ваша"
-                                                    className="w-20 bg-bg-2 border border-line rounded px-2 py-1 text-right text-[15px] font-bold outline-none focus:border-accent text-accent"
-                                                /> <span className="text-[13px] text-ink-3 font-normal">₽</span>
+                                            <div className="text-[15px] font-bold text-ink">
+                                                ~ {(backendUser?.expected_salary || estimatedSalary).toLocaleString("ru-RU")} ₽
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="p-4 space-y-4">
-                                    {skills.stack_id && (
+
+                                    {/* Стоимость кейса */}
+                                    <div className="flex justify-between items-center pb-3 border-b border-line">
                                         <div>
-                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
+                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5 mb-1">
+                                                <Briefcase size={14} className="text-accent" /> Стоимость кейса
+                                            </div>
+                                            <div className="text-[11px] text-ink-3">Системная: ~ {Math.round((skills.total_score_100 || 50) * 500 + 10000).toLocaleString("ru-RU")} ₽</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[15px] font-bold text-ink">
+                                                ~ {(backendUser?.project_rate || Math.round((skills.total_score_100 || 50) * 500 + 10000)).toLocaleString("ru-RU")} ₽
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Стек */}
+                                    {skills.stack_id && (
+                                        <div className="flex justify-between items-center pb-3 border-b border-line">
+                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
                                                 <Layers size={14} /> Стек
                                             </div>
                                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface border border-line rounded-md text-[13px] font-medium text-ink capitalize">
                                                 {(() => {
-                                                    const Icon =
-                                                        STACK_ICONS[
-                                                            skills.stack_id.toLowerCase()
-                                                        ] || Layers;
-                                                    return (
-                                                        <Icon
-                                                            size={14}
-                                                            className="text-accent"
-                                                        />
-                                                    );
+                                                    const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers;
+                                                    return <Icon size={14} className="text-accent" />;
                                                 })()}
                                                 {skills.stack_id}
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Языки */}
                                     {skills.language_id && (
-                                        <>
-                                        <div className="pt-4 border-t border-line mt-4">
-                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
-                                                <Banknote size={14} className="text-accent"/> Стоимость кейса
-                                            </div>
-                                            <div className="flex items-center justify-between bg-surface border border-line p-3 rounded-lg">
-                                                <div>
-                                                    <div className="text-[12px] text-ink-3">Системная оценка:</div>
-                                                    <div className="font-semibold text-ink">~ {Math.round((skills.total_score_100 || 50) * 500 + 10000).toLocaleString("ru-RU")} ₽</div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-[12px] text-ink-3 mb-1">Ваша цена:</div>
-                                                    <div className="flex items-center justify-end gap-1">
-                                                        <input 
-                                                            type="number" 
-                                                            value={backendUser?.project_rate || ""} 
-                                                            onChange={(e) => {
-                                                                const val = parseInt(e.target.value);
-                                                                const maxPrice = getMaxProjectRate();
-                                                                if (val > maxPrice) {
-                                                                    toast(`Максимальная цена для ${skills.final_grade} — ${maxPrice.toLocaleString('ru-RU')} ₽`, "error");
-                                                                    return;
-                                                                }
-                                                                authApi.updateProfile({ project_rate: val || null }).then(() => onRefresh());
-                                                            }}
-                                                            placeholder="Авто"
-                                                            className="w-20 bg-bg-2 border border-line rounded px-2 py-1 text-right text-sm font-semibold outline-none focus:border-accent text-accent"
-                                                        /> <span className="text-[13px] text-ink-3">₽</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                         <div>
-                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
+                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-2 flex items-center gap-1.5">
                                                 <Code2 size={14} /> Языки
                                             </div>
                                             <div className="flex flex-wrap gap-1.5">
-                                                {skills.language_id
-                                                    .split(",")
-                                                    .map((lang: string) => (
-                                                        <span
-                                                            key={lang}
-                                                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface border border-line rounded text-[11px] font-medium text-ink-2 uppercase"
-                                                        >
-                                                            {(() => {
-                                                                const LIcon =
-                                                                    LANG_ICONS[
-                                                                        lang
-                                                                            .trim()
-                                                                            .toLowerCase()
-                                                                    ] || Code2;
-                                                                return (
-                                                                    <LIcon
-                                                                        size={
-                                                                            12
-                                                                        }
-                                                                        className="text-ink-3"
-                                                                    />
-                                                                );
-                                                            })()}
-                                                            {lang.trim()}
-                                                        </span>
-                                                    ))}
+                                                {skills.language_id.split(",").map((lang: string) => (
+                                                    <span key={lang} className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface border border-line rounded text-[11px] font-medium text-ink-2 uppercase">
+                                                        {(() => {
+                                                            const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2;
+                                                            return <LIcon size={12} className="text-ink-3" />;
+                                                        })()}
+                                                        {lang.trim()}
+                                                    </span>
+                                                ))}
                                             </div>
                                         </div>
-                                        </>
                                     )}
                                 </div>
                             </div>
