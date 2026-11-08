@@ -4,6 +4,22 @@ import { X, ShieldCheck, Github, Star, CheckCircle2 } from "lucide-react";
 
 export function CompareCandidatesModal({
  candidates, onClose }: { candidates: any[], onClose: () => void }) {
+  // Блокировка скролла на мобильных (предотвращает баг с прыжком страницы)
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">

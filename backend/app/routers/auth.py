@@ -47,7 +47,15 @@ async def login(data: LoginReq, db: AsyncSession = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserProfile)
-async def me(user: UserDB = Depends(get_current_user)):
+async def me(user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    # Считаем реальное место в топе
+    rank = 1
+    if user.skills_data and user.skills_data.get("total_score_100"):
+        my_score = user.skills_data.get("total_score_100")
+        all_users = await db.execute(select(UserDB).where(UserDB.skills_data.isnot(None)))
+        better_users = [u for u in all_users.scalars().all() if u.skills_data.get("total_score_100", 0) > my_score]
+        rank = len(better_users) + 1
+
     return UserProfile(
         id=user.id, email=user.email, role=user.role, full_name=user.full_name,
         skills=user.skills_data, company_name=user.company_name, website=user.website,
@@ -59,7 +67,7 @@ async def me(user: UserDB = Depends(get_current_user)):
         attempts_used=user.attempts_used or 0,
         blocked_until=user.blocked_until,
         profile_views=user.profile_views or 0,
-        top_rank=1
+        top_rank=rank
     )
 
 

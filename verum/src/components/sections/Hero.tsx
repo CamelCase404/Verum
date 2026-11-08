@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Code, Terminal, Cpu } from "lucide-react";
 import { Particles } from "@/components/ui/Particles";
 import { MOCK_SPECIALISTS } from "@/data/specialists";
-import { UniversalSearch } from "./UniversalSearch";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
@@ -63,15 +62,7 @@ export function Hero() {
             />
 
             <div className="max-w-[1280px] mx-auto px-4 md:px-6 relative flex flex-col items-center">
-                {/* 1. ПОИСК СВЕРХУ ПО ЦЕНТРУ */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: EASE }}
-                    className="w-full max-w-[800px] mb-16 md:mb-24 z-20"
-                >
-                    <UniversalSearch />
-                </motion.div>
+                
 
                 {/* 2. СЕТКА (Текст + Карточка) */}
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-4 md:gap-12 lg:gap-[72px] items-center w-full">

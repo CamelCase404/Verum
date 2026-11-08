@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Loader2, ShieldCheck, Banknote, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -14,6 +14,22 @@ export function HireConfirmModal({
     onConfirm: () => void;
     loading: boolean;
 }) {
+  // Блокировка скролла на мобильных (предотвращает баг с прыжком страницы)
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
     const [agreed, setAgreed] = useState(false);
     
     // Считаем комиссию: 8% от годового оклада

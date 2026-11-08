@@ -81,12 +81,30 @@ export function DeveloperDashboard({
     const projects = backendUser?.projects || [];
 
     useEffect(() => {
-        if (skills?.stack_id) {
-            authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
-                .then(res => setRecommendedJobs(res.data.slice(0, 2)))
-                .catch(console.error);
+        if (!backendUser?.id || !skills?.stack_id) return;
+        
+        const cacheKey = `verum_recs_${backendUser.id}`;
+        const cached = localStorage.getItem(cacheKey);
+        const now = Date.now();
+        
+        // Если есть кэш и ему меньше 24 часов — берем из кэша
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (now - timestamp < 24 * 60 * 60 * 1000) {
+                setRecommendedJobs(data);
+                return;
+            }
         }
-    }, [skills?.stack_id, skills?.final_grade]);
+
+        // Иначе делаем запрос и кэшируем на сутки
+        authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
+            .then(res => {
+                const jobs = res.data.slice(0, 4);
+                setRecommendedJobs(jobs);
+                localStorage.setItem(cacheKey, JSON.stringify({ data: jobs, timestamp: now }));
+            })
+            .catch(console.error);
+    }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
 
     // Заполненность профиля (геймификация)
     let profileScore = 0;
@@ -234,6 +252,82 @@ export function DeveloperDashboard({
                 )}
             </div>
 
+
+            {/* БЛОК УДЕРЖАНИЯ: АКТИВНОСТЬ И РЕКОМЕНДАЦИИ (Самый первый блок) */}
+            <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm overflow-hidden relative mb-6">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
+                
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 mb-4">
+                    <h3 className="font-semibold text-base md:text-lg flex items-center gap-2">
+                        <Zap size={16} className="text-amber-500" /> 
+                        Ваша активность на платформе
+                    </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                    <div className="bg-surface-2 p-4 rounded-xl border border-line flex items-center justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 text-ink-3 mb-1">
+                                <Eye size={14} /> <span className="text-[12px] font-medium">Просмотры профиля</span>
+                            </div>
+                            <div className="text-2xl font-bold text-ink">{backendUser?.profile_views || 0}</div>
+                        </div>
+                        <TrendingUp size={24} className="text-accent opacity-50" />
+                    </div>
+                    <div className="bg-surface-2 p-4 rounded-xl border border-line flex items-center justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 text-ink-3 mb-1">
+                                <TrendingUp size={14} /> <span className="text-[12px] font-medium">Место в топе</span>
+                            </div>
+                            <div className="text-2xl font-bold text-ink">#{backendUser?.top_rank || "—"}</div>
+                        </div>
+                        <Briefcase size={24} className="text-accent opacity-50" />
+                    </div>
+                </div>
+
+                {/* Profile Strength (оставляем как есть) */}
+                <div className="mt-6 relative z-10">
+                    <div className="flex justify-between text-[12px] font-medium mb-1.5">
+                        <span className="text-ink-2">Заполненность профиля</span>
+                        <span className={profileScore === 100 ? "text-accent" : "text-warn"}>{profileScore}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-1000 ${profileScore === 100 ? "bg-accent" : "bg-warn"}`} style={{ width: `${profileScore}%` }} />
+                    </div>
+                    {profileScore < 100 && (
+                        <p className="text-[11px] text-ink-3 mt-2">
+                            Заполните профиль на 100%, чтобы получать в 2 раза больше приглашений от компаний.
+                        </p>
+                    )}
+                </div>
+
+                {/* Recommended Jobs (обновление раз в сутки) */}
+                <div className="mt-6 relative z-10">
+                    <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-3 flex items-center gap-2">
+                        <Briefcase size={14} /> Рекомендуемые задачи на сегодня
+                    </h4>
+                    {recommendedJobs.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {recommendedJobs.map(job => (
+                                <div key={job.id} className="p-3 bg-surface-2 border border-line rounded-xl hover:border-accent cursor-pointer transition-colors group">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="font-medium text-[13px] text-ink group-hover:text-accent transition-colors line-clamp-1">{job.title}</div>
+                                        <ChevronRight size={14} className="text-ink-3 shrink-0" />
+                                    </div>
+                                    <div className="text-[11px] text-ink-3 flex items-center justify-between">
+                                        <span className="truncate pr-2">{job.company_name}</span>
+                                        <span className="font-semibold text-accent whitespace-nowrap">{job.salary}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-[12px] text-ink-3 p-3 bg-surface-2 rounded-xl text-center border border-dashed border-line-2">
+                            {isTested ? "Пока нет новых задач под ваш стек" : "Пройдите тест, чтобы получать рекомендации"}
+                        </div>
+                    )}
+                </div>
+            </div>
             <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
                 {/* ЛЕВАЯ КОЛОНКА */}
                 <div className="space-y-4 md:space-y-6 min-w-0">
@@ -620,76 +714,6 @@ export function DeveloperDashboard({
                                 </button>
                             </div>
                         )}
-                    </div>
-
-                    {/* БЛОК УДЕРЖАНИЯ: АКТИВНОСТЬ И РЕКОМЕНДАЦИИ */}
-                    <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
-                        
-                        <div className="flex items-center justify-between mb-4 relative z-10">
-                            <h3 className="font-semibold text-base md:text-lg flex items-center gap-2">
-                                <Zap size={16} className="text-amber-500" /> 
-                                Ваша активность
-                            </h3>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
-                            <div className="bg-surface-2 p-3 rounded-xl border border-line">
-                                <div className="flex items-center gap-2 text-ink-3 mb-1">
-                                    <Eye size={14} /> <span className="text-[12px]">Просмотры</span>
-                                </div>
-                                <div className="text-xl font-bold text-ink">{backendUser?.profile_views || 0}</div>
-                            </div>
-                            <div className="bg-surface-2 p-3 rounded-xl border border-line">
-                                <div className="flex items-center gap-2 text-ink-3 mb-1">
-                                    <TrendingUp size={14} /> <span className="text-[12px]">В топе</span>
-                                </div>
-                                <div className="text-xl font-bold text-ink">#{backendUser?.top_rank || "—"}</div>
-                            </div>
-                        </div>
-
-                        {/* Profile Strength */}
-                        <div className="mb-6 relative z-10">
-                            <div className="flex justify-between text-[12px] font-medium mb-1.5">
-                                <span className="text-ink-2">Заполненность профиля</span>
-                                <span className={profileScore === 100 ? "text-accent" : "text-warn"}>{profileScore}%</span>
-                            </div>
-                            <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full transition-all duration-1000 ${profileScore === 100 ? "bg-accent" : "bg-warn"}`} style={{ width: `${profileScore}%` }} />
-                            </div>
-                            {profileScore < 100 && (
-                                <p className="text-[11px] text-ink-3 mt-2">
-                                    Заполните профиль на 100%, чтобы получать в 2 раза больше приглашений от компаний.
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Recommended Jobs */}
-                        <div className="relative z-10">
-                            <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-3 flex items-center gap-2">
-                                <Briefcase size={14} /> Рекомендуемые задачи
-                            </h4>
-                            {recommendedJobs.length > 0 ? (
-                                <div className="space-y-2">
-                                    {recommendedJobs.map(job => (
-                                        <div key={job.id} className="p-3 bg-surface-2 border border-line rounded-xl hover:border-accent cursor-pointer transition-colors group">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <div className="font-medium text-[13px] text-ink group-hover:text-accent transition-colors line-clamp-1">{job.title}</div>
-                                                <ChevronRight size={14} className="text-ink-3 shrink-0" />
-                                            </div>
-                                            <div className="text-[11px] text-ink-3 flex items-center justify-between">
-                                                <span>{job.company_name}</span>
-                                                <span className="font-semibold text-accent">{job.salary}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-[12px] text-ink-3 p-3 bg-surface-2 rounded-xl text-center border border-dashed border-line-2">
-                                    {isTested ? "Пока нет новых задач под ваш стек" : "Пройдите тест, чтобы получать рекомендации"}
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                     {/* МОИ ПРОЕКТЫ */}
