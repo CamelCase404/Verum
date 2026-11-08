@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
+import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
 import { authApi, chatApi } from "@/api";
@@ -62,6 +63,8 @@ export function CompanyDashboard({
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isJobOpen, setIsJobOpen] = useState(false);
+    const [isCaseOpen, setIsCaseOpen] = useState(false);
+    const [activeWorkType, setActiveWorkType] = useState<"vacancies" | "cases">("vacancies");
     const [editingJob, setEditingJob] = useState<any>(null);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     const [hireCandidate, setHireCandidate] = useState<any>(null);
@@ -86,7 +89,10 @@ export function CompanyDashboard({
 
     const [selectedCandidates, setSelectedCandidates] = useState<number[]>([]);
 
-    const jobs = backendUser?.job_postings || [];
+    const allJobs = backendUser?.job_postings || [];
+    const jobs = allJobs.filter((j: any) => j.type !== "case");
+    const cases = allJobs.filter((j: any) => j.type === "case");
+    const currentList = activeWorkType === "vacancies" ? jobs : cases;
 
     const fetchCandidates = () => {
         setLoadingCandidates(true);
@@ -351,21 +357,25 @@ export function CompanyDashboard({
                                 exit={{ opacity: 0, y: -10 }}
                                 className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm"
                             >
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="font-semibold text-lg flex items-center gap-2">
-                                        Активные вакансии
-                                    </h3>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                                    <div className="flex bg-surface-2 border border-line rounded-xl p-1 w-full sm:w-auto">
+                                        <button onClick={() => setActiveWorkType("vacancies")} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeWorkType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
+                                        <button onClick={() => setActiveWorkType("cases")} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeWorkType === "cases" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
+                                    </div>
                                     <button
-                                        onClick={() => { setEditingJob(null); setIsJobOpen(true); }}
-                                        className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-accent-2 transition-colors"
+                                        onClick={() => { 
+                                            if (activeWorkType === "vacancies") { setEditingJob(null); setIsJobOpen(true); }
+                                            else { setIsCaseOpen(true); }
+                                        }}
+                                        className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-accent-2 transition-colors w-full sm:w-auto justify-center"
                                     >
-                                        <Plus size={16} /> Создать
+                                        <Plus size={16} /> Создать {activeWorkType === "vacancies" ? "вакансию" : "кейс"}
                                     </button>
                                 </div>
 
-                                {jobs.length > 0 ? (
+                                {currentList.length > 0 ? (
                                     <div className="grid sm:grid-cols-2 gap-4">
-                                        {jobs.map((job: any) => (
+                                        {currentList.map((job: any) => (
                                             <div
                                                 key={job.id}
                                                 onClick={() => handleJobClick(job)}
@@ -385,6 +395,7 @@ export function CompanyDashboard({
                                                         <h4 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">
                                                             {job.title}
                                                         </h4>
+                                                        {job.type === "case" && <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full ml-2">Кейс</span>}
                                                     </div>
                                                     <p className="text-[12px] text-ink-3 line-clamp-2 mb-3">
                                                         {job.description}
@@ -750,6 +761,14 @@ export function CompanyDashboard({
                     <EditCompanyModal
                         key="edit-company"
                         onClose={() => setIsEditOpen(false)}
+                        backendUser={backendUser}
+                        onRefresh={onRefresh}
+                    />
+                )}
+                {isCaseOpen && (
+                    <CreateCaseModal
+                        key="create-case"
+                        onClose={() => setIsCaseOpen(false)}
                         backendUser={backendUser}
                         onRefresh={onRefresh}
                     />

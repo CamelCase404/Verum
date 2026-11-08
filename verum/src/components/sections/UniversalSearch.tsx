@@ -26,7 +26,7 @@ export function UniversalSearch() {
     const navigate = useNavigate();
     
     const [isOpen, setIsOpen] = useState(false);
-    const [searchRole, setSearchRole] = useState<"developer" | "company">("developer");
+    const searchRole = "company"; // Теперь ищем только сотрудников
     
     const [stack, setStack] = useState("");
     const [level, setLevel] = useState("");
@@ -44,9 +44,7 @@ export function UniversalSearch() {
     // Доступные языки зависят от выбранного стека
     const availableLangs = stack ? (STACK_LANGS[stack] || ALL_LANGS) : ALL_LANGS;
 
-    useEffect(() => {
-        if (user && isOpen) setSearchRole(user.role as any);
-    }, [user, isOpen]);
+    
 
     useEffect(() => {
         if (isOpen) {
@@ -110,20 +108,7 @@ export function UniversalSearch() {
                             
                             <div className="mb-6">
                                 <h2 className="text-2xl font-bold mb-4">Умный поиск</h2>
-                                <div className="flex bg-bg-2 p-1 rounded-xl">
-                                    <button
-                                        onClick={() => setSearchRole("developer")}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[14px] font-medium transition-all ${searchRole === "developer" ? "bg-surface text-accent shadow-sm" : "text-ink-3 hover:text-ink"}`}
-                                    >
-                                        <Code2 size={16} /> Ищу работу
-                                    </button>
-                                    <button
-                                        onClick={() => setSearchRole("company")}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[14px] font-medium transition-all ${searchRole === "company" ? "bg-surface text-accent shadow-sm" : "text-ink-3 hover:text-ink"}`}
-                                    >
-                                        <Building2 size={16} /> Ищу сотрудника
-                                    </button>
-                                </div>
+                                
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
