@@ -19,7 +19,7 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     same_site="lax",
-    https_only=False,
+    https_only=settings.SECURE_COOKIES,
 )
 
 app.include_router(media.router)

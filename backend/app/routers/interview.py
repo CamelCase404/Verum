@@ -168,6 +168,14 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
 async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
     if user.role != "developer":
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
+    
+    # Блокируем старт, пока предыдущее собеседование висит на модерации
+    if user.test_status == "pending":
+        raise HTTPException(
+            409,
+            "У вас уже есть собеседование на модерации. Дождитесь решения модератора."
+        )
+    
     from datetime import datetime
     now = utcnow_naive()
     if user.blocked_until:

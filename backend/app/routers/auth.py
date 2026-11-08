@@ -136,6 +136,12 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
             github_bonus = min(stars * 1000, 30000)
             estimated_salary = int(test_salary + github_bonus)
 
+            # Фильтр по минимальной зарплате (используем expected_salary, если он указан)
+            if req.min_salary:
+                effective_salary = u.expected_salary or estimated_salary
+                if effective_salary < req.min_salary:
+                    continue
+
             match_score = 0
             if user and user.role == "company" and user.job_postings:
                 target_job = None
@@ -271,6 +277,7 @@ async def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_curr
     if data.projects is not None: user.projects = data.projects
     if data.project_rate is not None: user.project_rate = data.project_rate
     if data.expected_salary is not None: user.expected_salary = data.expected_salary
+    if data.website is not None: user.website = data.website
     await db.commit()
     return {"status": "ok"}
 
@@ -330,13 +337,12 @@ async def search_jobs(req: SearchJobReq, user: UserDB | None = Depends(get_curre
             if req.format and req.format.lower() != job.get("format", "").lower(): 
                 match = False
             
-            # Умный поиск по зарплате (вытаскиваем первое число из строки)
+            # Умный поиск по зарплате (берём нижнюю границу диапазона)
             if req.min_salary:
                 salary_str = str(job.get("salary", "0"))
-                # Ищем первое вхождение цифр в строке (например, из "от 150 000 ₽" достанет 150000)
                 numbers = re.findall(r'\d+', salary_str.replace(" ", "").replace("\xa0", ""))
                 if numbers:
-                    job_salary = int("".join(numbers))
+                    job_salary = int(numbers[0])
                     if job_salary < req.min_salary:
                         match = False
                 else:
@@ -351,17 +357,34 @@ async def search_jobs(req: SearchJobReq, user: UserDB | None = Depends(get_curre
                 })
     return matched_jobs
 
+# Дедуп просмотров: считаем не больше 1 просмотра в день на пару (viewer_id, target_id)
+_profile_views_cache: dict[tuple[int, int], str] = {}
+
+def _today_str() -> str:
+    from datetime import date
+    return date.today().isoformat()
+
+
 @router.get("/user/{user_id}", response_model=UserProfile)
 async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), current_user: UserDB | None = Depends(get_current_user_optional)):
     result = await db.execute(select(UserDB).where(UserDB.id == user_id))
     user = result.scalars().first()
     if not user: raise HTTPException(404, "User not found")
     
-    # Если зашел не сам разработчик, а кто-то другой (компания), считаем просмотр
+    # Считаем просмотр не больше 1 раза в день от одной компании
     if current_user and current_user.id != user.id and current_user.role == "company":
-        user.profile_views = (user.profile_views or 0) + 1
-        await db.commit()
-        await db.refresh(user)
+        today = _today_str()
+        key = (current_user.id, user.id)
+        if _profile_views_cache.get(key) != today:
+            user.profile_views = (user.profile_views or 0) + 1
+            _profile_views_cache[key] = today
+            # Простая очистка старых записей, чтобы dict не рос бесконечно
+            if len(_profile_views_cache) > 50000:
+                for k in list(_profile_views_cache.keys()):
+                    if _profile_views_cache[k] != today:
+                        del _profile_views_cache[k]
+            await db.commit()
+            await db.refresh(user)
 
     # Считаем место в топе (сколько людей имеют балл выше + 1)
     rank = 1

@@ -123,8 +123,6 @@ class UserProfile(BaseModel):
     blocked_until: datetime | None = None
     profile_views: int = 0
     top_rank: int = 0
-    project_rate: int | None = None
-    expected_salary: int | None = None
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None
@@ -133,3 +131,4 @@ class UpdateProfileReq(BaseModel):
     job_postings: list[dict] | None = None
     project_rate: int | None = None
     expected_salary: int | None = None
+    website: str | None = None

@@ -21,6 +21,11 @@ class Settings:
         os.getenv("GIGACHAT_VERIFY_SSL", "false").lower() == "true"
     )
 
+    # Secure-cookie для OAuth-сессии. В проде за HTTPS → SECURE_COOKIES=true в .env
+    SECURE_COOKIES: bool = (
+        os.getenv("SECURE_COOKIES", "false").lower() == "true"
+    )
+
     # портал verum (5174) + интервью (5173) + запас 3000
     CORS_ORIGINS: list[str] = [
         o.strip()
