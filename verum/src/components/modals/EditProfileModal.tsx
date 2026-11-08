@@ -10,19 +10,16 @@ export function EditProfileModal({
   const [bio, setBio] = useState(backendUser?.bio || "");
   const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [expectedSalary, setExpectedSalary] = useState(backendUser?.expected_salary ? backendUser.expected_salary.toLocaleString("ru-RU") : "");
-  const [projectRate, setProjectRate] = useState(backendUser?.project_rate ? backendUser.project_rate.toLocaleString("ru-RU") : "");
-  const [loading, setLoading] = useState(false);
   
+  const [expectedSalary, setExpectedSalary] = useState(
+    backendUser?.expected_salary ? backendUser.expected_salary.toLocaleString("ru-RU") : ""
+  );
+  const [projectRate, setProjectRate] = useState(
+    backendUser?.project_rate ? backendUser.project_rate.toLocaleString("ru-RU") : ""
+  );
+  
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setAvatarPreview(URL.createObjectURL(file)); // Показываем предпросмотр
-    }
-  };
 
   const getMaxSalary = () => {
     const grade = backendUser?.skills?.final_grade;
@@ -31,12 +28,21 @@ export function EditProfileModal({
     if (grade === "Senior") return 350000;
     return 0;
   };
+
   const getMaxProjectRate = () => {
     const grade = backendUser?.skills?.final_grade;
     if (grade === "Junior") return 30000;
     if (grade === "Middle") return 80000;
     if (grade === "Senior") return 150000;
     return 0;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,14 +59,14 @@ export function EditProfileModal({
     const rawSalary = expectedSalary.replace(/\D/g, "");
     const valSalary = rawSalary ? parseInt(rawSalary) : null;
     if (valSalary && valSalary > getMaxSalary()) {
-      toast(`Максимальная зарплата для ${backendUser?.skills?.final_grade || "вашего грейда"} — ${getMaxSalary().toLocaleString('ru-RU')} ₽`, "error");
+      toast(`Максимальная зарплата для вашего грейда — ${getMaxSalary().toLocaleString('ru-RU')} ₽`, "error");
       return;
     }
 
     const rawRate = projectRate.replace(/\D/g, "");
     const valRate = rawRate ? parseInt(rawRate) : null;
     if (valRate && valRate > getMaxProjectRate()) {
-      toast(`Максимальная цена кейса для ${backendUser?.skills?.final_grade || "вашего грейда"} — ${getMaxProjectRate().toLocaleString('ru-RU')} ₽`, "error");
+      toast(`Максимальная цена кейса для вашего грейда — ${getMaxProjectRate().toLocaleString('ru-RU')} ₽`, "error");
       return;
     }
 
@@ -71,33 +77,13 @@ export function EditProfileModal({
         const uploadRes = await authApi.uploadAvatar(selectedFile);
         finalAvatarUrl = uploadRes.url;
       }
+
       await authApi.updateProfile({ 
         bio, 
         avatar_url: finalAvatarUrl,
         expected_salary: valSalary,
         project_rate: valRate
       });
-      toast("Профиль обновлен", "success");
-      onRefresh();
-      onClose();
-    } catch (e: any) {
-      toast(e.message || "Ошибка сохранения");
-    } finally {
-      setLoading(false);
-    }
-  };
-    setLoading(true);
-    try {
-      let finalAvatarUrl = avatarPreview;
-
-      // 1. Если выбран новый файл — загружаем его
-      if (selectedFile) {
-        const uploadRes = await authApi.uploadAvatar(selectedFile);
-        finalAvatarUrl = uploadRes.url;
-      }
-
-      // 2. Сохраняем остальные данные (био)
-      await authApi.updateProfile({ bio });
       
       toast("Профиль обновлен", "success");
       onRefresh();
@@ -111,7 +97,7 @@ export function EditProfileModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-4 sm:p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-md shadow-2xl relative">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface border border-line rounded-2xl p-4 sm:p-6 w-full max-w-[calc(100vw-2rem)] sm:max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
         <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink"><X size={20} /></button>
         <h2 className="text-xl font-bold mb-4">Редактировать профиль</h2>
         
@@ -143,6 +129,7 @@ export function EditProfileModal({
           {backendUser?.skills?.final_grade && backendUser.skills.final_grade !== "Reject" && (
             <div className="bg-surface-2 border border-line rounded-xl p-4 space-y-4">
               <div className="text-[12px] font-semibold text-ink-3 uppercase tracking-wider mb-2">Ваши ставки</div>
+              
               <div>
                 <label className="text-sm font-medium mb-1 flex items-center gap-2 text-ink-2">
                   <Banknote size={14} className="text-accent"/> Желаемая зарплата (в месяц)
@@ -158,6 +145,7 @@ export function EditProfileModal({
                   <span className="text-ink-3 ml-2 font-medium">₽</span>
                 </div>
               </div>
+
               <div>
                 <label className="text-sm font-medium mb-1 flex items-center gap-2 text-ink-2">
                   <Briefcase size={14} className="text-accent"/> Стоимость кейса (за проект)
