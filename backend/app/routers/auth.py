@@ -59,7 +59,7 @@ async def me(user: UserDB = Depends(get_current_user)):
         attempts_used=user.attempts_used or 0,
         blocked_until=user.blocked_until,
         profile_views=user.profile_views or 0,
-        top_rank=rank
+        top_rank=1
     )
 
 
