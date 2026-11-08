@@ -348,7 +348,7 @@ export function CompanyDashboard({
                         </button>
                     </div>
 
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence>
                         {activeTab === "jobs" && (
                             <motion.div
                                 key="jobs"
@@ -432,13 +432,13 @@ export function CompanyDashboard({
                                             className="mx-auto text-ink-4 mb-3"
                                         />
                                         <div className="text-[15px] font-medium mb-1">
-                                            Пока нет вакансий
+                                            {activeWorkType === "vacancies" ? "Пока нет вакансий" : "Пока нет кейсов"}
                                         </div>
                                         <button
                                             onClick={() => { setEditingJob(null); setIsJobOpen(true); }}
                                             className="text-[13px] text-accent font-medium hover:underline"
                                         >
-                                            Создать первую вакансию
+                                            Создать {activeWorkType === "vacancies" ? "первую вакансию" : "первый кейс"}
                                         </button>
                                     </div>
                                 )}

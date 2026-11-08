@@ -82,11 +82,11 @@ export function DeveloperDashboard({
 
     useEffect(() => {
         if (!backendUser?.id || !skills?.stack_id) return;
-        
+
         const cacheKey = `verum_recs_${backendUser.id}`;
         const cached = localStorage.getItem(cacheKey);
         const now = Date.now();
-        
+
         // Если есть кэш и ему меньше 24 часов — берем из кэша
         if (cached) {
             const { data, timestamp } = JSON.parse(cached);
@@ -97,11 +97,15 @@ export function DeveloperDashboard({
         }
 
         // Иначе делаем запрос и кэшируем на сутки
-        authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
-            .then(res => {
+        authApi
+            .searchJobs({ stack: skills.stack_id, level: skills.final_grade })
+            .then((res) => {
                 const jobs = res.data.slice(0, 4);
                 setRecommendedJobs(jobs);
-                localStorage.setItem(cacheKey, JSON.stringify({ data: jobs, timestamp: now }));
+                localStorage.setItem(
+                    cacheKey,
+                    JSON.stringify({ data: jobs, timestamp: now }),
+                );
             })
             .catch(console.error);
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
@@ -252,14 +256,13 @@ export function DeveloperDashboard({
                 )}
             </div>
 
-
             {/* БЛОК УДЕРЖАНИЯ: АКТИВНОСТЬ И РЕКОМЕНДАЦИИ (Самый первый блок) */}
             <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm overflow-hidden relative mb-6">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
-                
+
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 mb-4">
                     <h3 className="font-semibold text-base md:text-lg flex items-center gap-2">
-                        <Zap size={16} className="text-amber-500" /> 
+                        <Zap size={16} className="text-amber-500" />
                         Ваша активность на платформе
                     </h3>
                 </div>
@@ -268,35 +271,65 @@ export function DeveloperDashboard({
                     <div className="bg-surface-2 p-4 rounded-xl border border-line flex items-center justify-between">
                         <div>
                             <div className="flex items-center gap-2 text-ink-3 mb-1">
-                                <Eye size={14} /> <span className="text-[12px] font-medium">Просмотры профиля</span>
+                                <Eye size={14} />{" "}
+                                <span className="text-[12px] font-medium">
+                                    Просмотры профиля
+                                </span>
                             </div>
-                            <div className="text-2xl font-bold text-ink">{backendUser?.profile_views || 0}</div>
+                            <div className="text-2xl font-bold text-ink">
+                                {backendUser?.profile_views || 0}
+                            </div>
                         </div>
-                        <TrendingUp size={24} className="text-accent opacity-50" />
+                        <TrendingUp
+                            size={24}
+                            className="text-accent opacity-50"
+                        />
                     </div>
                     <div className="bg-surface-2 p-4 rounded-xl border border-line flex items-center justify-between">
                         <div>
                             <div className="flex items-center gap-2 text-ink-3 mb-1">
-                                <TrendingUp size={14} /> <span className="text-[12px] font-medium">Место в топе</span>
+                                <TrendingUp size={14} />{" "}
+                                <span className="text-[12px] font-medium">
+                                    Место в топе
+                                </span>
                             </div>
-                            <div className="text-2xl font-bold text-ink">#{backendUser?.top_rank || "—"}</div>
+                            <div className="text-2xl font-bold text-ink">
+                                #{backendUser?.top_rank || "—"}
+                            </div>
                         </div>
-                        <Briefcase size={24} className="text-accent opacity-50" />
+                        <Briefcase
+                            size={24}
+                            className="text-accent opacity-50"
+                        />
                     </div>
                 </div>
 
                 {/* Profile Strength (оставляем как есть) */}
                 <div className="mt-6 relative z-10">
                     <div className="flex justify-between text-[12px] font-medium mb-1.5">
-                        <span className="text-ink-2">Заполненность профиля</span>
-                        <span className={profileScore === 100 ? "text-accent" : "text-warn"}>{profileScore}%</span>
+                        <span className="text-ink-2">
+                            Заполненность профиля
+                        </span>
+                        <span
+                            className={
+                                profileScore === 100
+                                    ? "text-accent"
+                                    : "text-warn"
+                            }
+                        >
+                            {profileScore}%
+                        </span>
                     </div>
                     <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-1000 ${profileScore === 100 ? "bg-accent" : "bg-warn"}`} style={{ width: `${profileScore}%` }} />
+                        <div
+                            className={`h-full rounded-full transition-all duration-1000 ${profileScore === 100 ? "bg-accent" : "bg-warn"}`}
+                            style={{ width: `${profileScore}%` }}
+                        />
                     </div>
                     {profileScore < 100 && (
                         <p className="text-[11px] text-ink-3 mt-2">
-                            Заполните профиль на 100%, чтобы получать в 2 раза больше приглашений от компаний.
+                            Заполните профиль на 100%, чтобы получать в 2 раза
+                            больше приглашений от компаний.
                         </p>
                     )}
                 </div>
@@ -304,26 +337,41 @@ export function DeveloperDashboard({
                 {/* Recommended Jobs (обновление раз в сутки) */}
                 <div className="mt-6 relative z-10">
                     <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-3 flex items-center gap-2">
-                        <Briefcase size={14} /> Рекомендуемые задачи на сегодня
+                        <Briefcase size={14} /> Вакансии компаний, подходящие
+                        под ваш стек
                     </h4>
                     {recommendedJobs.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {recommendedJobs.map(job => (
-                                <div key={job.id} className="p-3 bg-surface-2 border border-line rounded-xl hover:border-accent cursor-pointer transition-colors group">
+                            {recommendedJobs.map((job) => (
+                                <div
+                                    key={job.id}
+                                    className="p-3 bg-surface-2 border border-line rounded-xl hover:border-accent cursor-pointer transition-colors group"
+                                >
                                     <div className="flex justify-between items-start mb-1">
-                                        <div className="font-medium text-[13px] text-ink group-hover:text-accent transition-colors line-clamp-1">{job.title}</div>
-                                        <ChevronRight size={14} className="text-ink-3 shrink-0" />
+                                        <div className="font-medium text-[13px] text-ink group-hover:text-accent transition-colors line-clamp-1">
+                                            {job.title}
+                                        </div>
+                                        <ChevronRight
+                                            size={14}
+                                            className="text-ink-3 shrink-0"
+                                        />
                                     </div>
                                     <div className="text-[11px] text-ink-3 flex items-center justify-between">
-                                        <span className="truncate pr-2">{job.company_name}</span>
-                                        <span className="font-semibold text-accent whitespace-nowrap">{job.salary}</span>
+                                        <span className="truncate pr-2">
+                                            {job.company_name}
+                                        </span>
+                                        <span className="font-semibold text-accent whitespace-nowrap">
+                                            {job.salary}
+                                        </span>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
                         <div className="text-[12px] text-ink-3 p-3 bg-surface-2 rounded-xl text-center border border-dashed border-line-2">
-                            {isTested ? "Пока нет новых задач под ваш стек" : "Пройдите тест, чтобы получать рекомендации"}
+                            {isTested
+                                ? "Пока нет новых задач под ваш стек"
+                                : "Пройдите тест, чтобы получать рекомендации"}
                         </div>
                     )}
                 </div>
@@ -603,36 +651,81 @@ export function DeveloperDashboard({
                                     </div>
                                 )}
 
-                                {skills.chat_history && skills.chat_history.length > 0 && (
-                                    <details className="mt-4 bg-surface-2 border border-line rounded-xl p-4 w-full max-w-full overflow-hidden">
-                                        <summary className="cursor-pointer text-[13px] font-semibold text-ink flex items-center justify-between">
-                                            <span className="flex items-center gap-2">
-                                                <Brain size={14} className="text-accent" />
-                                                История собеседования
-                                                <span className="text-[11px] font-normal text-ink-3">({skills.chat_history.length} сообщ.)</span>
-                                            </span>
-                                            <span className="text-[12px] text-accent">Развернуть ▼</span>
-                                        </summary>
-                                        <div className="mt-3 space-y-2 max-h-[400px] overflow-y-auto pr-2">
-                                            {skills.chat_history.map((m: any, i: number) => {
-                                                const isUser = m.role === "user";
-                                                const codeMatch = String(m.content).match(/\n\nКод:\n([\s\S]*)$/);
-                                                const textPart = codeMatch ? m.content.slice(0, codeMatch.index) : m.content;
-                                                const codePart = codeMatch ? codeMatch[1] : "";
-                                                return (
-                                                    <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                                                        <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed min-w-0 ${isUser ? "bg-accent text-white" : "bg-surface border border-line text-ink-2"}`}>
-                                                            <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{textPart}</div>
-                                                            {codePart && (
-                                                                <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-2.5 rounded-lg overflow-x-auto text-[10px] font-mono whitespace-pre max-w-full custom-scrollbar"><code>{codePart}</code></pre>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </details>
-                                )}
+                                {skills.chat_history &&
+                                    skills.chat_history.length > 0 && (
+                                        <details className="mt-4 bg-surface-2 border border-line rounded-xl p-4 w-full max-w-full overflow-hidden">
+                                            <summary className="cursor-pointer text-[13px] font-semibold text-ink flex items-center justify-between">
+                                                <span className="flex items-center gap-2">
+                                                    <Brain
+                                                        size={14}
+                                                        className="text-accent"
+                                                    />
+                                                    История собеседования
+                                                    <span className="text-[11px] font-normal text-ink-3">
+                                                        (
+                                                        {
+                                                            skills.chat_history
+                                                                .length
+                                                        }{" "}
+                                                        сообщ.)
+                                                    </span>
+                                                </span>
+                                                <span className="text-[12px] text-accent">
+                                                    Развернуть ▼
+                                                </span>
+                                            </summary>
+                                            <div className="mt-3 space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                                                {skills.chat_history.map(
+                                                    (m: any, i: number) => {
+                                                        const isUser =
+                                                            m.role === "user";
+                                                        const codeMatch =
+                                                            String(
+                                                                m.content,
+                                                            ).match(
+                                                                /\n\nКод:\n([\s\S]*)$/,
+                                                            );
+                                                        const textPart =
+                                                            codeMatch
+                                                                ? m.content.slice(
+                                                                      0,
+                                                                      codeMatch.index,
+                                                                  )
+                                                                : m.content;
+                                                        const codePart =
+                                                            codeMatch
+                                                                ? codeMatch[1]
+                                                                : "";
+                                                        return (
+                                                            <div
+                                                                key={i}
+                                                                className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                                                            >
+                                                                <div
+                                                                    className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed min-w-0 ${isUser ? "bg-accent text-white" : "bg-surface border border-line text-ink-2"}`}
+                                                                >
+                                                                    <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                                                                        {
+                                                                            textPart
+                                                                        }
+                                                                    </div>
+                                                                    {codePart && (
+                                                                        <pre className="mt-2 bg-[#1e1e1e] text-[#d4d4d4] p-2.5 rounded-lg overflow-x-auto text-[10px] font-mono whitespace-pre max-w-full custom-scrollbar">
+                                                                            <code>
+                                                                                {
+                                                                                    codePart
+                                                                                }
+                                                                            </code>
+                                                                        </pre>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    },
+                                                )}
+                                            </div>
+                                        </details>
+                                    )}
                             </div>
                         ) : isBlocked ? (
                             <div className="text-center py-6 bg-surface-2 rounded-xl border border-dashed border-line">
@@ -738,7 +831,9 @@ export function DeveloperDashboard({
                                 {projects.map((project: any) => (
                                     <div
                                         key={project.id}
-                                        onClick={() => setViewingProject(project)}
+                                        onClick={() =>
+                                            setViewingProject(project)
+                                        }
                                         className="group relative border border-line rounded-xl overflow-hidden bg-surface flex flex-col cursor-pointer hover:border-accent/40 transition-colors"
                                     >
                                         <div className="aspect-video bg-surface-2 relative overflow-hidden">
