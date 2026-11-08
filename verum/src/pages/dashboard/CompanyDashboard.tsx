@@ -348,15 +348,8 @@ export function CompanyDashboard({
                         </button>
                     </div>
 
-                    <AnimatePresence>
-                        {activeTab === "jobs" && (
-                            <motion.div
-                                key="jobs"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[300px]"
-                            >
+                    {activeTab === "jobs" && (
+                        <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[300px] animate-in fade-in duration-200">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                                     <div className="flex bg-surface-2 border border-line rounded-xl p-1 w-full sm:w-auto">
                                         <button onClick={() => setActiveWorkType("vacancies")} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeWorkType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
@@ -446,13 +439,7 @@ export function CompanyDashboard({
                         )}
 
                         {activeTab === "candidates" && (
-                            <motion.div
-                                key="candidates"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm"
-                            >
+                            <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm animate-in fade-in duration-200">
                                 <div className="flex flex-col gap-4 mb-6">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
@@ -751,9 +738,8 @@ export function CompanyDashboard({
                                         </p>
                                     </div>
                                 )}
-                            </motion.div>
+                            </div>
                         )}
-                    </AnimatePresence>
                 </div>
             </div>
             <AnimatePresence>
