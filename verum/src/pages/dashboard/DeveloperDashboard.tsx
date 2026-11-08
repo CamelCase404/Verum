@@ -80,34 +80,36 @@ export function DeveloperDashboard({
     const githubData = backendUser?.github_stats;
     const projects = backendUser?.projects || [];
 
+    const [showAllRecs, setShowAllRecs] = useState(false);
+
     useEffect(() => {
         if (!backendUser?.id || !skills?.stack_id) return;
 
         const cacheKey = `verum_recs_${backendUser.id}`;
-        const cached = localStorage.getItem(cacheKey);
-        const now = Date.now();
+        const today = new Date().toISOString().split('T')[0];
+        
+        let cachedData = { date: "", items: [] };
+        try {
+            const c = localStorage.getItem(cacheKey);
+            if (c) cachedData = JSON.parse(c);
+        } catch (e) {}
 
-        // Если есть кэш и ему меньше 24 часов — берем из кэша
-        if (cached) {
-            const { data, timestamp } = JSON.parse(cached);
-            if (now - timestamp < 24 * 60 * 60 * 1000) {
-                setRecommendedJobs(data);
-                return;
-            } else {
-                localStorage.removeItem(cacheKey); // Удаляем старый кэш
-            }
-        }
-
-        // Иначе делаем запрос и кэшируем на сутки
-        authApi
-            .searchJobs({ stack: skills.stack_id, level: skills.final_grade })
+        // Делаем свежий запрос
+        authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
             .then((res) => {
-                const jobs = res.data.slice(0, 4);
-                setRecommendedJobs(jobs);
-                localStorage.setItem(
-                    cacheKey,
-                    JSON.stringify({ data: jobs, timestamp: now }),
-                );
+                let finalItems = [];
+                if (cachedData.date === today) {
+                    // Если сегодня уже загружали — объединяем, чтобы новые кейсы появились
+                    const existingIds = new Set(cachedData.items.map((i: any) => i.id));
+                    const newItems = res.data.filter((i: any) => !existingIds.has(i.id));
+                    finalItems = [...cachedData.items, ...newItems];
+                } else {
+                    // Если день сменился — берем только то, что есть сейчас
+                    finalItems = res.data;
+                }
+                
+                setRecommendedJobs(finalItems);
+                localStorage.setItem(cacheKey, JSON.stringify({ date: today, items: finalItems }));
             })
             .catch(console.error);
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
@@ -173,6 +175,21 @@ export function DeveloperDashboard({
         } catch (e) {
             console.error("Ошибка удаления", e);
         }
+    };
+
+    const getMaxSalary = () => {
+        if (!skills) return 0;
+        if (skills.final_grade === "Junior") return 90000;
+        if (skills.final_grade === "Middle") return 220000;
+        if (skills.final_grade === "Senior") return 350000;
+        return 0;
+    };
+    const getMaxProjectRate = () => {
+        if (!skills) return 0;
+        if (skills.final_grade === "Junior") return 30000;
+        if (skills.final_grade === "Middle") return 80000;
+        if (skills.final_grade === "Senior") return 150000;
+        return 0;
     };
 
     const calculateSalary = () => {
@@ -345,6 +362,7 @@ export function DeveloperDashboard({
                         <span className="text-[11px] text-ink-3 font-medium">Список обновляется каждые 24 часа</span>
                     </div>
                     {recommendedJobs.length > 0 ? (
+                        <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {recommendedJobs.map((job) => (
                                 <div
@@ -374,6 +392,12 @@ export function DeveloperDashboard({
                                 </div>
                             ))}
                         </div>
+                        {recommendedJobs.length > 4 && (
+                            <button onClick={() => setShowAllRecs(!showAllRecs)} className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors">
+                                {showAllRecs ? "Скрыть" : `Показать все (${recommendedJobs.length})`}
+                            </button>
+                        )}
+                        </>
                     ) : (
                         <div className="text-[12px] text-ink-3 p-3 bg-surface-2 rounded-xl text-center border border-dashed border-line-2">
                             {isTested
@@ -451,14 +475,25 @@ export function DeveloperDashboard({
                                             />{" "}
                                             Доход
                                         </div>
-                                        <div className="text-xl font-bold text-ink">
-                                            ~{" "}
-                                            {estimatedSalary.toLocaleString(
-                                                "ru-RU",
-                                            )}{" "}
-                                            <span className="text-[13px] text-ink-3 font-normal">
-                                                ₽
-                                            </span>
+                                        <div className="text-right">
+                                            <div className="text-[11px] text-ink-3 mb-1">Системная: ~ {estimatedSalary.toLocaleString("ru-RU")} ₽</div>
+                                            <div className="flex items-center justify-end gap-1">
+                                                <input 
+                                                    type="number" 
+                                                    value={backendUser?.expected_salary || ""} 
+                                                    onChange={(e) => {
+                                                        const val = parseInt(e.target.value);
+                                                        const maxPrice = getMaxSalary();
+                                                        if (val > maxPrice) {
+                                                            toast(`Максимальная зарплата для ${skills.final_grade} — ${maxPrice.toLocaleString('ru-RU')} ₽`, "error");
+                                                            return;
+                                                        }
+                                                        authApi.updateProfile({ expected_salary: val || null }).then(() => onRefresh());
+                                                    }}
+                                                    placeholder="Ваша"
+                                                    className="w-20 bg-bg-2 border border-line rounded px-2 py-1 text-right text-[15px] font-bold outline-none focus:border-accent text-accent"
+                                                /> <span className="text-[13px] text-ink-3 font-normal">₽</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -486,6 +521,38 @@ export function DeveloperDashboard({
                                         </div>
                                     )}
                                     {skills.language_id && (
+                                        <>
+                                        <div className="pt-4 border-t border-line mt-4">
+                                            <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
+                                                <Banknote size={14} className="text-accent"/> Стоимость кейса
+                                            </div>
+                                            <div className="flex items-center justify-between bg-surface border border-line p-3 rounded-lg">
+                                                <div>
+                                                    <div className="text-[12px] text-ink-3">Системная оценка:</div>
+                                                    <div className="font-semibold text-ink">~ {Math.round((skills.total_score_100 || 50) * 500 + 10000).toLocaleString("ru-RU")} ₽</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-[12px] text-ink-3 mb-1">Ваша цена:</div>
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <input 
+                                                            type="number" 
+                                                            value={backendUser?.project_rate || ""} 
+                                                            onChange={(e) => {
+                                                                const val = parseInt(e.target.value);
+                                                                const maxPrice = getMaxProjectRate();
+                                                                if (val > maxPrice) {
+                                                                    toast(`Максимальная цена для ${skills.final_grade} — ${maxPrice.toLocaleString('ru-RU')} ₽`, "error");
+                                                                    return;
+                                                                }
+                                                                authApi.updateProfile({ project_rate: val || null }).then(() => onRefresh());
+                                                            }}
+                                                            placeholder="Авто"
+                                                            className="w-20 bg-bg-2 border border-line rounded px-2 py-1 text-right text-sm font-semibold outline-none focus:border-accent text-accent"
+                                                        /> <span className="text-[13px] text-ink-3">₽</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div>
                                             <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-1.5 flex items-center gap-1.5">
                                                 <Code2 size={14} /> Языки
@@ -519,6 +586,7 @@ export function DeveloperDashboard({
                                                     ))}
                                             </div>
                                         </div>
+                                        </>
                                     )}
                                 </div>
                             </div>

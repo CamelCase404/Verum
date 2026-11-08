@@ -67,7 +67,9 @@ async def me(user: UserDB = Depends(get_current_user), db: AsyncSession = Depend
         attempts_used=user.attempts_used or 0,
         blocked_until=user.blocked_until,
         profile_views=user.profile_views or 0,
-        top_rank=rank
+        top_rank=rank,
+        project_rate=user.project_rate,
+        expected_salary=user.expected_salary
     )
 
 
@@ -91,6 +93,8 @@ class CandidateProfile(BaseModel):
     estimated_salary: int = 0
     github_stars: int = 0
     avatar_url: str | None = None
+    project_rate: int | None = None
+    expected_salary: int | None = None
 
 @router.post("/search", response_model=list[CandidateProfile])
 async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(get_current_user_optional), db: AsyncSession = Depends(get_db)):
@@ -164,7 +168,8 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
                     id=u.id, full_name=u.full_name, email=u.email, final_grade=grade,
                     total_score=score, stack=data.get("stack_id", ""), language=data.get("language_id", ""),
                     summary=data.get("summary", ""), match_score=min(100, match_score),
-                    estimated_salary=estimated_salary, github_stars=stars, avatar_url=u.avatar_url
+                    estimated_salary=estimated_salary, github_stars=stars, avatar_url=u.avatar_url,
+                    project_rate=u.project_rate, expected_salary=u.expected_salary
                 )
             )
     results.sort(key=lambda x: (x.match_score, x.total_score), reverse=True)
@@ -264,6 +269,8 @@ async def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_curr
     if data.bio is not None: user.bio = data.bio
     if data.avatar_url is not None: user.avatar_url = data.avatar_url
     if data.projects is not None: user.projects = data.projects
+    if data.project_rate is not None: user.project_rate = data.project_rate
+    if data.expected_salary is not None: user.expected_salary = data.expected_salary
     await db.commit()
     return {"status": "ok"}
 
@@ -375,7 +382,9 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         attempts_used=user.attempts_used or 0,
         blocked_until=user.blocked_until,
         profile_views=user.profile_views or 0,
-        top_rank=rank
+        top_rank=rank,
+        project_rate=user.project_rate,
+        expected_salary=user.expected_salary
     )
 
 # ... (search_candidates оставляем как было, я его опустил для краткости, ты его не удаляй)

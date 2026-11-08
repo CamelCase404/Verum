@@ -114,6 +114,8 @@ class UserProfile(BaseModel):
     avatar_url: str | None = None
     projects: list[dict] | None = None
     job_postings: list[dict] | None = None
+    project_rate: int | None = None
+    expected_salary: int | None = None
     last_test_at: datetime | None = None
     test_status: str | None = None
     interview_video_url: str | None = None
@@ -121,9 +123,13 @@ class UserProfile(BaseModel):
     blocked_until: datetime | None = None
     profile_views: int = 0
     top_rank: int = 0
+    project_rate: int | None = None
+    expected_salary: int | None = None
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None
     avatar_url: str | None = None
     projects: list[dict] | None = None
     job_postings: list[dict] | None = None
+    project_rate: int | None = None
+    expected_salary: int | None = None

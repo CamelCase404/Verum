@@ -54,6 +54,8 @@ class UserDB(Base):
     pending_skills_data = Column(JSON, nullable=True)
     interview_video_url = Column(String, nullable=True)
     profile_views = Column(Integer, default=0)
+    project_rate = Column(Integer, nullable=True)
+    expected_salary = Column(Integer, nullable=True)
 
 
 

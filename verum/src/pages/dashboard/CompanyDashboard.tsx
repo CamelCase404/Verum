@@ -174,7 +174,11 @@ export function CompanyDashboard({
     const handleJobCreated = () => {
         setIsJobOpen(false);
         onRefresh();
-        setActiveTab("candidates");
+        if (activeWorkType === "cases") {
+            // При создании кейса остаемся на вкладке кейсов
+        } else {
+            setActiveTab("candidates");
+        }
     };
 
     const selectedJobTitle =
@@ -349,7 +353,7 @@ export function CompanyDashboard({
                     </div>
 
                     {activeTab === "jobs" && (
-                        <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[300px] animate-in fade-in duration-200">
+                        <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[300px]">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                                     <div className="flex bg-surface-2 border border-line rounded-xl p-1 w-full sm:w-auto">
                                         <button onClick={() => setActiveWorkType("vacancies")} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeWorkType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
@@ -376,7 +380,12 @@ export function CompanyDashboard({
                                             >
                                                 {/* Кнопка редактирования в верхнем правом углу */}
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); setEditingJob(job); setIsJobOpen(true); }}
+                                                    onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    setEditingJob(job); 
+                                                    if (job.type === "case") setIsCaseOpen(true);
+                                                    else setIsJobOpen(true);
+                                                }}
                                                     className="absolute top-3 right-3 p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors z-10"
                                                     title="Редактировать вакансию"
                                                 >
@@ -715,10 +724,18 @@ export function CompanyDashboard({
                                                     </div>
 
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); handleHireClick(cand); }}
+                                                        onClick={(e) => { 
+                                                        e.stopPropagation(); 
+                                                        const isCase = activeWorkType === "cases";
+                                                        handleHireClick({ 
+                                                            ...cand, 
+                                                            is_case: isCase,
+                                                            final_price: isCase ? (cand.project_rate || Math.round(cand.estimated_salary * 0.3)) : (cand.expected_salary || cand.estimated_salary)
+                                                        }); 
+                                                    }}
                                                         className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
                                                     >
-                                                        Нанять
+                                                        {cand.is_case ? "Заказать услугу" : "Нанять"}
                                                     </button>
                                                 </div>
                                             );

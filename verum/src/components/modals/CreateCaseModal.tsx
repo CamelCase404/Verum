@@ -64,7 +64,7 @@ export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: 
           stack, 
           level, 
           salary: budget ? `Бюджет: ${budget} ₽` : "По договоренности", 
-          format: "Разовый проект",
+          format: "Удалённо (кейс)",
           type: "case" // Отличаем кейс от вакансии
       };
       await authApi.updateJobs([...currentJobs, newCase]);

@@ -31,11 +31,15 @@ export function HireConfirmModal({
   }, []);
 
     const [agreed, setAgreed] = useState(false);
+    const isCase = candidate?.is_case;
     
     // Считаем комиссию: 8% от годового оклада
-    const monthlySalary = candidate.estimated_salary || 0;
+    const monthlySalary = candidate.final_price || candidate.estimated_salary || 0;
     const annualSalary = monthlySalary * 12;
-    const commission = Math.round(annualSalary * 0.08);
+    
+    // Если это кейс, показываем стоимость проекта, иначе годовую зарплату
+    const finalCost = isCase ? monthlySalary : annualSalary;
+    const commission = Math.round(finalCost * 0.08);
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -54,18 +58,18 @@ export function HireConfirmModal({
                     </div>
                     <h2 className="text-2xl font-bold mb-2">Подтверждение найма</h2>
                     <p className="text-ink-2 text-sm">
-                        Вы собираетесь нанять специалиста <b>{candidate.full_name}</b>.
+                        Вы собираетесь {isCase ? "заказать услугу" : "нанять специалиста"} <b>{candidate.full_name}</b>.
                     </p>
                 </div>
 
                 <div className="bg-surface-2 border border-line rounded-xl p-4 mb-6 space-y-3">
                     <div className="flex justify-between items-center text-sm">
-                        <span className="text-ink-3 flex items-center gap-2"><Banknote size={16}/> Оценка в месяц:</span>
+                        <span className="text-ink-3 flex items-center gap-2"><Banknote size={16}/> {isCase ? "Стоимость проекта:" : "Оценка в месяц:"}</span>
                         <span className="font-semibold">~ {monthlySalary.toLocaleString('ru-RU')} ₽</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                        <span className="text-ink-3">Годовой оклад:</span>
-                        <span className="font-semibold">~ {annualSalary.toLocaleString('ru-RU')} ₽</span>
+                        <span className="text-ink-3">{isCase ? "Итого:" : "Годовой оклад:"}</span>
+                        <span className="font-semibold">~ {finalCost.toLocaleString('ru-RU')} ₽</span>
                     </div>
                     <div className="pt-3 border-t border-line flex justify-between items-center">
                         <span className="text-ink font-medium">Комиссия платформы (8%):</span>
@@ -86,7 +90,7 @@ export function HireConfirmModal({
                         </div>
                     </div>
                     <span className="text-[13px] text-ink-2 leading-relaxed select-none group-hover:text-ink transition-colors">
-                        Я согласен с <Link to="/terms" target="_blank" className="text-accent hover:underline">условиями найма</Link> и обязуюсь выплатить комиссию платформы в размере 8% от годового оклада специалиста после успешного закрытия сделки.
+                        Я согласен с <Link to="/terms" target="_blank" className="text-accent hover:underline">условиями найма</Link> и обязуюсь выплатить комиссию платформы в размере 8% от {isCase ? "стоимости проекта" : "годового оклада"} специалиста после успешного закрытия сделки.
                     </span>
                 </label>
 
@@ -100,7 +104,7 @@ export function HireConfirmModal({
                         className="px-6 py-2.5 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                         {loading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-                        Подтвердить и в чат
+                        Подтвердить и перейти в чат
                     </button>
                 </div>
             </motion.div>
