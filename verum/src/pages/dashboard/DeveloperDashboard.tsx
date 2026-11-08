@@ -93,6 +93,8 @@ export function DeveloperDashboard({
             if (now - timestamp < 24 * 60 * 60 * 1000) {
                 setRecommendedJobs(data);
                 return;
+            } else {
+                localStorage.removeItem(cacheKey); // Удаляем старый кэш
             }
         }
 

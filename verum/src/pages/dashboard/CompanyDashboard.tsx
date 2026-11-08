@@ -338,7 +338,7 @@ export function CompanyDashboard({
                             onClick={() => setActiveTab("jobs")}
                             className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === "jobs" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}
                         >
-                            <Briefcase size={16} /> Мои вакансии
+                            <Briefcase size={16} /> Мои проекты
                         </button>
                         <button
                             onClick={() => setActiveTab("candidates")}
@@ -352,10 +352,10 @@ export function CompanyDashboard({
                         {activeTab === "jobs" && (
                             <motion.div
                                 key="jobs"
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm"
+                                exit={{ opacity: 0 }}
+                                className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[300px]"
                             >
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                                     <div className="flex bg-surface-2 border border-line rounded-xl p-1 w-full sm:w-auto">
@@ -448,9 +448,9 @@ export function CompanyDashboard({
                         {activeTab === "candidates" && (
                             <motion.div
                                 key="candidates"
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
+                                exit={{ opacity: 0 }}
                                 className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm"
                             >
                                 <div className="flex flex-col gap-4 mb-6">
