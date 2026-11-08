@@ -102,3 +102,19 @@ export const chatApi = {
   sendMessage: (conv_id: number, text: string, image_url?: string) =>
     request(`/api/chat/${conv_id}/messages`, { method: "POST", body: JSON.stringify({ text, image_url }) }),
 };
+
+
+export const billingApi = {
+  getPlans: () => request("/api/billing/plans"),
+  subscribe: (plan: string) =>
+    request("/api/billing/subscribe", { method: "POST", body: JSON.stringify({ plan }) }),
+  topup: (verifications: number) =>
+    request("/api/billing/topup", { method: "POST", body: JSON.stringify({ verifications }) }),
+  getUsage: () => request("/api/billing/usage"),
+};
+
+export const companyApi = {
+  requestUnlock: (developerId: number) =>
+    request(`/api/company/request-unlock/${developerId}`, { method: "POST" }),
+  getVerificationRequests: () => request("/api/company/verification-requests"),
+};

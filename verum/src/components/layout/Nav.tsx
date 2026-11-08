@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { chatApi } from "@/api";
-import { Menu, MessageSquare, User, Sun, Moon, ShieldCheck } from "lucide-react";
+import { Menu, MessageSquare, User, Sun, Moon, ShieldCheck, Sparkles } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Nav() {
-  const { toggleDrawer, user, theme } = useAppStore();
+  const { toggleDrawer, user, theme, backendUser } = useAppStore();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -92,6 +92,22 @@ export function Nav() {
           {/* Кнопки авторизации / навигации */}
           {user ? (
             <div className="flex items-center gap-2">
+              
+              {/* БЕЙДЖ ВЕРИФИКАЦИЙ (компании) */}
+              {user.role === "company" && backendUser && (backendUser.plan || backendUser.verifications_left !== undefined) && (
+                <Link
+                  to="/dashboard?tab=billing"
+                  className="hidden sm:flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-accent-soft text-accent border border-accent-line text-sm font-semibold hover:bg-accent/15 transition-colors"
+                  title="Остаток верификаций"
+                >
+                  <Sparkles size={16} />
+                  <span>
+                    {backendUser.plan === "enterprise"
+                      ? "∞"
+                      : `${backendUser.verifications_left ?? 0}`}
+                  </span>
+                </Link>
+              )}
               
               {/* КНОПКА АДМИНА */}
               {user?.role === "admin" && (

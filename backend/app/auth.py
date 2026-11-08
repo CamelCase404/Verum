@@ -57,6 +57,12 @@ class UserDB(Base):
     project_rate = Column(Integer, nullable=True)
     expected_salary = Column(Integer, nullable=True)
 
+    # ── SaaS-модель (Блок 2.0) ──
+    plan = Column(String(20), nullable=True)  # 'start' / 'pro' / 'enterprise' / NULL
+    verifications_left = Column(Integer, default=0, nullable=False)  # единый пул (Q2=C)
+    subscription_until = Column(DateTime, nullable=True)
+    banned = Column(Boolean, default=False, nullable=False)  # для разработчиков-читеров
+
 
 
 class Conversation(Base):
@@ -75,6 +81,55 @@ class Message(Base):
     image_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     is_read = Column(Boolean, default=False)
+
+
+# ── SaaS-модель (Блок 2.0) ──
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    plan = Column(String(20), nullable=False)  # 'start' / 'pro' / 'enterprise'
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+    status = Column(String(20), default="active", nullable=False)  # 'active' / 'cancelled' / 'expired'
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    amount = Column(Integer, nullable=False)  # в рублях
+    description = Column(String(255), nullable=True)
+    status = Column(String(20), default="pending", nullable=False)  # 'pending' / 'paid' / 'cancelled' / 'failed'
+    payment_id = Column(String(255), nullable=True)  # id от ЮKassa/CloudPayments
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    paid_at = Column(DateTime, nullable=True)
+
+
+class UsageLog(Base):
+    __tablename__ = "usage_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    action = Column(String(50), nullable=False)  # 'interview_start' / 'unlock_contacts' / 'overage_test' / 'overage_unlock'
+    candidate_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    interview_id = Column(String(36), nullable=True)  # UUID интервью (без FK — другая таблица)
+    cost = Column(Integer, default=0, nullable=False)  # 0 = из пула; 1500/5000 = overage
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class VerificationRequest(Base):
+    __tablename__ = "verification_requests"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    developer_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(20), default="pending", nullable=False)  # 'pending' / 'approved' / 'rejected' / 'expired' / 'cancelled'
+    reserved_credit = Column(Boolean, default=True, nullable=False)  # true = кредит зарезервирован, но не списан
+    moderated_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    moderated_at = Column(DateTime, nullable=True)
+    rejection_reason = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
 

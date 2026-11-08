@@ -12,6 +12,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   
   const setStoreUser = useAppStore((s) => s.setUser);
+  const setStoreBackendUser = useAppStore((s) => s.setBackendUser);
 
   const fetchUser = useCallback(() => {
     if (!getToken()) {
@@ -20,10 +21,11 @@ export function Dashboard() {
     }
     authApi.getMe().then((res) => {
       setBackendUser(res.data);
+      if (setStoreBackendUser) setStoreBackendUser(res.data);
       if (setStoreUser) setStoreUser({ name: res.data.full_name, email: res.data.email, role: res.data.role });
       setLoading(false);
     }).catch(() => navigate("/login"));
-  }, [navigate, setStoreUser]);
+  }, [navigate, setStoreUser, setStoreBackendUser]);
 
   useEffect(() => {
     fetchUser();

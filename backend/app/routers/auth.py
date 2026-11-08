@@ -69,7 +69,11 @@ async def me(user: UserDB = Depends(get_current_user), db: AsyncSession = Depend
         profile_views=user.profile_views or 0,
         top_rank=rank,
         project_rate=user.project_rate,
-        expected_salary=user.expected_salary
+        expected_salary=user.expected_salary,
+        plan=user.plan,
+        verifications_left=user.verifications_left,
+        subscription_until=user.subscription_until,
+        banned=bool(user.banned),
     )
 
 
@@ -98,7 +102,13 @@ class CandidateProfile(BaseModel):
 
 @router.post("/search", response_model=list[CandidateProfile])
 async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(get_current_user_optional), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(UserDB).where(UserDB.role == "developer", UserDB.skills_data.isnot(None)))
+    result = await db.execute(
+        select(UserDB).where(
+            UserDB.role == "developer",
+            UserDB.skills_data.isnot(None),
+            UserDB.banned == False,
+        )
+    )
     users = result.scalars().all()
 
     results = []
@@ -370,6 +380,7 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
     result = await db.execute(select(UserDB).where(UserDB.id == user_id))
     user = result.scalars().first()
     if not user: raise HTTPException(404, "User not found")
+    if user.banned: raise HTTPException(404, "Профиль недоступен")
     
     # Считаем просмотр не больше 1 раза в день от одной компании
     if current_user and current_user.id != user.id and current_user.role == "company":
@@ -407,7 +418,9 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         profile_views=user.profile_views or 0,
         top_rank=rank,
         project_rate=user.project_rate,
-        expected_salary=user.expected_salary
+        expected_salary=user.expected_salary,
+        plan=user.plan,
+        verifications_left=user.verifications_left,
+        subscription_until=user.subscription_until,
+        banned=bool(user.banned),
     )
-
-# ... (search_candidates оставляем как было, я его опустил для краткости, ты его не удаляй)

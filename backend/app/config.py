@@ -26,6 +26,59 @@ class Settings:
         os.getenv("SECURE_COOKIES", "false").lower() == "true"
     )
 
+    # SaaS-модель (Q3 = чат с нейросетью)
+    # ENFORCE_LIMITS=false на время миграции: старые компании не отваливаются,
+    # если verifications_left=0. Включать, когда все компании на подписке.
+    ENFORCE_LIMITS: bool = (
+        os.getenv("ENFORCE_LIMITS", "false").lower() == "true"
+    )
+
+    PLANS: dict = {
+        "start": {
+            "name": "Start",
+            "price_month": 30000,
+            "verifications_per_month": 15,
+            "pay_per_test": 1500,
+            "pay_per_unlock": 5000,
+            "features": [
+                "До 15 ИИ-интервью в месяц",
+                "Базовый античит-контроль",
+                "Обезличенная база верифицированных кадров",
+                "Pay-per-Test: 1 500 ₽ за доп. тест",
+                "Pay-per-Unlock: 5 000 ₽ за доп. контакты",
+            ],
+        },
+        "pro": {
+            "name": "Pro",
+            "price_month": 75000,
+            "verifications_per_month": 50,
+            "pay_per_test": 1500,
+            "pay_per_unlock": 5000,
+            "features": [
+                "До 50 ИИ-интервью в месяц",
+                "Углублённая ИИ-аналитика архитектурного мышления",
+                "On-Demand модерация: только 100% чистые профили",
+                "Интеграция с ATS (Хантфлоу, Поток)",
+                "Pay-per-Test: 1 500 ₽ за доп. тест",
+                "Pay-per-Unlock: 5 000 ₽ за доп. контакты",
+            ],
+        },
+        "enterprise": {
+            "name": "Enterprise",
+            "price_month": 200000,
+            "verifications_per_month": None,  # безлимит
+            "pay_per_test": None,
+            "pay_per_unlock": None,
+            "features": [
+                "Безлимитные ИИ-интервью",
+                "Кастомная настройка стресс-теста под продакшен-стек",
+                "Выделенный модератор финальной валидации",
+                "Выгрузка подробных видео-отчётов",
+                "SLA и приоритетная поддержка",
+            ],
+        },
+    }
+
     # портал verum (5174) + интервью (5173) + запас 3000
     CORS_ORIGINS: list[str] = [
         o.strip()

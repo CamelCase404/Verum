@@ -20,6 +20,7 @@ import {
     Layers,
     Code2,
     X,
+    Sparkles,
 } from "lucide-react";
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
@@ -27,6 +28,7 @@ import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
 import { authApi, chatApi } from "@/api";
+import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
 const STACKS = [
@@ -88,6 +90,11 @@ export function CompanyDashboard({
     const [openJob, setOpenJob] = useState(false);
 
     const [selectedCandidates, setSelectedCandidates] = useState<number[]>([]);
+
+    const backendUserStore = useAppStore((s) => s.backendUser);
+    const plan = backendUser?.plan ?? backendUserStore?.plan;
+    const verificationsLeft = backendUser?.verifications_left ?? backendUserStore?.verifications_left;
+    const isEnterprise = plan === "enterprise";
 
     const allJobs = backendUser?.job_postings || [];
     const jobs = allJobs.filter((j: any) => j.type !== "case");
@@ -277,6 +284,24 @@ export function CompanyDashboard({
                     <p className="text-ink-2 text-[13px] md:text-[15px]">
                         Управление вакансиями и поиск талантов
                     </p>
+                </div>
+                {/* План и счётчик верификаций */}
+                <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
+                    <div className="flex-1 md:flex-initial bg-surface border border-line rounded-xl px-3 py-2 flex items-center gap-2">
+                        <Sparkles size={16} className="text-accent shrink-0" />
+                        <div className="min-w-0">
+                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold">Верификаций</div>
+                            <div className="text-[15px] font-bold text-ink leading-tight">
+                                {isEnterprise ? "∞" : (verificationsLeft ?? 0)}
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => navigate("/pricing")}
+                        className="flex-1 md:flex-initial px-3 py-2 bg-accent text-white rounded-xl text-[13px] font-medium hover:bg-accent-2 transition-colors whitespace-nowrap"
+                    >
+                        {plan ? "Сменить тариф" : "Выбрать тариф"}
+                    </button>
                 </div>
             </div>
 

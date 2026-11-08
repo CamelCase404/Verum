@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -30,6 +30,7 @@ class DBInterview(Base):
     finished = Column(Boolean, default=False)
     rejected = Column(Boolean, default=False)
     reject_reason = Column(String, nullable=True)
+    timecode_markers = Column(JSON, nullable=True)  # массив [{time: "00:45", reason: "tab_switch"}]
     turns = relationship(
         "DBTurn",
         back_populates="interview",

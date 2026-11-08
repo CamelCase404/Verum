@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from ..auth import get_current_user, UserDB
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..auth import (
+    get_current_user, get_db, UserDB,
+    VerificationRequest, utcnow_naive,
+)
+from ..config import settings
 from ..gigachat_client import ask_text
 import json, re
 
@@ -46,3 +52,96 @@ async def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
     except Exception as e:
         # Если ИИ ошибся, отдаем дефолтные значения
         return {"title": "Разработчик", "stack": "Frontend", "level": "Middle", "suggested_salary": ""}
+
+
+# ─── On-Demand модерация (Q1=B) ───
+
+@router.post("/request-unlock/{developer_id}")
+async def request_unlock(
+    developer_id: int,
+    user: UserDB = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Компания просит открыть контакты кандидата. Триггерит On-Demand модерацию."""
+    if user.role != "company":
+        raise HTTPException(403, "Только для компаний")
+    if developer_id == user.id:
+        raise HTTPException(400, "Нельзя открыть свой профиль")
+
+    # Проверка лимита (только если ENFORCE_LIMITS=true)
+    if settings.ENFORCE_LIMITS:
+        is_enterprise = user.plan == "enterprise"
+        if not is_enterprise and (user.verifications_left is None or user.verifications_left <= 0):
+            raise HTTPException(
+                402,
+                "Лимит верификаций исчерпан. Пополните пакет или обновите тариф.",
+            )
+
+    # Кандидат существует и не забанен
+    dev_res = await db.execute(
+        select(UserDB).where(UserDB.id == developer_id, UserDB.role == "developer")
+    )
+    dev = dev_res.scalars().first()
+    if not dev:
+        raise HTTPException(404, "Кандидат не найден")
+    if dev.banned:
+        raise HTTPException(403, "Кандидат заблокирован модерацией")
+
+    # Уже есть активный/одобренный запрос?
+    ex_res = await db.execute(
+        select(VerificationRequest).where(
+            VerificationRequest.company_id == user.id,
+            VerificationRequest.developer_id == developer_id,
+            VerificationRequest.status.in_(["pending", "approved"]),
+        )
+    )
+    existing = ex_res.scalars().first()
+    if existing:
+        if existing.status == "approved":
+            return {"status": "already_unlocked", "request_id": existing.id}
+        return {"status": "already_pending", "request_id": existing.id}
+
+    req = VerificationRequest(
+        company_id=user.id,
+        developer_id=developer_id,
+        status="pending",
+        reserved_credit=True,
+    )
+    db.add(req)
+    await db.commit()
+    await db.refresh(req)
+    return {"status": "pending", "request_id": req.id}
+
+
+@router.get("/verification-requests")
+async def list_verification_requests(
+    user: UserDB = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if user.role != "company":
+        raise HTTPException(403, "Только для компаний")
+
+    res = await db.execute(
+        select(VerificationRequest)
+        .where(VerificationRequest.company_id == user.id)
+        .order_by(VerificationRequest.created_at.desc())
+    )
+    reqs = res.scalars().all()
+
+    items = []
+    for r in reqs:
+        d_res = await db.execute(select(UserDB).where(UserDB.id == r.developer_id))
+        d = d_res.scalars().first()
+        items.append({
+            "id": r.id,
+            "company_id": r.company_id,
+            "developer_id": r.developer_id,
+            "developer_name": d.full_name if d else None,
+            "developer_grade": (d.skills_data or {}).get("final_grade") if d and d.skills_data else None,
+            "developer_avatar": d.avatar_url if d else None,
+            "status": r.status,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+            "moderated_at": r.moderated_at.isoformat() if r.moderated_at else None,
+            "rejection_reason": r.rejection_reason,
+        })
+    return {"items": items}

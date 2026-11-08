@@ -123,6 +123,48 @@ class UserProfile(BaseModel):
     blocked_until: datetime | None = None
     profile_views: int = 0
     top_rank: int = 0
+    # ── SaaS-модель ──
+    plan: str | None = None
+    verifications_left: int | None = None  # None = безлимит (enterprise)
+    subscription_until: datetime | None = None
+    banned: bool = False
+
+
+# ── Billing-схемы ──
+
+class PlanInfo(BaseModel):
+    id: str
+    name: str
+    price_month: int
+    verifications_per_month: int | None
+    pay_per_test: int | None
+    pay_per_unlock: int | None
+    features: list[str] = Field(default_factory=list)
+
+class PlansResponse(BaseModel):
+    plans: list[PlanInfo]
+
+class SubscribeReq(BaseModel):
+    plan: str
+
+class TopupReq(BaseModel):
+    verifications: int
+    amount: int | None = None
+
+class UsageItem(BaseModel):
+    id: int
+    action: str
+    cost: int
+    candidate_id: int | None = None
+    interview_id: str | None = None
+    created_at: datetime
+
+class UsageResponse(BaseModel):
+    items: list[UsageItem]
+    total_spent: int
+    verifications_left: int | None
+    plan: str | None
+    subscription_until: datetime | None
 
 class UpdateProfileReq(BaseModel):
     bio: str | None = None

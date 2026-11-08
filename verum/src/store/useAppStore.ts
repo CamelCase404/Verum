@@ -10,6 +10,7 @@ interface AppState {
   chatOpen: boolean;
   paletteOpen: boolean;
   user: User | null;
+  backendUser: any | null;
   profile: Profile;
   notifications: Notification[];
   setTheme: (t: "light" | "dark") => void;
@@ -18,6 +19,7 @@ interface AppState {
   toggleChat: () => void;
   togglePalette: () => void;
   setUser: (u: User | null) => void;
+  setBackendUser: (u: any | null) => void;
   updateProfile: (p: Partial<Profile>) => void;
   addProject: (project: any) => void;
   removeProject: (id: string) => void;
@@ -46,6 +48,7 @@ export const useAppStore = create<AppState>()(
       chatOpen: false,
       paletteOpen: false,
       user: null,
+      backendUser: null,
       profile: defaultProfile,
       notifications: defaultNotifications(),
       setTheme: (t) => {
@@ -57,11 +60,12 @@ export const useAppStore = create<AppState>()(
       toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
       togglePalette: () => set((s) => ({ paletteOpen: !s.paletteOpen })),
       setUser: (u) => set({ user: u }),
+      setBackendUser: (u) => set({ backendUser: u }),
       updateProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
       addProject: (project) => set((s) => ({ profile: { ...s.profile, projects: [project, ...s.profile.projects] } })),
       removeProject: (id) => set((s) => ({ profile: { ...s.profile, projects: s.profile.projects.filter(p => p.id !== id) } })),
       markAllRead: () => set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, unread: false })) })),
-      reset: () => set({ user: null, profile: defaultProfile, drawerOpen: false, notifOpen: false, chatOpen: false, paletteOpen: false }),
+      reset: () => set({ user: null, backendUser: null, profile: defaultProfile, drawerOpen: false, notifOpen: false, chatOpen: false, paletteOpen: false }),
     }),
     { name: "verum_state_v9" }
   )
