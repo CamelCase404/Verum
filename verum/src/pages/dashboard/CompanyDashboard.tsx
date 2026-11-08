@@ -435,7 +435,7 @@ export function CompanyDashboard({
                                         </button>
                                     </div>
                                 )}
-                            </motion.div>
+                        </div>
                         )}
 
                         {activeTab === "candidates" && (
