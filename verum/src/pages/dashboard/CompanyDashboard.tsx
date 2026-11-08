@@ -20,7 +20,7 @@ import {
     Layers,
     Code2,
     X,
-    Sparkles,
+    BadgeCheck,
 } from "lucide-react";
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
@@ -286,22 +286,35 @@ export function CompanyDashboard({
                     </p>
                 </div>
                 {/* План и счётчик верификаций */}
-                <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
-                    <div className="flex-1 md:flex-initial bg-surface border border-line rounded-xl px-3 py-2 flex items-center gap-2">
-                        <Sparkles size={16} className="text-accent shrink-0" />
-                        <div className="min-w-0">
-                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold">Верификаций</div>
-                            <div className="text-[15px] font-bold text-ink leading-tight">
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <button
+                        onClick={() => navigate("/pricing")}
+                        className="flex-1 md:flex-initial inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-line bg-surface hover:bg-surface-2 hover:border-line-2 transition-colors"
+                        title="Остаток верификаций — перейти к тарифам" 
+                    >
+                        <BadgeCheck size={16} className="text-accent shrink-0" />
+                        <div className="text-left min-w-0">
+                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-medium">Верификаций</div>
+                            <div className="text-[14px] font-semibold text-ink tabular-nums leading-tight">
                                 {isEnterprise ? "∞" : (verificationsLeft ?? 0)}
                             </div>
                         </div>
-                    </div>
-                    <button
-                        onClick={() => navigate("/pricing")}
-                        className="flex-1 md:flex-initial px-3 py-2 bg-accent text-white rounded-xl text-[13px] font-medium hover:bg-accent-2 transition-colors whitespace-nowrap"
-                    >
-                        {plan ? "Сменить тариф" : "Выбрать тариф"}
                     </button>
+                    {plan ? (
+                        <button
+                            onClick={() => navigate("/pricing")}
+                            className="flex-1 md:flex-initial px-4 py-2 rounded-xl border border-line bg-surface-2 text-ink text-[13px] font-medium hover:bg-surface-3 transition-colors whitespace-nowrap"
+                        >
+                            Сменить тариф
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => navigate("/pricing")}
+                            className="flex-1 md:flex-initial px-4 py-2 rounded-xl bg-accent text-white text-[13px] font-medium hover:bg-accent-2 transition-colors shadow-sm whitespace-nowrap"
+                        >
+                            Выбрать тариф
+                        </button>
+                    )}
                 </div>
             </div>
 
