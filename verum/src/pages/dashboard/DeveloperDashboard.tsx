@@ -338,19 +338,24 @@ export function DeveloperDashboard({
 
                 {/* Recommended Jobs (обновление раз в сутки) */}
                 <div className="mt-6 relative z-10">
-                    <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-3 flex items-center gap-2">
-                        <Briefcase size={14} /> Вакансии компаний, подходящие
-                        под ваш стек
-                    </h4>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-1">
+                        <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 flex items-center gap-2">
+                            <Briefcase size={14} /> Вакансии и кейсы компаний под ваш стек
+                        </h4>
+                        <span className="text-[11px] text-ink-3 font-medium">Список обновляется каждые 24 часа</span>
+                    </div>
                     {recommendedJobs.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {recommendedJobs.map((job) => (
                                 <div
                                     key={job.id}
-                                    className="p-3 bg-surface-2 border border-line rounded-xl hover:border-accent cursor-pointer transition-colors group"
+                                    className="p-3 bg-surface-2 border border-line rounded-xl select-none"
                                 >
                                     <div className="flex justify-between items-start mb-1">
-                                        <div className="font-medium text-[13px] text-ink group-hover:text-accent transition-colors line-clamp-1">
+                                        <div className="font-medium text-[13px] text-ink line-clamp-1 flex items-center gap-2">
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0 ${job.type === "case" ? "bg-violet/10 text-violet" : "bg-accent/10 text-accent"}`}>
+                                                {job.type === "case" ? "Кейс" : "Вакансия"}
+                                            </span>
                                             {job.title}
                                         </div>
                                         <ChevronRight
