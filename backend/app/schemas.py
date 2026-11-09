@@ -140,8 +140,6 @@ class PlanInfo(BaseModel):
     price_month: int
     verifications_per_month: int | None
     tokens_per_month: int | None
-    pay_per_test: int | None
-    pay_per_unlock: int | None
     features: list[str] = Field(default_factory=list)
 
 class PlansResponse(BaseModel):

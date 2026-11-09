@@ -4,6 +4,8 @@ import { authApi, chatApi } from "@/api";
 import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
 import { ViewJobModal } from "@/components/modals/ViewJobModal";
 import { Modal } from "@/components/ui/Modal";
+import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
+import { useAppStore } from "@/store/useAppStore";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -15,6 +17,8 @@ export function PublicProfile() {
   const [showAllRepos, setShowAllRepos] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [isHireOpen, setIsHireOpen] = useState(false);
+  const currentUser = useAppStore((s) => s.user);
 
   const formatSalaryText = (val: string) => {
       if (!val) return "";
@@ -51,11 +55,17 @@ export function PublicProfile() {
   const isTested = !!skills && skills.final_grade && skills.final_grade !== "Reject";
   const githubData = user?.github_stats;
 
-  const handleStartChat = async () => {
-    try {
-      const res = await chatApi.startChat(user.id);
-      window.location.href = `/messages?chat=${res.data.conversation_id}`;
-    } catch (e) { console.error("Ошибка создания чата", e); }
+  const handleStartChat = () => {
+    if (!currentUser) {
+        window.location.href = "/login";
+        return;
+    }
+    if (currentUser.role !== "company") {
+        alert("Чат с разработчиком может открыть только компания.");
+        return;
+    }
+    // Открываем модалку списания токенов
+    setIsHireOpen(true);
   };
 
   const calculateSalary = () => {
@@ -366,6 +376,18 @@ export function PublicProfile() {
       )}
 
       {/* МОДАЛКА ПРОСМОТРА ПРОЕКТА (через Modal — с правильным scroll-lock) */}
+      {isHireOpen && (
+        <HireConfirmModal
+          candidate={{
+             ...user,
+             token_cost: user.skills?.final_grade === "Senior" ? 350 : user.skills?.final_grade === "Middle" ? 200 : 100
+          }}
+          onClose={() => setIsHireOpen(false)}
+          onConfirm={() => setIsHireOpen(false)}
+          loading={false}
+        />
+      )}
+
       {selectedProject && (
         <Modal onClose={() => setSelectedProject(null)} size="lg">
           <div className="flex flex-col max-h-[85vh]">

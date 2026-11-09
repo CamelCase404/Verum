@@ -23,7 +23,7 @@ import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
-import { authApi } from "@/api";
+import { authApi, companyApi } from "@/api";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
@@ -135,7 +135,7 @@ export function CompanyDashboard({
         if (!hireCandidate) return;
         setIsHiring(true);
         try {
-            const res = await authApi.hire ? (authApi as any).hire(hireCandidate.id) : Promise.resolve({data: {conversation_id: 1}});
+            const res = await companyApi.hire(hireCandidate.id);
             navigate(`/messages?chat=${res.data.conversation_id}`);
         } catch (e) {
             toast("Ошибка при создании чата");
