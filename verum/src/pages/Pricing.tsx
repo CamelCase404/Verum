@@ -105,7 +105,7 @@ export function Pricing() {
                                         </div>
 
                                         {/* Крупная плашка про базу Verum */}
-                                        <div className="mb-6 p-3.5 bg-accent/5 border border-accent/20 rounded-xl">
+                                        <div className="mb-6 p-4 bg-surface-2 border border-line rounded-xl">
                                             <div className="text-[12px] font-bold text-accent uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                                                 <Database size={14} /> Доступ к внутренней базе Verum
                                             </div>

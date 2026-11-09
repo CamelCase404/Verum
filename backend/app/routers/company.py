@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..auth import (
     get_current_user, get_db, UserDB,
-    VerificationRequest, utcnow_naive,
+    VerificationRequest, UsageLog, utcnow_naive,
 )
 from ..config import settings
 from ..gigachat_client import ask_text
