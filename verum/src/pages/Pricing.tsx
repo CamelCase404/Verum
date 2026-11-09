@@ -99,7 +99,7 @@ export function Pricing() {
                                             </div>
                                             <div className="flex justify-between items-center pb-3 border-b border-line">
                                                 <span className="text-[14px] text-ink-2 flex items-center gap-2"><Database size={16} className="text-ink-3"/> Токены</span>
-                                                <span className="font-bold text-accent text-xl">{p.tokens_per_month === null ? "∞" : (p.tokens_per_month || 3000)}</span>
+                                                <span className="font-bold text-accent text-xl">{p.tokens_per_month === null ? "∞" : (p.tokens_per_month || (p.id === "pro" ? 10000 : 3000))}</span>
                                             </div>
                                             
                                             {/* Плашка "На что хватит" */}
