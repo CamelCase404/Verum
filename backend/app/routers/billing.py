@@ -62,6 +62,10 @@ async def subscribe(
         None if info["verifications_per_month"] is None
         else info["verifications_per_month"]
     )
+    user.tokens = (
+        None if info.get("tokens_per_month") is None
+        else info.get("tokens_per_month")
+    )
 
     db.add(Subscription(
         company_id=user.id, plan=data.plan,
@@ -78,6 +82,7 @@ async def subscribe(
         "status": "ok",
         "plan": data.plan,
         "verifications_left": user.verifications_left,
+        "tokens": user.tokens,
         "subscription_until": user.subscription_until.isoformat() if user.subscription_until else None,
     }
 

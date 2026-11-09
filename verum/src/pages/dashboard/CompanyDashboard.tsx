@@ -284,36 +284,24 @@ export function CompanyDashboard({
                         Управление вакансиями и поиск талантов
                     </p>
                 </div>
-                {/* План и счётчик верификаций */}
-                <div className="flex items-center gap-2 w-full md:w-auto">
+                {/* План и счётчики (Строгий стиль) */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <div className="flex items-center bg-surface border border-line rounded-xl px-4 py-2 divide-x divide-line w-full sm:w-auto justify-between sm:justify-start">
+                        <div className="pr-4">
+                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Тесты</div>
+                            <div className="text-[15px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
+                        </div>
+                        <div className="pl-4">
+                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Токены</div>
+                            <div className="text-[15px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                        </div>
+                    </div>
                     <button
                         onClick={() => navigate("/pricing")}
-                        className="flex-1 md:flex-initial inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-line bg-surface hover:bg-surface-2 hover:border-line-2 transition-colors"
-                        title="Остаток верификаций — перейти к тарифам" 
+                        className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-[13px] font-medium transition-colors whitespace-nowrap border ${plan ? "bg-surface border-line text-ink hover:bg-surface-2" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
                     >
-                        <BadgeCheck size={16} className="text-accent shrink-0" />
-                        <div className="text-left min-w-0">
-                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-medium">Верификаций</div>
-                            <div className="text-[14px] font-semibold text-ink tabular-nums leading-tight">
-                                {isEnterprise ? "∞" : (verificationsLeft ?? 0)}
-                            </div>
-                        </div>
+                        {plan ? "Сменить тариф" : "Выбрать тариф"}
                     </button>
-                    {plan ? (
-                        <button
-                            onClick={() => navigate("/pricing")}
-                            className="flex-1 md:flex-initial px-4 py-2 rounded-xl border border-line bg-surface-2 text-ink text-[13px] font-medium hover:bg-surface-3 transition-colors whitespace-nowrap"
-                        >
-                            Сменить тариф
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => navigate("/pricing")}
-                            className="flex-1 md:flex-initial px-4 py-2 rounded-xl bg-accent text-white text-[13px] font-medium hover:bg-accent-2 transition-colors shadow-sm whitespace-nowrap"
-                        >
-                            Выбрать тариф
-                        </button>
-                    )}
                 </div>
             </div>
 
