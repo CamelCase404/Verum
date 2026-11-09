@@ -193,7 +193,7 @@ export function CompanyDashboard({
         <div className="relative w-full sm:w-auto flex-1 sm:flex-none">
             <button
                 onClick={() => setOpen(!open)}
-                className="w-full bg-surface border border-line text-sm text-ink rounded-lg px-3 py-2 outline-none flex items-center justify-between gap-2 hover:bg-surface-3 transition-colors min-w-[130px]"
+                className="w-full bg-bg-2 border border-line text-[13px] text-ink rounded-lg p-2.5 outline-none flex items-center justify-between gap-2 hover:border-line-2 transition-colors"
             >
                 <span className="flex items-center gap-1.5 truncate">
                     {Icon && <Icon size={14} className="text-ink-3" />}
@@ -259,33 +259,32 @@ export function CompanyDashboard({
                             </div>
                         </div>
                         {/* Виджет баланса */}
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
-                            <div className="flex-1 flex items-center bg-surface border border-line-2 rounded-xl p-2 shadow-sm">
-                                <div className="flex items-center gap-3 px-3 py-2 flex-1">
-                                    <div className="w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center text-accent shrink-0">
-                                        <ShieldCheck size={18} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold">Тесты</div>
-                                        <div className="text-[16px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
-                                    </div>
+                        <div className="grid grid-cols-2 gap-3 mb-5">
+                            <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0 border border-line">
+                                    <ShieldCheck size={20} />
                                 </div>
-                                <div className="w-px h-10 bg-line mx-1" />
-                                <div className="flex items-center gap-3 px-3 py-2 flex-1">
-                                    <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                        <Database size={18} />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] uppercase tracking-wider text-accent font-semibold">Токены</div>
-                                        <div className="text-[16px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
-                                    </div>
+                                <div>
+                                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Доступно тестов</div>
+                                    <div className="text-[20px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
                                 </div>
                             </div>
+                            
+                            <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                                    <Database size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] uppercase tracking-wider text-accent font-semibold mb-0.5">Доступно токенов</div>
+                                    <div className="text-[20px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                                </div>
+                            </div>
+                            
                             <button
                                 onClick={() => navigate("/pricing")}
-                                className={`px-4 py-3 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-2" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
+                                className={`col-span-2 py-2.5 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-3" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
                             >
-                                {plan ? "Сменить" : "Выбрать"}
+                                {plan ? "Сменить тариф" : "Выбрать тариф"}
                             </button>
                         </div>
 
@@ -390,51 +389,57 @@ export function CompanyDashboard({
                     {activeTab === "candidates" && (
                         <div className="flex flex-col gap-6 items-start w-full">
                             {/* ВЕРХНЯЯ ПАНЕЛЬ ФИЛЬТРОВ */}
-                            <div className="w-full bg-surface border border-line rounded-2xl p-4 shadow-sm flex flex-col gap-3">
-                                <div className="flex flex-wrap items-center gap-3 w-full">
-                                    {/* Переключатель Вакансии / Кейсы */}
-                                    <div className="flex bg-surface-2 border border-line rounded-xl p-1 shrink-0">
-                                        <button onClick={() => { setFilterType("vacancies"); setSelectedJobId(""); }} className={`px-4 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
-                                        <button onClick={() => { setFilterType("cases"); setSelectedJobId(""); }} className={`px-4 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "cases" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
-                                    </div>
-
-                                    {/* Выбор вакансии */}
-                                    {filteredJobs.length > 0 && (
-                                        <div className="relative w-full sm:w-[200px] shrink-0">
-                                            <button onClick={() => { setOpenJob(!openJob); setOpenGrade(false); setOpenStack(false); setOpenLang(false); }} className="w-full bg-surface-2 border border-line rounded-lg p-2 text-[13px] text-left flex justify-between items-center hover:bg-surface-3 transition-colors">
-                                                <span className="truncate">{selectedJobTitle}</span>
-                                                <ChevronDown size={14} className={`transition-transform ${openJob ? "rotate-180" : ""}`} />
-                                            </button>
-                                            {openJob && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-60 overflow-y-auto">
-                                                    <button onClick={() => { resetFilters(); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex justify-between items-center text-ink-2">
-                                                        Все {filterType === "vacancies" ? "вакансии" : "кейсы"}
-                                                        {!selectedJobId && <Check size={14} className="text-accent" />}
-                                                    </button>
-                                                    {filteredJobs.map((j: any) => (
-                                                        <button key={j.id} onClick={() => { handleJobClick(j); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex justify-between items-center text-ink-2">
-                                                            <span className="truncate pr-2">{j.title}</span>
-                                                            {selectedJobId === j.id && <Check size={14} className="text-accent" />}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
+                            <div className="w-full bg-surface border border-line rounded-2xl p-5 shadow-sm">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+                                    <div className="flex items-center gap-4">
+                                        <h3 className="font-semibold text-[16px] flex items-center gap-2"><Search size={18} className="text-accent" /> Фильтры</h3>
+                                        <div className="flex bg-surface-2 border border-line rounded-lg p-1">
+                                            <button onClick={() => { setFilterType("vacancies"); setSelectedJobId(""); }} className={`px-4 py-1.5 text-[12px] font-medium rounded-md transition-all ${filterType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
+                                            <button onClick={() => { setFilterType("cases"); setSelectedJobId(""); }} className={`px-4 py-1.5 text-[12px] font-medium rounded-md transition-all ${filterType === "cases" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
                                         </div>
+                                    </div>
+                                    {(filterGrade || filterStack || filterLang || selectedJobId) && (
+                                        <button onClick={resetFilters} className="text-[13px] text-ink-3 hover:text-red-400 flex items-center gap-1.5 transition-colors">
+                                            <X size={14} /> Сбросить фильтры
+                                        </button>
                                     )}
+                                </div>
 
-                                    {/* Стек, Уровень, Язык */}
-                                    <div className="flex flex-wrap gap-2 w-full">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="relative">
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Выбрать {filterType === "vacancies" ? "вакансию" : "кейс"}</label>
+                                        <button onClick={() => { setOpenJob(!openJob); setOpenGrade(false); setOpenStack(false); setOpenLang(false); }} className="w-full bg-bg-2 border border-line rounded-lg p-2.5 text-[13px] text-left flex justify-between items-center hover:border-line-2 transition-colors">
+                                            <span className="truncate">{selectedJobTitle}</span>
+                                            <ChevronDown size={14} className={`transition-transform ${openJob ? "rotate-180" : ""}`} />
+                                        </button>
+                                        {openJob && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-60 overflow-y-auto">
+                                                <button onClick={() => { resetFilters(); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex justify-between items-center text-ink-2">
+                                                    Все {filterType === "vacancies" ? "вакансии" : "кейсы"}
+                                                    {!selectedJobId && <Check size={14} className="text-accent" />}
+                                                </button>
+                                                {filteredJobs.map((j: any) => (
+                                                    <button key={j.id} onClick={() => { handleJobClick(j); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex justify-between items-center text-ink-2">
+                                                        <span className="truncate pr-2">{j.title}</span>
+                                                        {selectedJobId === j.id && <Check size={14} className="text-accent" />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Стек</label>
                                         <CustomSelect value={filterStack} options={STACKS.map(s => ({value: s, label: s}))} onChange={(v: any) => { setFilterStack(v); setFilterLang(""); }} open={openStack} setOpen={setOpenStack} placeholder="Все стеки" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Уровень</label>
                                         <CustomSelect value={filterGrade} options={["Junior", "Middle", "Senior"].map(g => ({value: g, label: g}))} onChange={setFilterGrade} open={openGrade} setOpen={setOpenGrade} placeholder="Все уровни" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Язык</label>
                                         <CustomSelect value={filterLang} options={availableLangs.map(l => ({value: l, label: l.toUpperCase()}))} onChange={setFilterLang} open={openLang} setOpen={setOpenLang} placeholder="Все языки" />
                                     </div>
                                 </div>
-
-                                {(filterGrade || filterStack || filterLang || selectedJobId) && (
-                                    <button onClick={resetFilters} className="text-[12px] text-ink-3 hover:text-red-400 flex items-center gap-1 transition-colors shrink-0">
-                                        <X size={12} /> Сбросить
-                                    </button>
-                                )}
                             </div>
 
                             {/* СПИСОК КАНДИДАТОВ (на всю ширину) */}
