@@ -260,8 +260,9 @@ export function CompanyDashboard({
                         </div>
                         {/* Виджет баланса */}
                         <div className="grid grid-cols-2 gap-3 mb-5">
+                            {/* Тесты */}
                             <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0 border border-line">
+                                <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0">
                                     <ShieldCheck size={20} />
                                 </div>
                                 <div>
@@ -269,6 +270,26 @@ export function CompanyDashboard({
                                     <div className="text-[20px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
                                 </div>
                             </div>
+                            
+                            {/* Токены */}
+                            <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0">
+                                    <Database size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Доступно токенов</div>
+                                    <div className="text-[20px] font-bold text-ink leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                                </div>
+                            </div>
+                            
+                            {/* Кнопка */}
+                            <button
+                                onClick={() => navigate("/pricing")}
+                                className={`col-span-2 py-2.5 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-3" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
+                            >
+                                {plan ? "Сменить тариф" : "Выбрать тариф"}
+                            </button>
+                        </div>
                             
                             <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">

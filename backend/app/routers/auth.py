@@ -115,7 +115,11 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
     unlocked_devs = set()
     if user and user.role == "company":
         from ..auth import Conversation
-        conv_res = await db.execute(select(Conversation.developer_id).where(Conversation.company_id == user.id))
+        # Берем ID всех, с кем есть чат (значит, токены уже списаны или это Enterprise)
+        conv_res = await db.execute(
+            select(Conversation.developer_id)
+            .where(Conversation.company_id == user.id)
+        )
         unlocked_devs = {row[0] for row in conv_res.fetchall()}
 
     results = []
