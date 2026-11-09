@@ -12,6 +12,13 @@ import json, re
 
 router = APIRouter(prefix="/api/company", tags=["company"])
 
+GRADE_TOKEN_COST = {
+    "Junior": 50,
+    "Middle": 150,
+    "Senior": 300,
+    "Reject": 0
+}
+
 class ParseJobReq(BaseModel):
     description: str
 
@@ -68,14 +75,18 @@ async def request_unlock(
     if developer_id == user.id:
         raise HTTPException(400, "Нельзя открыть свой профиль")
 
-    # Проверка лимита (только если ENFORCE_LIMITS=true)
+    # Проверка лимита токенов (только если ENFORCE_LIMITS=true)
     if settings.ENFORCE_LIMITS:
         is_enterprise = user.plan == "enterprise"
-        if not is_enterprise and (user.verifications_left is None or user.verifications_left <= 0):
-            raise HTTPException(
-                402,
-                "Лимит верификаций исчерпан. Пополните пакет или обновите тариф.",
-            )
+        if not is_enterprise:
+            dev_grade = (dev.skills_data or {}).get("final_grade", "Junior")
+            cost = GRADE_TOKEN_COST.get(dev_grade, 50)
+            if user.tokens < cost:
+                raise HTTPException(
+                    402,
+                    f"Недостаточно токенов для открытия контактов ({dev_grade} стоит {cost} токенов). Пополните баланс.",
+                )
+            user.tokens -= cost
 
     # Кандидат существует и не забанен
     dev_res = await db.execute(

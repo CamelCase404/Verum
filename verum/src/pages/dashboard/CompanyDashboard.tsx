@@ -229,13 +229,13 @@ export function CompanyDashboard({
                 />
             </button>
 
-            <AnimatePresence>
+            
                 {open && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
+                    <div
+                        
+                        
+                        
+                        
                         className="absolute top-full right-0 mt-1.5 w-full min-w-[140px] bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden max-h-60 overflow-y-auto"
                     >
                         <button
@@ -268,10 +268,9 @@ export function CompanyDashboard({
                                 )}
                             </button>
                         ))}
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
-        </div>
+                    </div>
     );
 
     return (
@@ -409,12 +408,12 @@ export function CompanyDashboard({
                                 </div>
 
                                 {currentList.length > 0 ? (
-                                    <div className="grid sm:grid-cols-2 gap-4">
+                                    <div key={activeWorkType} className="grid sm:grid-cols-2 gap-4">
                                         {currentList.map((job: any) => (
                                             <div
                                                 key={job.id}
                                                 onClick={() => handleJobClick(job)}
-                                                className="relative p-4 border border-line rounded-xl bg-surface-2 hover:border-accent cursor-pointer transition-colors group flex flex-col justify-between"
+                                                className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between"
                                             >
                                                 {/* Кнопка редактирования в верхнем правом углу */}
                                                 <button
@@ -432,7 +431,7 @@ export function CompanyDashboard({
                                                 
                                                 <div>
                                                     <div className="flex justify-between items-start mb-1 gap-2 pr-8">
-                                                        <h4 className="font-semibold text-[15px] text-ink group-hover:text-accent transition-colors">
+                                                        <h4 className="font-semibold text-[15px] text-ink">
                                                             {job.title}
                                                         </h4>
                                                         {job.type === "case" && <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full ml-2">Кейс</span>}
@@ -480,7 +479,10 @@ export function CompanyDashboard({
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2">
+                                    <div
+                                        key="empty"
+                                        className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2"
+                                    >
                                         <Briefcase
                                             size={32}
                                             className="mx-auto text-ink-4 mb-3"
@@ -511,12 +513,7 @@ export function CompanyDashboard({
                                                 />{" "}
                                                 Подходящие кандидаты
                                             </h3>
-                                            <button
-                                                onClick={() => navigate("/search?type=candidates")}
-                                                className="text-[12px] bg-accent/10 text-accent px-3 py-1.5 rounded-lg font-medium hover:bg-accent/20 transition-colors hidden sm:block"
-                                            >
-                                                Глобальный поиск →
-                                            </button>
+
                                         </div>
                                         {(filterGrade ||
                                             filterStack ||
@@ -557,27 +554,13 @@ export function CompanyDashboard({
                                                     />
                                                 </button>
 
-                                                <AnimatePresence>
+                                                
                                                     {openJob && (
-                                                        <motion.div
-                                                            initial={{
-                                                                opacity: 0,
-                                                                y: -5,
-                                                                scale: 0.95,
-                                                            }}
-                                                            animate={{
-                                                                opacity: 1,
-                                                                y: 0,
-                                                                scale: 1,
-                                                            }}
-                                                            exit={{
-                                                                opacity: 0,
-                                                                y: -5,
-                                                                scale: 0.95,
-                                                            }}
-                                                            transition={{
-                                                                duration: 0.15,
-                                                            }}
+                                                        <div
+                                                            
+                                                            
+                                                            
+                                                            
                                                             className="absolute top-full left-0 mt-1.5 w-[220px] bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden"
                                                         >
                                                             <button
@@ -632,10 +615,9 @@ export function CompanyDashboard({
                                                                     </button>
                                                                 ),
                                                             )}
-                                                        </motion.div>
+                                                        </div>
                                                     )}
-                                                </AnimatePresence>
-                                            </div>
+                                                                                            </div>
                                         )}
 
                                         <CustomSelect
@@ -768,9 +750,9 @@ export function CompanyDashboard({
                                                             <span className="capitalize">
                                                                 {cand.stack} • {cand.language}
                                                             </span>
-                                                            <span className="flex items-center gap-1">
-                                                                <Star size={12} className="text-amber-500" />{" "}
-                                                                {cand.github_stars} звезд
+                                                            <span className="flex items-center gap-1 text-ink-4">
+                                                                <Star size={12} />{" "}
+                                                                <span className="text-ink-2 font-medium">{cand.github_stars}</span>
                                                             </span>
                                                         </div>
                                                     </div>
@@ -794,7 +776,10 @@ export function CompanyDashboard({
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2">
+                                    <div
+                                        key="empty"
+                                        className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2"
+                                    >
                                         <Users
                                             size={32}
                                             className="mx-auto text-ink-4 mb-3"
@@ -811,7 +796,7 @@ export function CompanyDashboard({
                         )}
                 </div>
             </div>
-            <AnimatePresence>
+            
                 {isEditOpen && (
                     <EditCompanyModal
                         key="edit-company"
@@ -854,7 +839,6 @@ export function CompanyDashboard({
                     />
                 )}
 
-            </AnimatePresence>
-        </div>
+                    </div>
     );
 }

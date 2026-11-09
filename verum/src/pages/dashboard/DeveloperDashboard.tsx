@@ -379,7 +379,7 @@ export function DeveloperDashboard({
                             {recommendedJobs.map((job) => (
                                 <div
                                     key={job.id}
-                                    className="group p-4 bg-surface border border-line rounded-xl hover:border-accent/40 hover:shadow-md transition-all cursor-default flex flex-col justify-between"
+                                    className="p-4 bg-surface border border-line rounded-xl flex flex-col justify-between"
                                 >
                                     <div className="flex items-start justify-between gap-3 mb-3">
                                         <div className="flex items-center gap-3 min-w-0">
@@ -394,12 +394,12 @@ export function DeveloperDashboard({
                                                 <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-0.5 truncate">
                                                     {job.company_name}
                                                 </div>
-                                                <div className="font-semibold text-[14px] text-ink truncate group-hover:text-accent transition-colors">
+                                                <div className="font-semibold text-[14px] text-ink truncate">
                                                     {job.title}
                                                 </div>
                                             </div>
                                         </div>
-                                        <span className={`text-[10px] px-2 py-1 rounded-md font-bold shrink-0 border ${job.type === "case" ? "bg-violet-soft border-violet/20 text-violet" : "bg-accent-soft border-accent/20 text-accent"}`}>
+                                        <span className={`text-[10px] px-2 py-1 rounded-md font-bold shrink-0 ${job.type === "case" ? "bg-violet-soft text-violet" : "bg-accent-soft text-accent"}`}>
                                             {job.type === "case" ? "Кейс" : "Вакансия"}
                                         </span>
                                     </div>

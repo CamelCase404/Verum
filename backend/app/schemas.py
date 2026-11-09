@@ -126,7 +126,8 @@ class UserProfile(BaseModel):
     top_rank: int | None = None
     # ── SaaS-модель ──
     plan: str | None = None
-    verifications_left: int | None = None  # None = безлимит (enterprise)
+    verifications_left: int | None = None
+    tokens: int | None = None  # None = безлимит (enterprise)
     subscription_until: datetime | None = None
     banned: bool = False
 
