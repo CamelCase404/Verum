@@ -245,7 +245,9 @@ export function CompanyDashboard({
                         >
                             <Pencil size={12} />
                         </button>
-                        <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-5">
+                        
+                        {/* Шапка профиля: аватар + имя */}
+                        <div className="flex items-center gap-3 md:gap-4 mb-5">
                             <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-xl text-white shadow-md overflow-hidden bg-blue-500">
                                 {backendUser?.avatar_url ? (
                                     <img src={backendUser.avatar_url} alt="Logo" className="w-full h-full object-cover" />
@@ -258,9 +260,9 @@ export function CompanyDashboard({
                                 <p className="text-[12px] md:text-sm text-ink-3">{backendUser?.email}</p>
                             </div>
                         </div>
-                        {/* Виджет баланса */}
+
+                        {/* Виджет баланса (Тесты + Токены + Кнопка) */}
                         <div className="grid grid-cols-2 gap-3 mb-5">
-                            {/* Тесты */}
                             <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0">
                                     <ShieldCheck size={20} />
@@ -271,7 +273,6 @@ export function CompanyDashboard({
                                 </div>
                             </div>
                             
-                            {/* Токены */}
                             <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0">
                                     <Database size={20} />
@@ -279,25 +280,6 @@ export function CompanyDashboard({
                                 <div>
                                     <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Доступно токенов</div>
                                     <div className="text-[20px] font-bold text-ink leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
-                                </div>
-                            </div>
-                            
-                            {/* Кнопка */}
-                            <button
-                                onClick={() => navigate("/pricing")}
-                                className={`col-span-2 py-2.5 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-3" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
-                            >
-                                {plan ? "Сменить тариф" : "Выбрать тариф"}
-                            </button>
-                        </div>
-                            
-                            <div className="bg-surface-2 border border-line rounded-xl p-3 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                    <Database size={20} />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] uppercase tracking-wider text-accent font-semibold mb-0.5">Доступно токенов</div>
-                                    <div className="text-[20px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
                                 </div>
                             </div>
                             
@@ -312,6 +294,7 @@ export function CompanyDashboard({
                         <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words [overflow-wrap:anywhere] mb-4 md:mb-6">
                             {backendUser?.bio || "Добавьте описание вашей компании."}
                         </p>
+                        
                         <div className="space-y-2 md:space-y-3">
                             <div className="flex justify-between text-[12px] md:text-sm items-center">
                                 <span className="text-ink-3">Сайт</span>
