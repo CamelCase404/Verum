@@ -152,6 +152,10 @@ export function CompanyDashboard({
         setIsHiring(true);
         try {
             const res = await companyApi.hire(hireCandidate.id);
+            // Помечаем кандидата как оплаченного, чтобы кнопка стала "В чат"
+            setCandidates(prev => prev.map(c => 
+                c.id === hireCandidate.id ? { ...c, is_unlocked: true } : c
+            ));
             navigate(`/messages?chat=${res.data.conversation_id}`);
         } catch (e) {
             toast("Ошибка при создании чата");
@@ -254,32 +258,32 @@ export function CompanyDashboard({
                                 <p className="text-[12px] md:text-sm text-ink-3">{backendUser?.email}</p>
                             </div>
                         </div>
-                        {/* Виджет баланса перенесен сюда */}
+                        {/* Виджет баланса */}
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
-                            <div className="flex-1 flex items-center bg-surface-2 border border-line rounded-xl p-1 shadow-sm">
-                                <div className="flex items-center gap-2.5 px-3 py-1.5 flex-1">
-                                    <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                        <ShieldCheck size={14} />
+                            <div className="flex-1 flex items-center bg-surface border border-line-2 rounded-xl p-2 shadow-sm">
+                                <div className="flex items-center gap-3 px-3 py-2 flex-1">
+                                    <div className="w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center text-accent shrink-0">
+                                        <ShieldCheck size={18} />
                                     </div>
                                     <div>
-                                        <div className="text-[9px] uppercase tracking-wider text-ink-3 font-semibold">Тесты</div>
-                                        <div className="text-[13px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
+                                        <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold">Тесты</div>
+                                        <div className="text-[16px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
                                     </div>
                                 </div>
-                                <div className="w-px h-7 bg-line mx-1" />
-                                <div className="flex items-center gap-2.5 px-3 py-1.5 flex-1">
-                                    <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                        <Database size={14} />
+                                <div className="w-px h-10 bg-line mx-1" />
+                                <div className="flex items-center gap-3 px-3 py-2 flex-1">
+                                    <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                                        <Database size={18} />
                                     </div>
                                     <div>
-                                        <div className="text-[9px] uppercase tracking-wider text-accent font-semibold">Токены</div>
-                                        <div className="text-[13px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                                        <div className="text-[10px] uppercase tracking-wider text-accent font-semibold">Токены</div>
+                                        <div className="text-[16px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
                                     </div>
                                 </div>
                             </div>
                             <button
                                 onClick={() => navigate("/pricing")}
-                                className={`px-3 py-2 rounded-xl text-[12px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-2" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
+                                className={`px-4 py-3 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-2" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
                             >
                                 {plan ? "Сменить" : "Выбрать"}
                             </button>
@@ -386,8 +390,8 @@ export function CompanyDashboard({
                     {activeTab === "candidates" && (
                         <div className="flex flex-col gap-6 items-start w-full">
                             {/* ВЕРХНЯЯ ПАНЕЛЬ ФИЛЬТРОВ */}
-                            <div className="w-full bg-surface border border-line rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full">
+                            <div className="w-full bg-surface border border-line rounded-2xl p-4 shadow-sm flex flex-col gap-3">
+                                <div className="flex flex-wrap items-center gap-3 w-full">
                                     {/* Переключатель Вакансии / Кейсы */}
                                     <div className="flex bg-surface-2 border border-line rounded-xl p-1 shrink-0">
                                         <button onClick={() => { setFilterType("vacancies"); setSelectedJobId(""); }} className={`px-4 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
