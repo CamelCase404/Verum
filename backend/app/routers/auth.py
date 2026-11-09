@@ -73,7 +73,6 @@ async def me(user: UserDB = Depends(get_current_user), db: AsyncSession = Depend
         plan=user.plan,
         verifications_left=user.verifications_left,
         tokens=user.tokens,
-        tokens=user.tokens,
         subscription_until=user.subscription_until,
         banned=bool(user.banned),
     )
@@ -445,7 +444,6 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         expected_salary=user.expected_salary,
         plan=user.plan,
         verifications_left=user.verifications_left,
-        tokens=user.tokens,
         tokens=user.tokens,
         subscription_until=user.subscription_until,
         banned=bool(user.banned),
