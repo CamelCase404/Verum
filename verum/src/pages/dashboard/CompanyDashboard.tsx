@@ -30,6 +30,16 @@ import { toast } from "@/components/layout/ToastContainer";
 const STACKS = [
     "Mobile (iOS)", "Mobile (Android)", "Frontend", "Backend", "GameDev", "DevOps / SRE", "Data / ML",
 ];
+const STACK_LANGS: Record<string, string[]> = {
+    "Mobile (iOS)": ["swift", "objc", "swiftui", "uikit", "combine"],
+    "Mobile (Android)": ["kotlin", "java", "compose", "coroutines"],
+    "Frontend": ["html", "css", "js", "ts", "react", "vue", "svelte"],
+    "Backend": ["python", "fastapi", "django", "go", "node", "java", "csharp", "next"],
+    "GameDev": ["unity", "unreal", "godot"],
+    "DevOps / SRE": ["docker", "k8s", "terraform", "ansible", "bash"],
+    "Data / ML": ["python", "pandas", "pytorch", "tensorflow", "sql"]
+};
+const ALL_LANGS = Array.from(new Set(Object.values(STACK_LANGS).flat()));
 
 export function CompanyDashboard({
     backendUser,
@@ -56,6 +66,8 @@ export function CompanyDashboard({
     // Фильтры (языки убраны)
     const [filterGrade, setFilterGrade] = useState("");
     const [filterStack, setFilterStack] = useState("");
+    const [filterLang, setFilterLang] = useState("");
+    const [filterType, setFilterType] = useState<"vacancies" | "cases">("vacancies");
     const [selectedJobId, setSelectedJobId] = useState<string>("");
 
     // Дропдауны
@@ -302,10 +314,10 @@ export function CompanyDashboard({
                             {currentList.length > 0 ? (
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     {currentList.map((job: any) => (
-                                        <div key={job.id} onClick={() => handleJobClick(job)} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between">
+                                        <div key={job.id} onClick={() => handleJobClick(job)} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between hover:border-line-2 cursor-pointer transition-all group">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setEditingJob(job); if (job.type === "case") setIsCaseOpen(true); else setIsJobOpen(true); }}
-                                                className="absolute top-3 right-3 p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors z-10"
+                                                className="absolute top-3 right-3 p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors z-10 opacity-0 group-hover:opacity-100"
                                                 title="Редактировать"
                                             >
                                                 <Pencil size={14} />
@@ -333,7 +345,7 @@ export function CompanyDashboard({
                                                 <div className="mt-3 pt-3 border-t border-line w-full">
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/vacancy/${job.id}`, { state: { title: job.title } }); }}
-                                                        className="w-full py-1.5 bg-surface border border-line rounded text-[12px] font-medium text-ink-2 hover:text-accent hover:border-accent transition-colors"
+                                                        className="w-full py-1.5 bg-surface border border-line rounded text-[12px] font-medium text-ink-2 group-hover:text-accent group-hover:border-accent transition-colors"
                                                     >
                                                         Посмотреть отклики
                                                     </button>
@@ -355,147 +367,165 @@ export function CompanyDashboard({
                     )}
 
                     {activeTab === "candidates" && (
-                        <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm animate-in fade-in duration-200">
-                            <div className="flex flex-col gap-4 mb-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <h3 className="font-semibold text-lg flex items-center gap-2"><Search size={18} className="text-accent" /> Подходящие кандидаты</h3>
-                                    </div>
-                                    {(filterGrade || filterStack || selectedJobId) && (
-                                        <button onClick={resetFilters} className="text-[12px] text-ink-3 hover:text-red-400 flex items-center gap-1 transition-colors">
-                                            <X size={12} /> Сбросить фильтры
-                                        </button>
+                        <div className="flex flex-col lg:flex-row gap-6 items-start">
+                            {/* ЛЕВЫЙ САЙДБАР ФИЛЬТРОВ */}
+                            <aside className="w-full lg:w-[280px] shrink-0 bg-surface border border-line rounded-2xl p-5 shadow-sm sticky top-20">
+                                <div className="flex items-center justify-between mb-5">
+                                    <h3 className="font-semibold text-[16px] flex items-center gap-2"><Search size={18} className="text-accent" /> Фильтры</h3>
+                                    {(filterGrade || filterStack || filterLang || selectedJobId) && (
+                                        <button onClick={resetFilters} className="text-[12px] text-ink-3 hover:text-red-400 transition-colors">Сбросить</button>
                                     )}
                                 </div>
 
-                                {/* ПАНЕЛЬ ФИЛЬТРОВ (без языков) */}
-                                <div className="flex flex-wrap items-center gap-2 w-full">
-                                    {jobs.length > 0 && (
-                                        <div className="relative w-full sm:w-auto flex-1 sm:flex-none">
-                                            <button
-                                                onClick={() => { setOpenJob(!openJob); setOpenGrade(false); setOpenStack(false); }}
-                                                className="w-full bg-surface-2 border border-line text-sm text-ink rounded-lg px-3 py-2 outline-none flex items-center justify-between gap-2 hover:bg-surface-3 transition-colors min-w-[160px]"
-                                            >
-                                                <span className="truncate max-w-[130px]">Вакансия: <b>{selectedJobTitle}</b></span>
-                                                <ChevronDown size={14} className={`transition-transform duration-200 ${openJob ? "rotate-180" : ""}`} />
-                                            </button>
-
-                                            {openJob && (
-                                                <div className="absolute top-full left-0 mt-1.5 w-[220px] bg-surface border border-line rounded-xl shadow-xl z-50 py-1 overflow-hidden">
-                                                    <button onClick={() => { resetFilters(); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
-                                                        Все вакансии
-                                                        {!selectedJobId && <Check size={14} className="text-accent shrink-0" />}
-                                                    </button>
-                                                    {jobs.filter((j: any) => !j.is_external).map((j: any) => (
-                                                        <button key={j.id} onClick={() => { handleJobClick(j); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
-                                                            <span className="truncate pr-2">{j.title}</span>
-                                                            {selectedJobId === j.id && <Check size={14} className="text-accent shrink-0" />}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <CustomSelect value={filterStack} options={STACKS.map((s) => ({ value: s, label: s }))} onChange={setFilterStack} open={openStack} setOpen={(v: boolean) => { setOpenStack(v); setOpenJob(false); setOpenGrade(false); }} placeholder="Все стеки" icon={Layers} />
-                                    <CustomSelect value={filterGrade} options={["Junior", "Middle", "Senior"].map((g) => ({ value: g, label: g }))} onChange={setFilterGrade} open={openGrade} setOpen={(v: boolean) => { setOpenGrade(v); setOpenJob(false); setOpenStack(false); }} placeholder="Все грейды" />
-
-                                    {selectedCandidates.length > 0 && (
-                                        <button onClick={() => setIsCompareOpen(true)} className="w-full sm:w-auto px-4 py-2 bg-surface-2 text-accent rounded-lg text-sm font-medium hover:bg-surface-3 hover:border-accent transition-colors flex items-center justify-center gap-2 active:scale-95">
-                                            <Scale size={16} /> Сравнить ({selectedCandidates.length})
-                                        </button>
-                                    )}
+                                {/* Переключатель Вакансии / Кейсы */}
+                                <div className="flex bg-surface-2 border border-line rounded-xl p-1 mb-5">
+                                    <button onClick={() => { setFilterType("vacancies"); setSelectedJobId(""); }} className={`flex-1 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
+                                    <button onClick={() => { setFilterType("cases"); setSelectedJobId(""); }} className={`flex-1 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "cases" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
                                 </div>
-                            </div>
 
-                            {loadingCandidates ? (
-                                <div className="text-center py-10 text-ink-3">Загрузка базы талантов...</div>
-                            ) : candidates.length > 0 ? (
-                                <div className="space-y-3">
-                                    {candidates.slice(0, 10).map((cand: any) => {
-                                        const isSelected = selectedCandidates.includes(cand.id);
-                                        return (
-                                            <div key={cand.id} className={`flex items-start gap-3 p-3.5 border rounded-xl transition-colors ${cand.is_unlocked ? "opacity-60 bg-surface-3 border-line-2" : isSelected ? "border-accent bg-accent/5" : "border-line bg-surface-2 hover:border-line-2"}`}>
-                                                {!cand.is_unlocked ? (
-                                                    <button onClick={() => toggleSelect(cand.id)} className="mt-1 text-ink-3 hover:text-accent transition-colors focus:outline-none">
-                                                        {isSelected ? <CheckSquare size={20} className="text-accent" /> : <Square size={20} />}
+                                {/* Выбор конкретной вакансии/кейса */}
+                                {filteredJobs.length > 0 && (
+                                    <div className="relative mb-4">
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Выбрать {filterType === "vacancies" ? "вакансию" : "кейс"}</label>
+                                        <button onClick={() => { setOpenJob(!openJob); setOpenGrade(false); setOpenStack(false); }} className="w-full bg-bg-2 border border-line rounded-lg p-2.5 text-[13px] text-left flex justify-between items-center hover:border-line-2 transition-colors">
+                                            <span className="truncate">{selectedJobTitle}</span>
+                                            <ChevronDown size={14} className={`transition-transform ${openJob ? "rotate-180" : ""}`} />
+                                        </button>
+                                        {openJob && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-60 overflow-y-auto">
+                                                <button onClick={() => { resetFilters(); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex justify-between items-center text-ink-2">
+                                                    Все {filterType === "vacancies" ? "вакансии" : "кейсы"}
+                                                    {!selectedJobId && <Check size={14} className="text-accent" />}
+                                                </button>
+                                                {filteredJobs.map((j: any) => (
+                                                    <button key={j.id} onClick={() => { handleJobClick(j); setOpenJob(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex justify-between items-center text-ink-2">
+                                                        <span className="truncate pr-2">{j.title}</span>
+                                                        {selectedJobId === j.id && <Check size={14} className="text-accent" />}
                                                     </button>
-                                                ) : (
-                                                    <div className="w-5 h-5 mt-1 flex items-center justify-center text-ink-4">
-                                                        <Check size={16} />
-                                                    </div>
-                                                )}
-
-                                                <div className="flex-1 min-w-0 overflow-hidden">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <div onClick={() => navigate(`/profile/${cand.id}`)} className={`font-semibold text-[15px] truncate flex items-center gap-2 cursor-pointer transition-colors ${cand.is_unlocked ? "text-ink-3" : "text-ink hover:text-accent"}`}>
-                                                            {cand.full_name}
-                                                            <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                                <ShieldCheck size={10} /> {cand.final_grade}
-                                                            </span>
-                                                            {cand.is_unlocked && (
-                                                                <span className="text-[10px] bg-surface text-ink-3 border border-line px-2 py-0.5 rounded-md font-medium">
-                                                                    Чат открыт
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className={`text-sm font-bold whitespace-nowrap ml-2 ${cand.is_unlocked ? "text-ink-3" : "text-accent"}`}>~ {cand.estimated_salary.toLocaleString("ru-RU")} ₽</div>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-4 mt-2">
-                                                        <div className="text-[12px] font-medium text-ink-3">Совпадение: {cand.match_score}%</div>
-                                                        <div className="text-[11px] text-ink-4">Балл: {cand.total_score}/100</div>
-                                                    </div>
-
-                                                    <div className="text-[12px] text-ink-4 flex items-center gap-3 flex-wrap">
-                                                        <span className="capitalize">{cand.stack} • {cand.language}</span>
-                                                        <span className="flex items-center gap-1">
-                                                            <Star size={12} /> <span>{cand.github_stars}</span>
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {cand.is_unlocked ? (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); navigate(`/messages?chat=${cand.id}`); }}
-                                                        className="self-center px-4 py-1.5 bg-surface border border-line-2 text-ink-3 text-[12px] font-medium rounded-lg hover:text-ink hover:bg-surface-2 transition-colors whitespace-nowrap"
-                                                    >
-                                                        В чат
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={(e) => { 
-                                                            e.stopPropagation(); 
-                                                            handleHireClick({ ...cand, token_cost: cand.final_grade === "Senior" ? 350 : cand.final_grade === "Middle" ? 200 : 100 }); 
-                                                        }}
-                                                        className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
-                                                    >
-                                                        Нанять
-                                                    </button>
-                                                )}
+                                                ))}
                                             </div>
-                                        );
-                                    })}
-                                    
-                                    {candidates.length > 10 && (
-                                        <button
-                                            onClick={() => navigate(`/search?type=candidates${selectedJobId ? `&job_id=${selectedJobId}` : ''}`)}
-                                            className="w-full mt-4 py-2.5 bg-surface-2 border border-line rounded-xl text-sm font-medium text-ink hover:bg-surface-3 transition-colors"
-                                        >
-                                            Показать всех ({candidates.length})
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="space-y-4">
+                                    {/* Стек */}
+                                    <div>
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Стек</label>
+                                        <CustomSelect value={filterStack} options={STACKS.map(s => ({value: s, label: s}))} onChange={(v: any) => { setFilterStack(v); setFilterLang(""); }} open={openStack} setOpen={setOpenStack} placeholder="Все стеки" />
+                                    </div>
+                                    {/* Уровень */}
+                                    <div>
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Уровень</label>
+                                        <CustomSelect value={filterGrade} options={["Junior", "Middle", "Senior"].map(g => ({value: g, label: g}))} onChange={setFilterGrade} open={openGrade} setOpen={setOpenGrade} placeholder="Все уровни" />
+                                    </div>
+                                    {/* Язык */}
+                                    <div>
+                                        <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Язык</label>
+                                        <CustomSelect value={filterLang} options={availableLangs.map(l => ({value: l, label: l.toUpperCase()}))} onChange={setFilterLang} open={openLang} setOpen={setOpenLang} placeholder="Все языки" />
+                                    </div>
+                                </div>
+                            </aside>
+
+                            {/* СПИСОК КАНДИДАТОВ */}
+                            <div className="flex-1 min-w-0 bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[500px]">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold text-[15px] text-ink-2">Найдено кандидатов: {candidates.length}</h3>
+                                    {selectedCandidates.length > 0 && (
+                                        <button onClick={() => setIsCompareOpen(true)} className="px-3 py-1.5 bg-surface-2 border border-line rounded-lg text-[12px] font-medium text-accent hover:bg-surface-3 hover:border-accent transition-colors flex items-center gap-1.5">
+                                            <Scale size={14} /> Сравнить ({selectedCandidates.length})
                                         </button>
                                     )}
                                 </div>
-                            ) : (
-                                <div className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2">
-                                    <Users size={32} className="mx-auto text-ink-4 mb-3" />
-                                    <div className="text-[15px] font-medium mb-1">Кандидаты не найдены</div>
-                                    <p className="text-[13px] text-ink-3">Попробуйте изменить фильтры.</p>
-                                </div>
-                            )}
+
+                                {loadingCandidates ? (
+                                    <div className="text-center py-10 text-ink-3">Загрузка базы талантов...</div>
+                                ) : candidates.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {candidates.slice(0, 10).map((cand: any) => {
+                                            const isSelected = selectedCandidates.includes(cand.id);
+                                            return (
+                                                <div key={cand.id} className={`flex items-start gap-3 p-3.5 border rounded-xl transition-colors ${cand.is_unlocked ? "opacity-60 bg-surface-3 border-line-2" : isSelected ? "border-accent bg-accent/5" : "border-line bg-surface-2 hover:border-line-2"}`}>
+                                                    {!cand.is_unlocked ? (
+                                                        <button onClick={() => toggleSelect(cand.id)} className="mt-1 text-ink-3 hover:text-accent transition-colors focus:outline-none">
+                                                            {isSelected ? <CheckSquare size={20} className="text-accent" /> : <Square size={20} />}
+                                                        </button>
+                                                    ) : (
+                                                        <div className="w-5 h-5 mt-1 flex items-center justify-center text-ink-4">
+                                                            <Check size={16} />
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex-1 min-w-0 overflow-hidden">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <div onClick={() => navigate(`/profile/${cand.id}`)} className={`font-semibold text-[15px] truncate flex items-center gap-2 cursor-pointer transition-colors ${cand.is_unlocked ? "text-ink-3" : "text-ink hover:text-accent"}`}>
+                                                                {cand.full_name}
+                                                                <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                                    <ShieldCheck size={10} /> {cand.final_grade}
+                                                                </span>
+                                                                {cand.is_unlocked && (
+                                                                    <span className="text-[10px] bg-surface text-ink-3 border border-line px-2 py-0.5 rounded-md font-medium">
+                                                                        Чат открыт
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className={`text-sm font-bold whitespace-nowrap ml-2 ${cand.is_unlocked ? "text-ink-3" : "text-accent"}`}>~ {cand.estimated_salary.toLocaleString("ru-RU")} ₽</div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-4 mt-2">
+                                                            <div className="text-[12px] font-medium text-ink-3">Совпадение: {cand.match_score}%</div>
+                                                            <div className="text-[11px] text-ink-4">Балл: {cand.total_score}/100</div>
+                                                        </div>
+
+                                                        <div className="text-[12px] text-ink-4 flex items-center gap-3 flex-wrap">
+                                                            <span className="capitalize">{cand.stack} • {cand.language}</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Star size={12} /> <span>{cand.github_stars}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {cand.is_unlocked ? (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/messages?chat=${cand.id}`); }}
+                                                            className="self-center px-4 py-1.5 bg-surface border border-line-2 text-ink-3 text-[12px] font-medium rounded-lg hover:text-ink hover:bg-surface-2 transition-colors whitespace-nowrap"
+                                                        >
+                                                            В чат
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation(); 
+                                                                handleHireClick({ ...cand, token_cost: cand.final_grade === "Senior" ? 350 : cand.final_grade === "Middle" ? 200 : 100 }); 
+                                                            }}
+                                                            className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
+                                                        >
+                                                            Нанять
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                        
+                                        {candidates.length > 10 && (
+                                            <button
+                                                onClick={() => navigate(`/search?type=candidates${selectedJobId ? `&job_id=${selectedJobId}` : ''}`)}
+                                                className="w-full mt-4 py-2.5 bg-surface-2 border border-line rounded-xl text-sm font-medium text-ink hover:bg-surface-3 transition-colors"
+                                            >
+                                                Показать всех ({candidates.length})
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-10 border border-dashed border-line-2 rounded-xl bg-surface-2">
+                                        <Users size={32} className="mx-auto text-ink-4 mb-3" />
+                                        <div className="text-[15px] font-medium mb-1">Кандидаты не найдены</div>
+                                        <p className="text-[13px] text-ink-3">Попробуйте изменить фильтры.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
+                    )}                </div>
             </div>
 
             {isEditOpen && <EditCompanyModal onClose={() => setIsEditOpen(false)} backendUser={backendUser} onRefresh={onRefresh} />}
