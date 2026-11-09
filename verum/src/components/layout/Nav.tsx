@@ -53,25 +53,21 @@ export function Nav() {
         </div>
 
         {/* ПРАВАЯ СТОРОНА: Тумблер темы и Кнопки */}
-        <div className="flex items-center gap-1.5 sm:gap-3 md:gap-5">
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-5">
           
-          {/* Плавный переключатель темы (Тумблер) */}
+          {/* Тумблер темы (десктоп) */}
           <button 
             onClick={toggleTheme} 
             className="hidden sm:inline-flex relative h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none border border-line-2 bg-surface-2"
             title="Переключить тему"
           >
             <span className="sr-only">Переключить тему</span>
-            
-            {/* Иконки внутри тумблера */}
             <span className={`absolute left-1.5 transition-opacity duration-300 ${theme === "dark" ? "opacity-100" : "opacity-0"}`}>
               <Moon size={12} className="text-ink-4" />
             </span>
             <span className={`absolute right-1.5 transition-opacity duration-300 ${theme === "dark" ? "opacity-0" : "opacity-100"}`}>
               <Sun size={12} className="text-ink-4" />
             </span>
-
-            {/* Сам ползунок */}
             <span
               className={`inline-block h-5 w-5 transform rounded-full shadow-sm ring-0 transition-transform duration-300 ease-in-out ${
                 theme === "dark" ? "translate-x-6 bg-accent" : "translate-x-1 bg-white"
@@ -79,7 +75,7 @@ export function Nav() {
             />
           </button>
 
-          
+          {/* Тумблер темы (мобилка) */}
           <button 
             onClick={toggleTheme} 
             className="sm:hidden p-2 text-ink-2 hover:text-accent transition-colors flex items-center justify-center"
@@ -87,7 +83,8 @@ export function Nav() {
           >
             {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
           </button>
-<div className="w-px h-6 bg-line hidden sm:block"></div>
+
+          <div className="w-px h-6 bg-line hidden sm:block"></div>
 
           {/* Кнопки авторизации / навигации */}
           {user ? (

@@ -112,6 +112,12 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
     )
     users = result.scalars().all()
 
+    unlocked_devs = set()
+    if user and user.role == "company":
+        from ..auth import Conversation
+        conv_res = await db.execute(select(Conversation.developer_id).where(Conversation.company_id == user.id))
+        unlocked_devs = {row[0] for row in conv_res.fetchall()}
+
     results = []
     for u in users:
         data = u.skills_data
@@ -209,7 +215,8 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
                     total_score=score, stack=data.get("stack_id", ""), language=data.get("language_id", ""),
                     summary=data.get("summary", ""), match_score=min(100, match_score),
                     estimated_salary=estimated_salary, github_stars=stars, avatar_url=u.avatar_url,
-                    project_rate=u.project_rate, expected_salary=u.expected_salary
+                    project_rate=u.project_rate, expected_salary=u.expected_salary,
+                    is_unlocked=(u.id in unlocked_devs)
                 )
             )
     results.sort(key=lambda x: (x.match_score, x.total_score), reverse=True)

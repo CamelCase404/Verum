@@ -117,6 +117,7 @@ class UserProfile(BaseModel):
     job_postings: list[dict] | None = None
     project_rate: int | None = None
     expected_salary: int | None = None
+    is_unlocked: bool = False
     last_test_at: datetime | None = None
     test_status: str | None = None
     interview_video_url: str | None = None
@@ -174,4 +175,5 @@ class UpdateProfileReq(BaseModel):
     job_postings: list[dict] | None = None
     project_rate: int | None = None
     expected_salary: int | None = None
+    is_unlocked: bool = False
     website: str | None = None

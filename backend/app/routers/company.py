@@ -108,18 +108,22 @@ async def hire_developer(
         db.add(conv)
         await db.flush()
         
-        if not is_enterprise:
-            user.tokens -= cost
-            conv.tokens_spent = cost
-            from datetime import datetime, timedelta
-            conv.refund_deadline = utcnow_naive() + timedelta(days=3)
-            
-            db.add(UsageLog(
-                company_id=user.id, action="hire_chat",
-                cost=cost, candidate_id=dev.id
-            ))
-        await db.commit()
-        await db.refresh(conv)
+    # Списываем токены, если чат новый ИЛИ если он был создан до внедрения оплаты (tokens_spent == 0)
+    needs_payment = not conv.tokens_spent
+    
+    if needs_payment and not is_enterprise:
+        user.tokens -= cost
+        conv.tokens_spent = cost
+        from datetime import datetime, timedelta
+        conv.refund_deadline = utcnow_naive() + timedelta(days=3)
+        
+        db.add(UsageLog(
+            company_id=user.id, action="hire_chat",
+            cost=cost, candidate_id=dev.id
+        ))
+    
+    await db.commit()
+    await db.refresh(conv)
     
     return {
         "status": "ok",

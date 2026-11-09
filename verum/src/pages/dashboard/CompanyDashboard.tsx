@@ -415,44 +415,64 @@ export function CompanyDashboard({
                                     {candidates.slice(0, 10).map((cand: any) => {
                                         const isSelected = selectedCandidates.includes(cand.id);
                                         return (
-                                            <div key={cand.id} className={`flex items-start gap-3 p-3.5 border rounded-xl transition-colors ${isSelected ? "border-accent bg-accent/5" : "border-line bg-surface-2 hover:border-line-2"}`}>
-                                                <button onClick={() => toggleSelect(cand.id)} className="mt-1 text-ink-3 hover:text-accent transition-colors focus:outline-none">
-                                                    {isSelected ? <CheckSquare size={20} className="text-accent" /> : <Square size={20} />}
-                                                </button>
+                                            <div key={cand.id} className={`flex items-start gap-3 p-3.5 border rounded-xl transition-colors ${cand.is_unlocked ? "opacity-60 bg-surface-3 border-line-2" : isSelected ? "border-accent bg-accent/5" : "border-line bg-surface-2 hover:border-line-2"}`}>
+                                                {!cand.is_unlocked ? (
+                                                    <button onClick={() => toggleSelect(cand.id)} className="mt-1 text-ink-3 hover:text-accent transition-colors focus:outline-none">
+                                                        {isSelected ? <CheckSquare size={20} className="text-accent" /> : <Square size={20} />}
+                                                    </button>
+                                                ) : (
+                                                    <div className="w-5 h-5 mt-1 flex items-center justify-center text-ink-4">
+                                                        <Check size={16} />
+                                                    </div>
+                                                )}
 
                                                 <div className="flex-1 min-w-0 overflow-hidden">
                                                     <div className="flex items-center justify-between mb-1">
-                                                        <div onClick={() => navigate(`/profile/${cand.id}`)} className="font-semibold text-[15px] text-ink truncate flex items-center gap-2 hover:text-accent cursor-pointer transition-colors">
+                                                        <div onClick={() => navigate(`/profile/${cand.id}`)} className={`font-semibold text-[15px] truncate flex items-center gap-2 cursor-pointer transition-colors ${cand.is_unlocked ? "text-ink-3" : "text-ink hover:text-accent"}`}>
                                                             {cand.full_name}
                                                             <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
                                                                 <ShieldCheck size={10} /> {cand.final_grade}
                                                             </span>
+                                                            {cand.is_unlocked && (
+                                                                <span className="text-[10px] bg-surface text-ink-3 border border-line px-2 py-0.5 rounded-md font-medium">
+                                                                    Чат открыт
+                                                                </span>
+                                                            )}
                                                         </div>
-                                                        <div className="text-sm font-bold text-accent whitespace-nowrap ml-2">~ {cand.estimated_salary.toLocaleString("ru-RU")} ₽</div>
+                                                        <div className={`text-sm font-bold whitespace-nowrap ml-2 ${cand.is_unlocked ? "text-ink-3" : "text-accent"}`}>~ {cand.estimated_salary.toLocaleString("ru-RU")} ₽</div>
                                                     </div>
 
                                                     <div className="flex items-center gap-4 mt-2">
-                                                        <div className="text-[12px] font-medium text-ink-2">Совпадение: {cand.match_score}%</div>
-                                                        <div className="text-[11px] text-ink-3">Балл: {cand.total_score}/100</div>
+                                                        <div className="text-[12px] font-medium text-ink-3">Совпадение: {cand.match_score}%</div>
+                                                        <div className="text-[11px] text-ink-4">Балл: {cand.total_score}/100</div>
                                                     </div>
 
-                                                    <div className="text-[12px] text-ink-3 flex items-center gap-3 flex-wrap">
+                                                    <div className="text-[12px] text-ink-4 flex items-center gap-3 flex-wrap">
                                                         <span className="capitalize">{cand.stack} • {cand.language}</span>
-                                                        <span className="flex items-center gap-1 text-ink-4">
-                                                            <Star size={12} /> <span className="text-ink-2 font-medium">{cand.github_stars}</span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Star size={12} /> <span>{cand.github_stars}</span>
                                                         </span>
                                                     </div>
                                                 </div>
 
-                                                <button
-                                                    onClick={(e) => { 
-                                                        e.stopPropagation(); 
-                                                        handleHireClick({ ...cand, token_cost: cand.final_grade === "Senior" ? 350 : cand.final_grade === "Middle" ? 200 : 100 }); 
-                                                    }}
-                                                    className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
-                                                >
-                                                    Нанять
-                                                </button>
+                                                {cand.is_unlocked ? (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); navigate(`/messages?chat=${cand.id}`); }}
+                                                        className="self-center px-4 py-1.5 bg-surface border border-line-2 text-ink-3 text-[12px] font-medium rounded-lg hover:text-ink hover:bg-surface-2 transition-colors whitespace-nowrap"
+                                                    >
+                                                        В чат
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation(); 
+                                                            handleHireClick({ ...cand, token_cost: cand.final_grade === "Senior" ? 350 : cand.final_grade === "Middle" ? 200 : 100 }); 
+                                                        }}
+                                                        className="self-center px-4 py-1.5 bg-accent text-white text-[12px] font-medium rounded-lg hover:bg-accent-2 transition-colors whitespace-nowrap"
+                                                    >
+                                                        Нанять
+                                                    </button>
+                                                )}
                                             </div>
                                         );
                                     })}
