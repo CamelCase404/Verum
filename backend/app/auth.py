@@ -72,6 +72,8 @@ class Conversation(Base):
     company_id = Column(Integer, ForeignKey("users.id"))
     developer_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
+    tokens_spent = Column(Integer, default=0)
+    refund_deadline = Column(DateTime, nullable=True)
 
 class Message(Base):
     __tablename__ = "messages"

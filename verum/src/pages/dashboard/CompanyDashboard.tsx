@@ -189,7 +189,7 @@ export function CompanyDashboard({
         <div className="relative w-full sm:w-auto flex-1 sm:flex-none">
             <button
                 onClick={() => setOpen(!open)}
-                className="w-full bg-surface-2 border border-line text-sm text-ink rounded-lg px-3 py-2 outline-none flex items-center justify-between gap-2 hover:bg-surface-3 transition-colors min-w-[130px]"
+                className="w-full bg-surface border border-line text-sm text-ink rounded-lg px-3 py-2 outline-none flex items-center justify-between gap-2 hover:bg-surface-3 transition-colors min-w-[130px]"
             >
                 <span className="flex items-center gap-1.5 truncate">
                     {Icon && <Icon size={14} className="text-ink-3" />}
@@ -229,41 +229,7 @@ export function CompanyDashboard({
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Кабинет компании</h1>
                     <p className="text-ink-2 text-[13px] md:text-[15px]">Управление вакансиями и поиск талантов</p>
                 </div>
-                {/* План и счётчики (Строгий B2B-виджет) */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                    {/* Единый виджет баланса */}
-                    <div className="flex items-center bg-surface border border-line rounded-xl p-1 shadow-sm">
-                        {/* Тесты */}
-                        <div className="flex items-center gap-2.5 px-3 py-1.5">
-                            <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-ink-3 shrink-0">
-                                <ShieldCheck size={16} />
-                            </div>
-                            <div>
-                                <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold">Тесты</div>
-                                <div className="text-[14px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
-                            </div>
-                        </div>
-                        <div className="w-px h-8 bg-line mx-1" />
-                        {/* Токены */}
-                        <div className="flex items-center gap-2.5 px-3 py-1.5">
-                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                <Database size={16} />
-                            </div>
-                            <div>
-                                <div className="text-[10px] uppercase tracking-wider text-accent font-semibold">Токены</div>
-                                <div className="text-[14px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Кнопка тарифа */}
-                    <button
-                        onClick={() => navigate("/pricing")}
-                        className={`px-5 py-2.5 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center gap-2 border ${plan ? "bg-surface-2 border-line text-ink hover:bg-surface-3" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
-                    >
-                        {plan ? "Сменить тариф" : "Выбрать тариф"}
-                    </button>
-                </div>
+                
             </div>
 
             <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
@@ -288,6 +254,37 @@ export function CompanyDashboard({
                                 <p className="text-[12px] md:text-sm text-ink-3">{backendUser?.email}</p>
                             </div>
                         </div>
+                        {/* Виджет баланса перенесен сюда */}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
+                            <div className="flex-1 flex items-center bg-surface-2 border border-line rounded-xl p-1 shadow-sm">
+                                <div className="flex items-center gap-2.5 px-3 py-1.5 flex-1">
+                                    <div className="w-7 h-7 rounded-lg bg-surface flex items-center justify-center text-ink-3 shrink-0 border border-line">
+                                        <ShieldCheck size={14} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[9px] uppercase tracking-wider text-ink-3 font-semibold">Тесты</div>
+                                        <div className="text-[13px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
+                                    </div>
+                                </div>
+                                <div className="w-px h-7 bg-line mx-1" />
+                                <div className="flex items-center gap-2.5 px-3 py-1.5 flex-1">
+                                    <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                                        <Database size={14} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[9px] uppercase tracking-wider text-accent font-semibold">Токены</div>
+                                        <div className="text-[13px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => navigate("/pricing")}
+                                className={`px-3 py-2 rounded-xl text-[12px] font-medium transition-all shadow-sm flex items-center justify-center border ${plan ? "bg-surface border-line text-ink hover:bg-surface-2" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
+                            >
+                                {plan ? "Сменить" : "Выбрать"}
+                            </button>
+                        </div>
+
                         <p className="text-[13px] md:text-[14px] text-ink-2 leading-relaxed break-words [overflow-wrap:anywhere] mb-4 md:mb-6">
                             {backendUser?.bio || "Добавьте описание вашей компании."}
                         </p>
@@ -389,25 +386,25 @@ export function CompanyDashboard({
                     {activeTab === "candidates" && (
                         <div className="flex flex-col lg:flex-row gap-6 items-start">
                             {/* ЛЕВЫЙ САЙДБАР ФИЛЬТРОВ */}
-                            <aside className="w-full lg:w-[280px] shrink-0 bg-surface border border-line rounded-2xl p-5 shadow-sm sticky top-20">
-                                <div className="flex items-center justify-between mb-5">
-                                    <h3 className="font-semibold text-[16px] flex items-center gap-2"><Search size={18} className="text-accent" /> Фильтры</h3>
+                            <aside className="w-full lg:w-[280px] shrink-0 bg-surface-2 border border-line rounded-2xl p-4 shadow-sm sticky top-20">
+                                <div className="flex items-center justify-between mb-4 px-1">
+                                    <h3 className="font-semibold text-[15px] flex items-center gap-2"><Search size={16} className="text-accent" /> Фильтры</h3>
                                     {(filterGrade || filterStack || filterLang || selectedJobId) && (
-                                        <button onClick={resetFilters} className="text-[12px] text-ink-3 hover:text-red-400 transition-colors">Сбросить</button>
+                                        <button onClick={resetFilters} className="text-[11px] text-ink-3 hover:text-red-400 transition-colors">Сбросить</button>
                                     )}
                                 </div>
 
                                 {/* Переключатель Вакансии / Кейсы */}
-                                <div className="flex bg-surface-2 border border-line rounded-xl p-1 mb-5">
-                                    <button onClick={() => { setFilterType("vacancies"); setSelectedJobId(""); }} className={`flex-1 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
-                                    <button onClick={() => { setFilterType("cases"); setSelectedJobId(""); }} className={`flex-1 py-1.5 text-[12px] font-medium rounded-lg transition-all ${filterType === "cases" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
+                                <div className="flex bg-surface border border-line rounded-lg p-1 mb-5">
+                                    <button onClick={() => { setFilterType("vacancies"); setSelectedJobId(""); }} className={`flex-1 py-1.5 text-[12px] font-medium rounded-md transition-all ${filterType === "vacancies" ? "bg-surface-2 text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
+                                    <button onClick={() => { setFilterType("cases"); setSelectedJobId(""); }} className={`flex-1 py-1.5 text-[12px] font-medium rounded-md transition-all ${filterType === "cases" ? "bg-surface-2 text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
                                 </div>
 
                                 {/* Выбор конкретной вакансии/кейса */}
                                 {filteredJobs.length > 0 && (
                                     <div className="relative mb-4">
                                         <label className="text-[12px] font-medium mb-1.5 block text-ink-2">Выбрать {filterType === "vacancies" ? "вакансию" : "кейс"}</label>
-                                        <button onClick={() => { setOpenJob(!openJob); setOpenGrade(false); setOpenStack(false); }} className="w-full bg-bg-2 border border-line rounded-lg p-2.5 text-[13px] text-left flex justify-between items-center hover:border-line-2 transition-colors">
+                                        <button onClick={() => { setOpenJob(!openJob); setOpenGrade(false); setOpenStack(false); }} className="w-full bg-surface border border-line rounded-lg p-2.5 text-[13px] text-left flex justify-between items-center hover:border-line-2 transition-colors">
                                             <span className="truncate">{selectedJobTitle}</span>
                                             <ChevronDown size={14} className={`transition-transform ${openJob ? "rotate-180" : ""}`} />
                                         </button>

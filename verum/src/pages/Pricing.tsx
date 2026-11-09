@@ -102,14 +102,17 @@ export function Pricing() {
                                                 <span className="font-bold text-accent text-xl">{p.tokens_per_month === null ? "∞" : (p.tokens_per_month || (p.id === "pro" ? 10000 : 3000))}</span>
                                             </div>
                                             
-                                            {/* Плашка "На что хватит" */}
-                                            <div className="mt-3 flex items-start gap-2 text-[12px] text-ink-3 leading-relaxed">
-                                                <Check size={14} className="text-accent shrink-0 mt-0.5" />
-                                                <span>
-                                                    {p.id === "start" && "Хватит на 3 Senior, 5 Middle и 10 Junior."}
-                                                    {p.id === "pro" && "Хватит на 10 Senior, 15 Middle и 30 Junior."}
-                                                    {p.id === "enterprise" && "Неограниченный доступ ко всей базе."}
-                                                </span>
+                                        </div>
+
+                                        {/* Крупная плашка про базу Verum */}
+                                        <div className="mb-6 p-3.5 bg-accent/5 border border-accent/20 rounded-xl">
+                                            <div className="text-[12px] font-bold text-accent uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                                <Database size={14} /> Доступ к внутренней базе Verum
+                                            </div>
+                                            <div className="text-[14px] font-medium text-ink leading-snug">
+                                                {p.id === "start" && "Хватит на 3 Senior, 5 Middle и 10 Junior."}
+                                                {p.id === "pro" && "Хватит на 10 Senior, 15 Middle и 30 Junior."}
+                                                {p.id === "enterprise" && "Неограниченный доступ ко всей базе."}
                                             </div>
                                         </div>
 
