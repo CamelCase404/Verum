@@ -31,6 +31,18 @@ export function Dashboard() {
     fetchUser();
   }, [fetchUser]);
 
+  // Обработка авто-запуска интервью, если пришли по ссылке на вакансию 
+  useEffect(() => {
+    if (backendUser?.role === "developer") {
+        const pendingJobStr = localStorage.getItem("verum.pending_job");
+        if (pendingJobStr) {
+            // Очищаем, чтобы не запустилось при следующем обновлении страницы
+            localStorage.removeItem("verum.pending_job");
+            window.dispatchEvent(new CustomEvent("verum-open-interview", { detail: JSON.parse(pendingJobStr) }));
+        }
+    }
+  }, [backendUser]);
+
   if (loading) return <div className="min-h-screen flex items-center justify-center text-ink text-xl">Загрузка профиля...</div>;
 
   // Роутинг по ролям
