@@ -145,3 +145,44 @@ async def list_verification_requests(
             "rejection_reason": r.rejection_reason,
         })
     return {"items": items}
+
+@router.get("/vacancy/{job_id}/top")
+async def get_vacancy_top(
+    job_id: str,
+    user: UserDB = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if user.role != "company":
+        raise HTTPException(403, "Только для компаний")
+    
+    from ..auth import VacancyApplication
+    from sqlalchemy import select
+    
+    # Ищем одобренные отклики именно на эту вакансию
+    res = await db.execute(
+        select(VacancyApplication)
+        .where(VacancyApplication.job_id == job_id, VacancyApplication.company_id == user.id)
+    )
+    apps = res.scalars().all()
+    
+    if not apps:
+        return {"items": []}
+        
+    dev_ids = [a.developer_id for a in apps]
+    dev_res = await db.execute(select(UserDB).where(UserDB.id.in_(dev_ids)))
+    devs = dev_res.scalars().all()
+    
+    items = []
+    for d in devs:
+        if d.skills_data:
+            items.append({
+                "id": d.id,
+                "full_name": d.full_name,
+                "final_grade": d.skills_data.get("final_grade", "—"),
+                "total_score": d.skills_data.get("total_score_100", 0),
+                "summary": d.skills_data.get("summary", ""),
+                "avatar_url": d.avatar_url,
+            })
+    
+    items.sort(key=lambda x: x["total_score"], reverse=True)
+    return {"items": items}

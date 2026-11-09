@@ -112,8 +112,28 @@ async def approve(
     if comp.plan != "enterprise" and comp.verifications_left is not None and comp.verifications_left > 0:
         comp.verifications_left -= 1
 
-    # Перенести skills_data → skills_data (одобрено)
+    # Перенести pending_skills_data → skills_data (одобрено)
     if dev.pending_skills_data:
+        # Если это был тест под вакансию — привязываем его к вакансии
+        job_id = dev.pending_skills_data.get("job_id")
+        if job_id:
+            from ..auth import VacancyApplication
+            # Проверяем, нет ли уже отклика
+            ex_app = await db.execute(
+                select(VacancyApplication).where(
+                    VacancyApplication.job_id == job_id,
+                    VacancyApplication.developer_id == dev.id
+                )
+            )
+            if not ex_app.scalars().first():
+                db.add(VacancyApplication(
+                    job_id=job_id,
+                    company_id=comp.id,
+                    developer_id=dev.id,
+                    interview_id=dev.pending_skills_data.get("interview_id"),
+                    status="approved"
+                ))
+        
         dev.skills_data = dev.pending_skills_data
         dev.pending_skills_data = None
         dev.test_status = "approved"

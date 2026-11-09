@@ -280,6 +280,28 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
     return {"status": "ok"}
 
 
+@router.delete("/me")
+async def delete_account(user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Полное удаление аккаунта и всех связанных данных."""
+    from sqlalchemy import delete
+    from ..interview_store import SessionLocal as InterviewSession, DBInterview, DBTurn
+    
+    # 1. Удаляем интервью и ответы (они в другой БД-сессии)
+    async with InterviewSession() as idb:
+        res = await idb.execute(select(DBInterview.id).where(DBInterview.user_id == user.id))
+        it_ids = [r[0] for r in res.fetchall()]
+        if it_ids:
+            await idb.execute(delete(DBTurn).where(DBTurn.interview_id.in_(it_ids)))
+            await idb.execute(delete(DBInterview).where(DBInterview.id.in_(it_ids)))
+        await idb.commit()
+
+    # 2. Удаляем пользователя (каскадно удалит чаты, отклики, счета и т.д. благодаря ondelete="CASCADE")
+    await db.delete(user)
+    await db.commit()
+    
+    return {"status": "ok"}
+
+
 @router.put("/profile")
 async def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if data.bio is not None: user.bio = data.bio

@@ -23,6 +23,7 @@ class StartInterviewRequest(BaseModel):
     level: Level
     stack_id: str
     language_ids: list[str]
+    job_id: str | None = None
 
 class Turn(BaseModel):
     role: Literal["assistant", "user"]

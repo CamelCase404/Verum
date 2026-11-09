@@ -119,6 +119,17 @@ class UsageLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class VacancyApplication(Base):
+    __tablename__ = "vacancy_applications"
+    id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(String(50), nullable=False)
+    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    developer_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    interview_id = Column(String(36), nullable=False)
+    status = Column(String(20), default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class VerificationRequest(Base):
     __tablename__ = "verification_requests"
     id = Column(Integer, primary_key=True, index=True)

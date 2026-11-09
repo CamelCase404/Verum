@@ -165,12 +165,14 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
 
 
 @router.post("/start", response_model=StartInterviewResponse)
-async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user)) -> StartInterviewResponse:
+async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> StartInterviewResponse:
     if user.role != "developer":
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
     
-    # Блокируем старт, пока предыдущее собеседование висит на модерации
-    if user.test_status == "pending":
+    is_job_test = bool(req.job_id)
+    
+    # Блокируем старт, пока предыдущее собеседование висит на модерации (только для обычных тестов)
+    if not is_job_test and user.test_status == "pending":
         raise HTTPException(
             409,
             "У вас уже есть собеседование на модерации. Дождитесь решения модератора."
@@ -178,16 +180,16 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
     
     from datetime import datetime
     now = utcnow_naive()
-    if user.blocked_until:
+    # Проверяем таймер 180 дней только если это НЕ тест под вакансию
+    if not is_job_test and user.blocked_until:
         blocked = user.blocked_until
-        # Если дата с часовым поясом, убираем его для сравнения
         if blocked.tzinfo is not None:
             blocked = blocked.replace(tzinfo=None)
         if blocked > now:
             raise HTTPException(
                 403,
                 f"Доступ к собеседованию заблокирован до {blocked.strftime('%d.%m.%Y')}. "
-                f"Вы исчерпали все попытки."
+                f"Вы исчерпали все попытки. Для прохождения теста под конкретную вакансию используйте ссылку от компании."
             )
     # Сбрасываем "хвосты" от прошлой попытки, чтобы админ не увидел старое видео с новым чатом
     user.interview_video_url = None
@@ -199,6 +201,8 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
 
     langs_str = ", ".join(req.language_ids)
     it = await create(req.level, req.stack_id, langs_str, user_id=user.id)
+    if getattr(req, 'job_id', None):
+        it.job_id = req.job_id
     try:
         q = await _generate_pure_question(0, it, [])
     except Exception as e:

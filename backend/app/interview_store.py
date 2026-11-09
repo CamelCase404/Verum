@@ -30,7 +30,8 @@ class DBInterview(Base):
     finished = Column(Boolean, default=False)
     rejected = Column(Boolean, default=False)
     reject_reason = Column(String, nullable=True)
-    timecode_markers = Column(JSON, nullable=True)  # массив [{time: "00:45", reason: "tab_switch"}]
+    timecode_markers = Column(JSON, nullable=True)
+    job_id = Column(String(50), nullable=True)  # массив [{time: "00:45", reason: "tab_switch"}]
     turns = relationship(
         "DBTurn",
         back_populates="interview",
@@ -66,6 +67,7 @@ class Interview:
     stack_id: str
     language_id: str
     user_id: int | None = None
+    job_id: str | None = None
     stage: int = 0
     finished: bool = False
     rejected: bool = False
@@ -104,6 +106,7 @@ async def get(interview_id: str) -> Optional[Interview]:
         return Interview(
             id=db_it.id,
             user_id=getattr(db_it, "user_id", None),
+            job_id=getattr(db_it, "job_id", None),
             level=db_it.level,
             stack_id=db_it.stack_id,
             language_id=db_it.language_id,

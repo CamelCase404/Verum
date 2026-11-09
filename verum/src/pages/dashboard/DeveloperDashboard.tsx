@@ -64,6 +64,7 @@ export function DeveloperDashboard({
 }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isInterviewOpen, setIsInterviewOpen] = useState(false);
+    const [pendingJobId, setPendingJobId] = useState<string | null>(null);
     const [editingProject, setEditingProject] = useState<any>(null);
     const [viewingProject, setViewingProject] = useState<any>(null);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -83,6 +84,16 @@ export function DeveloperDashboard({
     const projects = backendUser?.projects || [];
 
     const [showAllRecs, setShowAllRecs] = useState(false);
+
+    // Слушаем кастомное событие из Dashboard.tsx
+    useEffect(() => {
+        const handleOpen = (e: any) => {
+            setPendingJobId(e.detail?.id || null);
+            setIsInterviewOpen(true);
+        };
+        window.addEventListener("verum-open-interview", handleOpen);
+        return () => window.removeEventListener("verum-open-interview", handleOpen);
+    }, []);
 
     useEffect(() => {
         if (!backendUser?.id || !skills?.stack_id) return;
@@ -1122,7 +1133,8 @@ export function DeveloperDashboard({
                 {isInterviewOpen && (
                     <InterviewModal
                         key="interview-modal"
-                        onClose={() => setIsInterviewOpen(false)}
+                        onClose={() => { setIsInterviewOpen(false); setPendingJobId(null); }}
+                        jobId={pendingJobId}
                     />
                 )}
                 {viewingProject && (

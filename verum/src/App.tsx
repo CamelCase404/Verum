@@ -40,6 +40,7 @@ import { Messages } from "@/pages/Messages";
 import { PublicProfile } from "@/pages/PublicProfile";
 import { AdminDashboard } from "@/pages/AdminDashboard";
 import { SearchResults } from "@/pages/SearchResults";
+import { PublicVacancy } from "@/pages/PublicVacancy";
 
 function Layout() {
   const location = useLocation();
@@ -126,6 +127,7 @@ export default function App() {
           <Route path="/profile/:id" element={<PublicProfile />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/v/:slug" element={<PublicVacancy />} />
         </Route>
       </Routes>
 

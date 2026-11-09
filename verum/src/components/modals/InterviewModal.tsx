@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function InterviewModal({
- onClose }: { onClose: () => void }) {
+ onClose, jobId }: { onClose: () => void, jobId?: string | null }) {
 
   const { updateProfile, theme } = useAppStore();
   const [step, setStep] = useState<"start" | "loading">("start");
@@ -17,6 +17,13 @@ export function InterviewModal({
             alert("Сначала войдите в аккаунт через GitHub или Email!");
             return;
         }
+        // Сохраняем ID вакансии, чтобы тест-фронт его подхватил
+        if (jobId) {
+            localStorage.setItem("verum_test_job_id", jobId);
+        } else {
+            localStorage.removeItem("verum_test_job_id");
+        }
+        
         // Перекидываем на боевой домен (или на localhost, если мы в режиме разработки)
         const testAppUrl = import.meta.env.VITE_TEST_APP_URL || "https://test.verumskills.ru";
         window.location.href = `${testAppUrl}/?token=${token}&theme=${theme}`;

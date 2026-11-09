@@ -57,11 +57,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
     catalog: () => request<CatalogResponse>("/api/catalog"),
 
-    startInterview: (level: LevelApi, stack_id: string, language_ids: string[]) =>
-        request<StartInterviewResponse>("/api/interview/start", {
+    startInterview: (level: LevelApi, stack_id: string, language_ids: string[]) => {
+        // Подхватываем ID вакансии, если пришли по ссылке
+        const jobId = localStorage.getItem("verum_test_job_id");
+        return request<StartInterviewResponse>("/api/interview/start", {
             method: "POST",
-            body: JSON.stringify({ level, stack_id, language_ids }),
-        }),
+            body: JSON.stringify({ level, stack_id, language_ids, job_id: jobId || null }),
+        });
+    },
 
     answer: (interview_id: string, answer: string, seconds_spent: number) =>
         request<AnswerResponse>("/api/interview/answer", {

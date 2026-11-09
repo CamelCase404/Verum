@@ -37,6 +37,8 @@ export const authApi = {
     request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password: pass }) }),
 
   getMe: () => request("/api/auth/me"),
+  
+  deleteAccount: () => request("/api/auth/me", { method: "DELETE" }),
 
   getPublicUser: (id: number | string) => request(`/api/auth/user/${id}`),
 
@@ -117,4 +119,9 @@ export const companyApi = {
   requestUnlock: (developerId: number) =>
     request(`/api/company/request-unlock/${developerId}`, { method: "POST" }),
   getVerificationRequests: () => request("/api/company/verification-requests"),
+};
+
+export const vacancyApi = {
+  getPublic: (slug: string) => request(`/api/jobs/${slug}`),
+  getTop: (jobId: string) => request(`/api/company/vacancy/${jobId}/top`),
 };

@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageSquare, User, LogOut, ShieldCheck } from "lucide-react";
+import { X, MessageSquare, User, LogOut, ShieldCheck, Trash2 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
+import { authApi } from "@/api";
+import { toast } from "@/components/layout/ToastContainer";
 
 export function Drawer() {
   const { drawerOpen, toggleDrawer, user, setUser } = useAppStore();
@@ -9,8 +11,31 @@ export function Drawer() {
 
   const handleLogout = () => {
     localStorage.removeItem("verum_token");
+    localStorage.removeItem("verum_state_v9"); // Очищаем стейт zustand
     if (setUser) setUser(null);
     window.location.href = "/";
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm(
+      "Вы уверены, что хотите удалить аккаунт?\n\n" +
+      "Это действие необратимо. Будут удалены: профиль, история собеседований, " +
+      "чаты, отклики на вакансии и все связанные данные."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await authApi.deleteAccount();
+      toast("Аккаунт удален", "success");
+      setTimeout(() => {
+        localStorage.removeItem("verum_token");
+        localStorage.removeItem("verum_state_v9");
+        if (setUser) setUser(null);
+        window.location.href = "/";
+      }, 1000);
+    } catch (e: any) {
+      toast(e.message || "Ошибка удаления аккаунта");
+    }
   };
 
   const navItems = [
@@ -93,10 +118,16 @@ export function Drawer() {
 
             {/* Кнопка выхода (внизу) */}
             {user && (
-              <div className="p-4 border-t border-line">
+              <div className="p-4 border-t border-line flex flex-col gap-2">
+                <button
+                  onClick={handleDeleteAccount}
+                  className="w-full h-[42px] rounded-lg border border-transparent text-warn hover:bg-warn-soft transition-colors text-[13px] flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={15} /> Удалить аккаунт
+                </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full h-[42px] rounded-lg border border-line-2 text-ink-2 hover:text-red-500 hover:bg-red-500/10 transition-colors text-[14px] flex items-center justify-center gap-2"
+                  className="w-full h-[42px] rounded-lg border border-line-2 text-ink-2 hover:text-ink hover:bg-surface-2 transition-colors text-[14px] flex items-center justify-center gap-2"
                 >
                   <LogOut size={16} /> Выйти
                 </button>
