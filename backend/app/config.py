@@ -39,7 +39,6 @@ class Settings:
             "price_month": 30000,
             "verifications_per_month": 20,
             "tokens_per_month": 3000,
-            "pay_per_test": 1500,
             "features": [
                 "20 тестов для внешних кандидатов",
                 "3000 токенов (хватит на 3 Senior, 5 Middle, 10 Junior)",
@@ -52,7 +51,6 @@ class Settings:
             "price_month": 75000,
             "verifications_per_month": 60,
             "tokens_per_month": 10000,
-            "pay_per_test": 1500,
             "features": [
                 "60 тестов для внешних кандидатов",
                 "10 000 токенов для доступа к базе",
@@ -64,7 +62,6 @@ class Settings:
             "price_month": 200000,
             "verifications_per_month": None,
             "tokens_per_month": None,
-            "pay_per_test": None,
             "features": [
                 "Безлимитные тесты",
                 "Безлимитный доступ к базе",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { chatApi } from "@/api";
-import { Menu, MessageSquare, User, Sun, Moon, ShieldCheck, Sparkles } from "lucide-react";
+import { Menu, MessageSquare, User, Sun, Moon, ShieldCheck } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Nav() {

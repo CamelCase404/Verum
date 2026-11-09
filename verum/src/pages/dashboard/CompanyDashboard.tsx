@@ -16,6 +16,7 @@ import {
     ChevronDown,
     Check,
     Layers,
+    Database,
     X,
 } from "lucide-react";
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
@@ -73,6 +74,7 @@ export function CompanyDashboard({
     // Дропдауны
     const [openGrade, setOpenGrade] = useState(false);
     const [openStack, setOpenStack] = useState(false);
+    const [openLang, setOpenLang] = useState(false);
     const [openJob, setOpenJob] = useState(false);
 
     const [selectedCandidates, setSelectedCandidates] = useState<number[]>([]);
@@ -86,6 +88,8 @@ export function CompanyDashboard({
     const jobs = allJobs.filter((j: any) => j.type !== "case");
     const cases = allJobs.filter((j: any) => j.type === "case");
     const currentList = activeWorkType === "vacancies" ? jobs : cases;
+    const filteredJobs = filterType === "vacancies" ? jobs.filter((j: any) => !j.is_external) : cases;
+    const availableLangs = filterStack ? (STACK_LANGS[filterStack] || ALL_LANGS) : ALL_LANGS;
 
     const fetchCandidates = () => {
         setLoadingCandidates(true);
@@ -225,21 +229,37 @@ export function CompanyDashboard({
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Кабинет компании</h1>
                     <p className="text-ink-2 text-[13px] md:text-[15px]">Управление вакансиями и поиск талантов</p>
                 </div>
-                {/* План и счётчики (Строгий стиль) */}
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                    <div className="flex items-center bg-surface border border-line rounded-xl px-4 py-2 divide-x divide-line w-full sm:w-auto justify-between sm:justify-start">
-                        <div className="pr-4">
-                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Тесты</div>
-                            <div className="text-[15px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
+                {/* План и счётчики (Строгий B2B-виджет) */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    {/* Единый виджет баланса */}
+                    <div className="flex items-center bg-surface border border-line rounded-xl p-1 shadow-sm">
+                        {/* Тесты */}
+                        <div className="flex items-center gap-2.5 px-3 py-1.5">
+                            <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-ink-3 shrink-0">
+                                <ShieldCheck size={16} />
+                            </div>
+                            <div>
+                                <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold">Тесты</div>
+                                <div className="text-[14px] font-bold text-ink leading-none">{isEnterprise ? "∞" : (verificationsLeft ?? 0)}</div>
+                            </div>
                         </div>
-                        <div className="pl-4">
-                            <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-0.5">Токены</div>
-                            <div className="text-[15px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                        <div className="w-px h-8 bg-line mx-1" />
+                        {/* Токены */}
+                        <div className="flex items-center gap-2.5 px-3 py-1.5">
+                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                                <Database size={16} />
+                            </div>
+                            <div>
+                                <div className="text-[10px] uppercase tracking-wider text-accent font-semibold">Токены</div>
+                                <div className="text-[14px] font-bold text-accent leading-none">{backendUser?.tokens === null ? "∞" : (backendUser?.tokens ?? 0)}</div>
+                            </div>
                         </div>
                     </div>
+                    
+                    {/* Кнопка тарифа */}
                     <button
                         onClick={() => navigate("/pricing")}
-                        className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-[13px] font-medium transition-colors whitespace-nowrap border ${plan ? "bg-surface border-line text-ink hover:bg-surface-2" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
+                        className={`px-5 py-2.5 rounded-xl text-[13px] font-medium transition-all shadow-sm flex items-center justify-center gap-2 border ${plan ? "bg-surface-2 border-line text-ink hover:bg-surface-3" : "bg-accent border-accent text-white hover:bg-accent-2"}`}
                     >
                         {plan ? "Сменить тариф" : "Выбрать тариф"}
                     </button>
@@ -345,7 +365,7 @@ export function CompanyDashboard({
                                                 <div className="mt-3 pt-3 border-t border-line w-full">
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/vacancy/${job.id}`, { state: { title: job.title } }); }}
-                                                        className="w-full py-1.5 bg-surface border border-line rounded text-[12px] font-medium text-ink-2 group-hover:text-accent group-hover:border-accent transition-colors"
+                                                        className="w-full py-1.5 bg-surface border border-line rounded text-[12px] font-medium text-ink-2 hover:text-accent hover:border-accent transition-colors"
                                                     >
                                                         Посмотреть отклики
                                                     </button>
