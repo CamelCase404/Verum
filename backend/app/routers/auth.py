@@ -460,6 +460,14 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         better_users = [u for u in all_users.scalars().all() if u.skills_data.get("total_score_100", 0) > my_score]
         rank = len(better_users) + 1
 
+    is_unlocked = False
+    if current_user and current_user.id != user.id and current_user.role == "company":
+        from ..auth import Conversation
+        conv_res = await db.execute(select(Conversation).where(Conversation.company_id == current_user.id, Conversation.developer_id == user.id))
+        conv = conv_res.scalars().first()
+        if conv and (conv.tokens_spent > 0 or current_user.plan == "enterprise"):
+            is_unlocked = True
+
     return UserProfile(
         id=user.id, email=user.email, role=user.role, full_name=user.full_name,
         skills=user.skills_data, company_name=user.company_name, website=user.website,
@@ -477,4 +485,5 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         tokens=user.tokens,
         subscription_until=user.subscription_until,
         banned=bool(user.banned),
+        is_unlocked=is_unlocked,
     )

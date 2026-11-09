@@ -55,7 +55,7 @@ export function PublicProfile() {
   const isTested = !!skills && skills.final_grade && skills.final_grade !== "Reject";
   const githubData = user?.github_stats;
 
-  const handleStartChat = () => {
+  const handleStartChat = async () => {
     if (!currentUser) {
         window.location.href = "/login";
         return;
@@ -64,8 +64,19 @@ export function PublicProfile() {
         alert("Чат с разработчиком может открыть только компания.");
         return;
     }
-    // Открываем модалку списания токенов
-    setIsHireOpen(true);
+    
+    // Если уже оплачен — сразу в чат
+    if (user.is_unlocked) {
+        try {
+            const res = await chatApi.startChat(user.id);
+            window.location.href = `/messages?chat=${res.data.conversation_id}`;
+        } catch (e) {
+            console.error(e);
+        }
+    } else {
+        // Иначе показываем модалку
+        setIsHireOpen(true);
+    }
   };
 
   const calculateSalary = () => {
@@ -187,8 +198,8 @@ export function PublicProfile() {
             </div>
           )}
 
-          <button onClick={handleStartChat} className="w-full mt-2 py-2.5 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
-            <MessageSquare size={16} /> Написать сообщение
+          <button onClick={handleStartChat} className={`w-full mt-2 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 ${user.is_unlocked ? "bg-surface-2 border border-line-2 text-ink-3 hover:text-ink hover:bg-surface-3" : "bg-accent text-white hover:bg-accent-2"}`}>
+            <MessageSquare size={16} /> {user.is_unlocked ? "Перейти в чат" : "Написать сообщение"}
           </button>
         </div>
 
