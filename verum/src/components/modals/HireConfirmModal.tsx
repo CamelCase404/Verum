@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, Loader2, ShieldCheck, Lock, Sparkles, FileText } from "lucide-react";
+import { X, Loader2, ShieldCheck, Lock, Database, MessageSquare } from "lucide-react";
 import { companyApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 import { useAppStore } from "@/store/useAppStore";
@@ -24,48 +24,33 @@ export function HireConfirmModal({
     const [agreed, setAgreed] = useState(false);
 
     useEffect(() => {
-        const scrollY = window.scrollY;
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = "100%";
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.position = "";
-            document.body.style.top = "";
-            document.body.style.width = "";
-            document.body.style.overflow = "";
-            window.scrollTo(0, scrollY);
-        };
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
     }, []);
 
     const isEnterprise = backendUser?.plan === "enterprise";
-    const left = backendUser?.verifications_left;
-    const hasUnlimited = isEnterprise || left === null || left === undefined;
-    const hasEnough = hasUnlimited || (typeof left === "number" && left > 0);
+    const cost = candidate?.token_cost || 0;
+    const tokensLeft = backendUser?.tokens ?? 0;
+    const hasEnough = isEnterprise || tokensLeft >= cost;
 
-    const handleUnlock = async () => {
+    const handleHire = async () => {
         if (!hasEnough) {
             navigate("/pricing");
             return;
         }
         setSubmitting(true);
         try {
-            const res = await companyApi.requestUnlock(candidate.id);
-            if (res.data.status === "pending") {
-                toast("Запрос отправлен модератору. Ожидайте подтверждения (2–3 минуты).", "success");
-            } else if (res.data.status === "already_unlocked") {
-                toast("Контакты уже открыты", "success");
-            } else if (res.data.status === "already_pending") {
-                toast("Запрос уже в очереди модерации", "success");
+            const res = await companyApi.hire(candidate.id);
+            toast(`Чат открыт. Списано ${res.data.cost} токенов.`, "success");
+            
+            if (setBackendUser && backendUser) {
+                setBackendUser({ ...backendUser, tokens: res.data.tokens_left });
             }
-            // Обновим локальный счётчик оптимистично (уменьшим на 1 при pending)
-            if (res.data.status === "pending" && backendUser && typeof left === "number" && left > 0) {
-                setBackendUser({ ...backendUser, verifications_left: left - 1 });
-            }
-            onConfirm();
+            
+            navigate(`/messages?chat=${res.data.conversation_id}`);
             onClose();
         } catch (e: any) {
-            toast(e.message || "Ошибка запроса");
+            toast(e.message || "Ошибка");
         } finally {
             setSubmitting(false);
         }
@@ -76,7 +61,7 @@ export function HireConfirmModal({
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-surface border border-line rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative"
+                className="bg-surface border border-line rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl relative"
             >
                 <button onClick={onClose} className="absolute top-4 right-4 text-ink-3 hover:text-ink">
                     <X size={20} />
@@ -84,40 +69,37 @@ export function HireConfirmModal({
 
                 <div className="text-center mb-6">
                     <div className="w-16 h-16 bg-accent-soft text-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                        <ShieldCheck size={32} />
+                        <MessageSquare size={32} />
                     </div>
-                    <h2 className="text-2xl font-bold mb-2">Открыть контакты</h2>
+                    <h2 className="text-xl font-bold mb-2">Начать диалог</h2>
                     <p className="text-ink-2 text-sm">
-                        Запрос на <b>{candidate.full_name}</b> уйдёт модератору Verum.
-                        Проверка занимает 2–3 минуты, затем откроются контакты и чат.
+                        Открытие чата с <b>{candidate.full_name}</b> ({candidate.final_grade})
                     </p>
                 </div>
 
-                {/* Счётчик верификаций */}
-                <div className="bg-surface-2 border border-line rounded-xl p-4 mb-6 space-y-3">
-                    <div className="flex justify-between items-center text-sm">
+                <div className="bg-surface-2 border border-line rounded-xl p-4 mb-6">
+                    <div className="flex justify-between items-center text-sm mb-3">
                         <span className="text-ink-3 flex items-center gap-2">
-                            <Sparkles size={16} className="text-accent" />
-                            Остаток верификаций:
+                            <Database size={16} /> Стоимость:
                         </span>
-                        <span className="font-bold text-ink text-lg">
-                            {isEnterprise ? "∞" : (left ?? 0)}
+                        <span className="font-bold text-ink text-lg text-accent">
+                            {isEnterprise ? "0" : cost} токенов
                         </span>
                     </div>
-                    <div className="pt-3 border-t border-line flex justify-between items-center">
-                        <span className="text-ink font-medium">Списание за запрос:</span>
-                        <span className="text-lg font-bold text-accent">
-                            {isEnterprise ? "0" : "1"} верификация
+                    <div className="pt-3 border-t border-line flex justify-between items-center text-[12px]">
+                        <span className="text-ink-3">Остаток:</span>
+                        <span className="font-medium text-ink">
+                            {isEnterprise ? "∞" : tokensLeft} токенов
                         </span>
                     </div>
                 </div>
 
-                {!hasEnough && (
-                    <div className="bg-warn-soft border border-warn/20 text-warn text-[13px] rounded-xl p-3 mb-6 flex items-start gap-2">
-                        <Lock size={16} className="shrink-0 mt-0.5" />
-                        <span>Лимит верификаций исчерпан. Пополните пакет или обновите тариф, чтобы продолжить.</span>
-                    </div>
-                )}
+                <div className="bg-surface-2 border border-line rounded-xl p-3 mb-6 flex items-start gap-2 text-[12px] text-ink-3">
+                    <ShieldCheck size={16} className="text-accent shrink-0 mt-0.5" />
+                    <span>
+                        <b>Гарантия возврата:</b> Если разработчик не ответит в течение 3 дней, токены вернутся на ваш счет автоматически.
+                    </span>
+                </div>
 
                 <label className="flex items-start gap-3 cursor-pointer group mb-6">
                     <div className="relative flex items-center mt-0.5">
@@ -132,38 +114,26 @@ export function HireConfirmModal({
                         </div>
                     </div>
                     <span className="text-[13px] text-ink-2 leading-relaxed select-none group-hover:text-ink transition-colors">
-                        Я согласен с правилами платформы. Если модератор обнаружит читерство,
-                        списание не произойдёт, а кандидат будет заблокирован.
+                        Я согласен со списанием токенов и условиями возврата.
                     </span>
                 </label>
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-5 py-2.5 rounded-xl font-medium hover:bg-surface-2 transition-colors"
-                    >
+                <div className="flex gap-3 justify-end">
+                    <button onClick={onClose} className="px-5 py-2.5 rounded-xl font-medium hover:bg-surface-2 transition-colors">
                         Отмена
                     </button>
                     {!hasEnough ? (
-                        <button
-                            onClick={() => { onClose(); navigate("/pricing"); }}
-                            className="px-6 py-2.5 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 transition-colors flex items-center justify-center gap-2"
-                        >
-                            <Sparkles size={16} />
-                            Пополнить пакет
+                        <button onClick={() => { onClose(); navigate("/pricing"); }} className="px-6 py-2.5 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 flex items-center gap-2">
+                            Пополнить
                         </button>
                     ) : (
                         <button
-                            onClick={handleUnlock}
-                            disabled={!agreed || submitting || loading}
-                            className="px-6 py-2.5 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            onClick={handleHire}
+                            disabled={!agreed || submitting || loading} 
+                            className="px-6 py-2.5 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 disabled:opacity-50 flex items-center gap-2"
                         >
-                            {submitting || loading ? (
-                                <Loader2 size={16} className="animate-spin" />
-                            ) : (
-                                <FileText size={16} />
-                            )}
-                            Открыть контакты
+                            {submitting || loading ? <Loader2 size={16} className="animate-spin" /> : <MessageSquare size={16} />}
+                            Нанять
                         </button>
                     )}
                 </div>

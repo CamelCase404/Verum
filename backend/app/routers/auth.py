@@ -159,24 +159,47 @@ async def search_candidates(req: SearchRequest, user: UserDB | None = Depends(ge
                 if req.job_id:
                     target_job = next((j for j in user.job_postings if str(j.get("id")) == str(req.job_id)), None)
                 if not target_job:
-                    target_job = user.job_postings[-1]
-                    
-                job_stack = target_job.get("stack", "").lower()
-                job_level = target_job.get("level", "").lower()
-                cand_grade = grade.lower()
+                    # Если вакансия не выбрана, берем последнюю внутреннюю
+                    internal_jobs = [j for j in user.job_postings if not j.get("is_external")]
+                    if internal_jobs:
+                        target_job = internal_jobs[-1]
+                
+                if target_job:
+                    job_stack = target_job.get("stack", "").lower()
+                    job_level = target_job.get("level", "").lower()
+                    job_salary_str = target_job.get("salary", "")
+                    cand_grade = grade.lower()
 
-                if job_stack and cand_stack:
-                    if job_stack == cand_stack: match_score += 50
-                    elif job_stack in cand_stack or cand_stack in job_stack: match_score += 30
+                    # 1. Балл за тест (макс 40)
+                    match_score += int((score / 100) * 40)
 
-                if job_level and cand_grade:
+                    # 2. Совпадение стека (макс 20)
+                    if job_stack and cand_stack:
+                        if job_stack == cand_stack: match_score += 20
+                        elif job_stack in cand_stack or cand_stack in job_stack: match_score += 10
+
+                    # 3. Совпадение уровня (макс 25)
                     levels = ["junior", "middle", "senior"]
                     if job_level in levels and cand_grade in levels:
                         diff = abs(levels.index(job_level) - levels.index(cand_grade))
-                        if diff == 0: match_score += 30
-                        elif diff == 1: match_score += 15
+                        if diff == 0: match_score += 25
+                        elif diff == 1: match_score += 10
 
-                match_score += int((score / 100) * 20)
+                    # 4. Совпадение языков (макс 15)
+                    job_langs = [l.strip().lower() for l in str(target_job.get("languages", "")).split(",") if l.strip()]
+                    cand_langs = [l.strip().lower() for l in data.get("language_id", "").split(",") if l.strip()]
+                    if job_langs and cand_langs:
+                        overlap = set(job_langs).intersection(set(cand_langs))
+                        if overlap:
+                            match_score += 15
+
+                    # 4. Зарплата (макс 10)
+                    if job_salary_str and u.expected_salary:
+                        salary_nums = [int(n) for n in re.findall(r'\d+', job_salary_str.replace(" ", ""))]
+                        if salary_nums:
+                            max_job_salary = max(salary_nums)
+                            if u.expected_salary <= max_job_salary:
+                                match_score += 5
             else:
                 match_score = int(score)
 

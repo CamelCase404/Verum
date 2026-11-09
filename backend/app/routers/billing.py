@@ -25,6 +25,7 @@ async def get_plans():
             name=info["name"],
             price_month=info["price_month"],
             verifications_per_month=info["verifications_per_month"],
+            tokens_per_month=info.get("tokens_per_month"),
             pay_per_test=info["pay_per_test"],
             pay_per_unlock=info["pay_per_unlock"],
             features=info.get("features", []),

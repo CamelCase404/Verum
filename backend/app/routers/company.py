@@ -13,9 +13,9 @@ import json, re
 router = APIRouter(prefix="/api/company", tags=["company"])
 
 GRADE_TOKEN_COST = {
-    "Junior": 50,
-    "Middle": 150,
-    "Senior": 300,
+    "Junior": 100,
+    "Middle": 200,
+    "Senior": 350,
     "Reject": 0
 }
 
@@ -63,32 +63,18 @@ async def parse_job(req: ParseJobReq, user: UserDB = Depends(get_current_user)):
 
 # ─── On-Demand модерация (Q1=B) ───
 
-@router.post("/request-unlock/{developer_id}")
-async def request_unlock(
+@router.post("/hire/{developer_id}")
+async def hire_developer(
     developer_id: int,
     user: UserDB = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Компания просит открыть контакты кандидата. Триггерит On-Demand модерацию."""
+    """Прямое открытие чата с кандидатом за токены (без модерации)."""
     if user.role != "company":
         raise HTTPException(403, "Только для компаний")
     if developer_id == user.id:
-        raise HTTPException(400, "Нельзя открыть свой профиль")
+        raise HTTPException(400, "Нельзя нанять себя")
 
-    # Проверка лимита токенов (только если ENFORCE_LIMITS=true)
-    if settings.ENFORCE_LIMITS:
-        is_enterprise = user.plan == "enterprise"
-        if not is_enterprise:
-            dev_grade = (dev.skills_data or {}).get("final_grade", "Junior")
-            cost = GRADE_TOKEN_COST.get(dev_grade, 50)
-            if user.tokens < cost:
-                raise HTTPException(
-                    402,
-                    f"Недостаточно токенов для открытия контактов ({dev_grade} стоит {cost} токенов). Пополните баланс.",
-                )
-            user.tokens -= cost
-
-    # Кандидат существует и не забанен
     dev_res = await db.execute(
         select(UserDB).where(UserDB.id == developer_id, UserDB.role == "developer")
     )
@@ -96,32 +82,51 @@ async def request_unlock(
     if not dev:
         raise HTTPException(404, "Кандидат не найден")
     if dev.banned:
-        raise HTTPException(403, "Кандидат заблокирован модерацией")
+        raise HTTPException(403, "Кандидат заблокирован")
 
-    # Уже есть активный/одобренный запрос?
-    ex_res = await db.execute(
-        select(VerificationRequest).where(
-            VerificationRequest.company_id == user.id,
-            VerificationRequest.developer_id == developer_id,
-            VerificationRequest.status.in_(["pending", "approved"]),
+    # Считаем стоимость
+    dev_grade = (dev.skills_data or {}).get("final_grade", "Junior")
+    cost = GRADE_TOKEN_COST.get(dev_grade, 100)
+    
+    is_enterprise = user.plan == "enterprise"
+    if not is_enterprise:
+        if user.tokens < cost:
+            raise HTTPException(402, f"Недостаточно токенов. Нужно {cost}, у вас {user.tokens}.")
+
+    # Проверяем, есть ли уже чат
+    from ..auth import Conversation
+    conv_res = await db.execute(
+        select(Conversation).where(
+            Conversation.company_id == user.id,
+            Conversation.developer_id == developer_id
         )
     )
-    existing = ex_res.scalars().first()
-    if existing:
-        if existing.status == "approved":
-            return {"status": "already_unlocked", "request_id": existing.id}
-        return {"status": "already_pending", "request_id": existing.id}
-
-    req = VerificationRequest(
-        company_id=user.id,
-        developer_id=developer_id,
-        status="pending",
-        reserved_credit=True,
-    )
-    db.add(req)
-    await db.commit()
-    await db.refresh(req)
-    return {"status": "pending", "request_id": req.id}
+    conv = conv_res.scalars().first()
+    
+    if not conv:
+        conv = Conversation(company_id=user.id, developer_id=developer_id)
+        db.add(conv)
+        await db.flush()
+        
+        if not is_enterprise:
+            user.tokens -= cost
+            conv.tokens_spent = cost
+            from datetime import datetime, timedelta
+            conv.refund_deadline = utcnow_naive() + timedelta(days=3)
+            
+            db.add(UsageLog(
+                company_id=user.id, action="hire_chat",
+                cost=cost, candidate_id=dev.id
+            ))
+        await db.commit()
+        await db.refresh(conv)
+    
+    return {
+        "status": "ok",
+        "conversation_id": conv.id,
+        "tokens_left": user.tokens,
+        "cost": cost if not is_enterprise else 0
+    }
 
 
 @router.get("/verification-requests")

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Check, Zap, ShieldCheck, Database, Search, Crown, Building2, Loader2, Sparkles } from "lucide-react";
+import { Check, Zap, ShieldCheck, Database, Search, Crown, Building2, Loader2 } from "lucide-react";
 import { PageHero, SectionHead } from "@/components/ui/PageHero";
 import { FaqBlock } from "@/components/ui/FaqBlock";
 import { billingApi } from "@/api";
@@ -93,23 +93,28 @@ export function Pricing() {
                                         </div>
 
                                         <div className="bg-surface-2 rounded-xl p-4 mb-6 border border-line">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="text-[13px] text-ink-2 flex items-center gap-1.5"><ShieldCheck size={14}/> Тесты</span>
-                                                <span className="font-bold text-ink">{p.verifications_per_month === null ? "∞" : p.verifications_per_month}</span>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="text-[14px] text-ink-2 flex items-center gap-2"><ShieldCheck size={16} className="text-ink-3"/> Тесты</span>
+                                                <span className="font-bold text-ink text-xl">{p.verifications_per_month === null ? "∞" : p.verifications_per_month}</span>
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[13px] text-ink-2 flex items-center gap-1.5"><Database size={14}/> Токены</span>
-                                                <span className="font-bold text-accent">{p.tokens_per_month === null ? "∞" : p.tokens_per_month}</span>
+                                            <div className="flex justify-between items-center pb-3 border-b border-line">
+                                                <span className="text-[14px] text-ink-2 flex items-center gap-2"><Database size={16} className="text-ink-3"/> Токены</span>
+                                                <span className="font-bold text-accent text-xl">{p.tokens_per_month === null ? "∞" : (p.tokens_per_month || 3000)}</span>
                                             </div>
-                                            {p.id === "start" && (
-                                                <div className="mt-3 pt-3 border-t border-line text-[11px] text-ink-3 leading-relaxed">
-                                                    Хватит на ~5 Senior, ~5 Middle и ~10 Junior.
-                                                </div>
-                                            )}
+                                            
+                                            {/* Плашка "На что хватит" */}
+                                            <div className="mt-3 flex items-start gap-2 text-[12px] text-ink-3 leading-relaxed">
+                                                <Check size={14} className="text-accent shrink-0 mt-0.5" />
+                                                <span>
+                                                    {p.id === "start" && "Хватит на 3 Senior, 5 Middle и 10 Junior."}
+                                                    {p.id === "pro" && "Хватит на 10 Senior, 15 Middle и 30 Junior."}
+                                                    {p.id === "enterprise" && "Неограниченный доступ ко всей базе."}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <ul className="flex-1 space-y-3 mb-6">
-                                            {p.features.map((f: string, j: number) => (
+                                            {(p.features || []).map((f: string, j: number) => (
                                                 <li key={j} className="flex gap-2 text-[13.5px] text-ink-2">
                                                     <Check size={16} className="text-accent shrink-0" />
                                                     <span>{f}</span>
@@ -151,13 +156,13 @@ export function Pricing() {
                                 Открываете контакты готового инженера. Стоимость зависит от грейда:
                             </p>
                             <div className="flex justify-between text-[12px] bg-surface-2 px-3 py-2 rounded text-ink-3 mb-1">
-                                <span>Junior</span> <b className="text-ink">50 токенов</b>
+                                <span>Junior</span> <b className="text-ink">100 токенов</b>
                             </div>
                             <div className="flex justify-between text-[12px] bg-surface-2 px-3 py-2 rounded text-ink-3 mb-1">
-                                <span>Middle</span> <b className="text-ink">150 токенов</b>
+                                <span>Middle</span> <b className="text-ink">200 токенов</b>
                             </div>
                             <div className="flex justify-between text-[12px] bg-surface-2 px-3 py-2 rounded text-ink-3">
-                                <span>Senior</span> <b className="text-ink">300 токенов</b>
+                                <span>Senior</span> <b className="text-ink">350 токенов</b>
                             </div>
                         </div>
                     </div>

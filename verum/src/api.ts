@@ -116,8 +116,7 @@ export const billingApi = {
 };
 
 export const companyApi = {
-  requestUnlock: (developerId: number) =>
-    request(`/api/company/request-unlock/${developerId}`, { method: "POST" }),
+  hire: (developerId: number) => request(`/api/company/hire/${developerId}`, { method: "POST" }),
   getVerificationRequests: () => request("/api/company/verification-requests"),
 };
 

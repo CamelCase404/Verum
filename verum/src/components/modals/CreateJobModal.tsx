@@ -4,9 +4,19 @@ import { X, Loader2, Sparkles, ChevronDown, Check, Copy, Briefcase, Globe, Link 
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
-const STACKS = ["Frontend", "Backend", "Fullstack", "Mobile", "DevOps", "Data / ML"];
+const STACKS = ["Mobile (iOS)", "Mobile (Android)", "Frontend", "Backend", "GameDev", "DevOps / SRE", "Data / ML"];
 const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
+
+const STACK_LANGS: Record<string, string[]> = {
+    "Mobile (iOS)": ["Swift", "Objective-C", "SwiftUI", "UIKit", "Combine"],
+    "Mobile (Android)": ["Kotlin", "Java", "Jetpack Compose", "Coroutines"],
+    "Frontend": ["HTML", "CSS", "JavaScript", "TypeScript", "React", "Vue", "Svelte"],
+    "Backend": ["Python", "FastAPI", "Django", "Go", "Node.js", "Java", "C#", "Next.js"],
+    "GameDev": ["Unity (C#)", "Unreal (C++)", "Godot (GDScript)"],
+    "DevOps / SRE": ["Docker", "Kubernetes", "Terraform", "Ansible", "Bash"],
+    "Data / ML": ["Python", "Pandas", "PyTorch", "TensorFlow", "SQL"]
+};
 
 export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, jobToEdit?: any }) {
   const isEditing = !!jobToEdit;
@@ -20,6 +30,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
   const [stack, setStack] = useState("Frontend");
   const [level, setLevel] = useState("Middle");
   const [format, setFormat] = useState("Удалённо");
+  const [languages, setLanguages] = useState<string[]>([]);
   
   // Зарплата
   const [salaryFrom, setSalaryFrom] = useState("");
@@ -49,6 +60,9 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       setStack(jobToEdit.stack || "Frontend");
       setLevel(jobToEdit.level || "Middle");
       setFormat(jobToEdit.format || "Удалённо");
+      if (jobToEdit.languages) {
+          setLanguages(jobToEdit.languages.split(", ").filter(Boolean));
+      }
       setIsExternal(jobToEdit.is_external || false);
       if (jobToEdit.slug) setGeneratedSlug(jobToEdit.slug);
       
@@ -131,7 +145,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       } else {
         const newJob = { 
             id: Date.now().toString(), 
-            title, description, stack, level, salary: finalSalary, format,
+            title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "),
             is_external: isExternal,
             slug: isExternal ? finalSlug : null
         };
@@ -189,7 +203,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                         {openStack && (
                           <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
                             {STACKS.map(s => (
-                              <button key={s} onClick={() => { setStack(s); setOpenStack(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
+                              <button key={s} onClick={() => { setStack(s); setLanguages([]); setOpenStack(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                                 {s} {stack === s && <Check size={14} className="text-accent" />}
                               </button>
                             ))}
@@ -216,6 +230,31 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                       </AnimatePresence>
                     </div>
                   </div>
+
+                  {/* Выбор языков */}
+                  {stack && STACK_LANGS[stack] && (
+                      <div>
+                          <label className="text-sm font-medium mb-1 block">Языки (до 4)</label>
+                          <div className="flex flex-wrap gap-2">
+                              {STACK_LANGS[stack].map(lang => {
+                                  const active = languages.includes(lang);
+                                  return (
+                                      <button
+                                          key={lang}
+                                          type="button"
+                                          onClick={() => {
+                                              if (active) setLanguages(l => l.filter(x => x !== lang));
+                                              else if (languages.length < 4) setLanguages(l => [...l, lang]);
+                                          }}
+                                          className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${active ? "bg-accent text-white border-accent" : "bg-bg-2 border-line text-ink-2 hover:border-line-2"}`}
+                                      >
+                                          {lang}
+                                      </button>
+                                  );
+                              })}
+                          </div>
+                      </div>
+                  )}
 
                   <div className="relative">
                     <label className="text-sm font-medium mb-1 block">Формат</label>
