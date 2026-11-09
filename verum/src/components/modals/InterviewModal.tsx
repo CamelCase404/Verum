@@ -12,6 +12,11 @@ export function InterviewModal({
   const [step, setStep] = useState<"start" | "loading">("start");
 
   const startTest = () => {
+        const backendUser = useAppStore.getState().backendUser;
+        if (backendUser?.role !== "developer") {
+            toast("Собеседование доступно только для разработчиков");
+            return;
+        }
         const token = localStorage.getItem("verum_token");
         if (!token) {
             alert("Сначала войдите в аккаунт через GitHub или Email!");

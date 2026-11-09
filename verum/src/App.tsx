@@ -40,6 +40,7 @@ import { Messages } from "@/pages/Messages";
 import { PublicProfile } from "@/pages/PublicProfile";
 import { AdminDashboard } from "@/pages/AdminDashboard";
 import { SearchResults } from "@/pages/SearchResults";
+import { VacancyApplicants } from "@/pages/dashboard/VacancyApplicants";
 import { PublicVacancy } from "@/pages/PublicVacancy";
 
 function Layout() {
@@ -127,6 +128,7 @@ export default function App() {
           <Route path="/profile/:id" element={<PublicProfile />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/dashboard/vacancy/:id" element={<VacancyApplicants />} />
           <Route path="/v/:slug" element={<PublicVacancy />} />
         </Route>
       </Routes>

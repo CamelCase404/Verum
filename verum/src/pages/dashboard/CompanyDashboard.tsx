@@ -27,7 +27,6 @@ import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
-import { VacancyApplicantsModal } from "@/components/modals/VacancyApplicantsModal";
 import { authApi, chatApi } from "@/api";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
@@ -71,7 +70,6 @@ export function CompanyDashboard({
     const [editingJob, setEditingJob] = useState<any>(null);
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     const [hireCandidate, setHireCandidate] = useState<any>(null);
-    const [viewingApplicants, setViewingApplicants] = useState<any>(null);
     const [isHiring, setIsHiring] = useState(false);
 
     const [activeTab, setActiveTab] = useState<"jobs" | "candidates">("jobs");
@@ -470,7 +468,7 @@ export function CompanyDashboard({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setViewingApplicants(job);
+                                                                navigate(`/dashboard/vacancy/${job.id}`, { state: { title: job.title } });
                                                             }}
                                                             className="w-full py-1.5 bg-surface border border-line rounded text-[12px] font-medium text-ink-2 hover:text-accent hover:border-accent transition-colors"
                                                         >
@@ -855,13 +853,7 @@ export function CompanyDashboard({
                         loading={isHiring}
                     />
                 )}
-                {viewingApplicants && (
-                    <VacancyApplicantsModal
-                        key="vacancy-applicants"
-                        job={viewingApplicants}
-                        onClose={() => setViewingApplicants(null)}
-                    />
-                )}
+
             </AnimatePresence>
         </div>
     );

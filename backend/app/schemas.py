@@ -123,7 +123,7 @@ class UserProfile(BaseModel):
     attempts_used: int = 0
     blocked_until: datetime | None = None
     profile_views: int = 0
-    top_rank: int = 0
+    top_rank: int | None = None
     # ── SaaS-модель ──
     plan: str | None = None
     verifications_left: int | None = None  # None = безлимит (enterprise)

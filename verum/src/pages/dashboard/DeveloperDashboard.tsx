@@ -100,31 +100,27 @@ export function DeveloperDashboard({
 
         const cacheKey = `verum_recs_${backendUser.id}`;
         const today = new Date().toISOString().split('T')[0];
-        
-        let cachedData = { date: "", items: [] };
+
+        let cachedData: { date: string; items: any[] } | null = null;
         try {
             const c = localStorage.getItem(cacheKey);
             if (c) cachedData = JSON.parse(c);
         } catch (e) {}
 
-        // Делаем свежий запрос
-        authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
-            .then((res) => {
-                let finalItems = [];
-                if (cachedData.date === today) {
-                    // Если сегодня уже загружали — объединяем, чтобы новые кейсы появились
-                    const existingIds = new Set(cachedData.items.map((i: any) => i.id));
-                    const newItems = res.data.filter((i: any) => !existingIds.has(i.id));
-                    finalItems = [...cachedData.items, ...newItems];
-                } else {
-                    // Если день сменился — берем только то, что есть сейчас
-                    finalItems = res.data;
-                }
-                
-                setRecommendedJobs(finalItems);
-                localStorage.setItem(cacheKey, JSON.stringify({ date: today, items: finalItems }));
-            })
-            .catch(console.error);
+        if (cachedData && cachedData.date === today) {
+            // Если данные за сегодня уже есть — берем их из кэша
+            setRecommendedJobs(cachedData.items);
+        } else {
+            // Если данных нет или они за прошлый день — делаем запрос
+            authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
+                .then((res) => {
+                    const newItems = res.data || [];
+                    setRecommendedJobs(newItems);
+                    // Перезаписываем кэш новыми данными
+                    localStorage.setItem(cacheKey, JSON.stringify({ date: today, items: newItems }));
+                })
+                .catch(console.error);
+        }
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
 
     
@@ -379,31 +375,42 @@ export function DeveloperDashboard({
                     </div>
                     {recommendedJobs.length > 0 ? (
                         <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {recommendedJobs.map((job) => (
                                 <div
                                     key={job.id}
-                                    className="p-3 bg-surface-2 border border-line rounded-xl select-none"
+                                    className="group p-4 bg-surface border border-line rounded-xl hover:border-accent/40 hover:shadow-md transition-all cursor-default flex flex-col justify-between"
                                 >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <div className="font-medium text-[13px] text-ink line-clamp-1 flex items-center gap-2">
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0 ${job.type === "case" ? "bg-violet/10 text-violet" : "bg-accent/10 text-accent"}`}>
-                                                {job.type === "case" ? "Кейс" : "Вакансия"}
-                                            </span>
-                                            {job.title}
+                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-10 h-10 rounded-lg bg-surface-2 border border-line flex items-center justify-center overflow-hidden shrink-0">
+                                                {job.company_avatar ? (
+                                                    <img src={job.company_avatar} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Briefcase size={16} className="text-ink-3" />
+                                                )}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-0.5 truncate">
+                                                    {job.company_name}
+                                                </div>
+                                                <div className="font-semibold text-[14px] text-ink truncate group-hover:text-accent transition-colors">
+                                                    {job.title}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <ChevronRight
-                                            size={14}
-                                            className="text-ink-3 shrink-0"
-                                        />
+                                        <span className={`text-[10px] px-2 py-1 rounded-md font-bold shrink-0 border ${job.type === "case" ? "bg-violet-soft border-violet/20 text-violet" : "bg-accent-soft border-accent/20 text-accent"}`}>
+                                            {job.type === "case" ? "Кейс" : "Вакансия"}
+                                        </span>
                                     </div>
-                                    <div className="text-[11px] text-ink-3 flex items-center justify-between">
-                                        <span className="truncate pr-2">
-                                            {job.company_name}
-                                        </span>
-                                        <span className="font-semibold text-accent whitespace-nowrap">
+                                    <div className="flex items-end justify-between mt-auto pt-3 border-t border-line">
+                                        <div className="flex flex-wrap gap-2 text-[11px] text-ink-2">
+                                            <span className="px-2 py-0.5 bg-surface-2 rounded border border-line">{job.stack}</span>
+                                            {job.format && <span className="px-2 py-0.5 bg-surface-2 rounded border border-line">{job.format}</span>}
+                                        </div>
+                                        <div className="font-bold text-[13px] text-accent whitespace-nowrap">
                                             {job.salary}
-                                        </span>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

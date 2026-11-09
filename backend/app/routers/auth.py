@@ -49,7 +49,7 @@ async def login(data: LoginReq, db: AsyncSession = Depends(get_db)):
 @router.get("/me", response_model=UserProfile)
 async def me(user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     # Считаем реальное место в топе
-    rank = 1
+    rank = None
     if user.skills_data and user.skills_data.get("total_score_100"):
         my_score = user.skills_data.get("total_score_100")
         all_users = await db.execute(select(UserDB).where(UserDB.skills_data.isnot(None)))
@@ -420,7 +420,7 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
             await db.refresh(user)
 
     # Считаем место в топе (сколько людей имеют балл выше + 1)
-    rank = 1
+    rank = None
     if user.skills_data and user.skills_data.get("total_score_100"):
         my_score = user.skills_data.get("total_score_100")
         rank_res = await db.execute(select(func.count(UserDB.id)).where(UserDB.skills_data.isnot(None)))

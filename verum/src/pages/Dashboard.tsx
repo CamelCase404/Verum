@@ -46,9 +46,10 @@ export function Dashboard() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-ink text-xl">Загрузка профиля...</div>;
 
   // Роутинг по ролям
-  const content = backendUser?.role === "company" 
+  const isCompany = backendUser?.role === "company";
+  const content = isCompany
     ? <CompanyDashboard backendUser={backendUser} onRefresh={fetchUser} />
-    : <DeveloperDashboard backendUser={backendUser} onRefresh={fetchUser} />;
+    : (backendUser?.role === "developer" ? <DeveloperDashboard backendUser={backendUser} onRefresh={fetchUser} /> : <div className="text-center py-20">Неизвестная роль</div>);
 
 
   return (

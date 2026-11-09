@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, Sparkles, ChevronDown, Check, Copy, Briefcase, Globe, Link as LinkIcon } from "lucide-react";
+import { X, Loader2, Sparkles, ChevronDown, Check, Copy, Briefcase, Globe, Link as LinkIcon, RefreshCw } from "lucide-react";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
@@ -33,19 +33,11 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
   const [openLevel, setOpenLevel] = useState(false);
   const [openFormat, setOpenFormat] = useState(false);
 
-  // Блокировка скролла
+  // Блокировка скролла (без прыжка вверх)
   useEffect(() => {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
       return () => {
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.width = '';
           document.body.style.overflow = '';
-          window.scrollTo(0, scrollY);
       };
   }, []);
 
@@ -123,11 +115,16 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
           else finalSalary = "По договоренности";
       }
 
+      let finalSlug = generatedSlug;
+      if (isExternal && !finalSlug) {
+          finalSlug = generateSlug(title, level);
+      }
+
       const currentJobs = backendUser?.job_postings || [];
       
       if (isEditing) {
         const updatedJobs = currentJobs.map((j: any) => 
-          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, is_external: isExternal, slug: isExternal ? generatedSlug : null } : j
+          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, is_external: isExternal, slug: isExternal ? finalSlug : null } : j
         );
         await authApi.updateJobs(updatedJobs);
         toast("Вакансия обновлена", "success");
@@ -136,7 +133,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
             id: Date.now().toString(), 
             title, description, stack, level, salary: finalSalary, format,
             is_external: isExternal,
-            slug: isExternal ? generatedSlug : null
+            slug: isExternal ? finalSlug : null
         };
         await authApi.updateJobs([...currentJobs, newJob]);
         toast("Вакансия опубликована", "success");
@@ -321,6 +318,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                         <div className="text-[12px] font-semibold text-ink-3 uppercase tracking-wider mb-2">Ваша персональная ссылка</div>
                         <div className="flex items-center gap-2">
                             <input readOnly value={`${window.location.origin}/v/${generatedSlug}`} className="flex-1 bg-bg-2 border border-line rounded-lg px-3 py-2 text-[13px] text-ink-2 outline-none" />
+                            <button onClick={() => setGeneratedSlug(generateSlug(title, level))} className="p-2 bg-surface border border-line rounded-lg hover:text-accent transition-colors" title="Сгенерировать новую ссылку"><RefreshCw size={16} /></button>
                             <button onClick={copyLink} className="p-2 bg-surface border border-line rounded-lg hover:text-accent transition-colors" title="Копировать"><Copy size={16} /></button>
                         </div>
                     </div>
