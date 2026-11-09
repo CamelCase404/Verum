@@ -6,7 +6,8 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from ..auth import UserDB, get_current_user, utcnow_naive
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..auth import UserDB, get_current_user, get_db, utcnow_naive
 from ..gigachat_client import ask_chat, ask_text
 from ..interview_store import create, get, save
 from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_INTERVIEWER, SYSTEM_REPORT
