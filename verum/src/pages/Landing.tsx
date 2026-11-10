@@ -235,7 +235,30 @@ export function Landing() {
                         transition={{ duration: 1.5, ease: EASE }}
                         className="h-px w-full bg-gradient-to-r from-transparent via-line to-transparent origin-center mb-16"
                     />
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+                    
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="mb-12 md:mb-16 text-center"
+                    >
+                        <motion.div
+                            variants={fadeUp}
+                            custom={0}
+                            className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent mb-4"
+                        >
+                            Эффективность
+                        </motion.div>
+                        <motion.h2
+                            variants={fadeUp}
+                            custom={1}
+                            className="text-[clamp(24px,4vw,36px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink"
+                        >
+                            Цифры, которые говорят сами за себя
+                        </motion.h2>
+                    </motion.div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center lg:text-left">
                         {METRICS.map((m, i) => (
                             <motion.div
                                 key={i}
@@ -248,7 +271,7 @@ export function Landing() {
                                 <div className="text-[40px] md:text-[56px] font-semibold text-ink leading-none tracking-[-0.04em] mb-2 tabular-nums">
                                     {m.value}
                                 </div>
-                                <div className="text-[13px] md:text-[14px] text-ink-3 leading-snug max-w-[180px]">
+                                <div className="text-[13px] md:text-[14px] text-ink-3 leading-snug max-w-[180px] mx-auto lg:mx-0">
                                     {m.label}
                                 </div>
                             </motion.div>
