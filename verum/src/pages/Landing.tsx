@@ -114,27 +114,6 @@ const FEATURES = [
     },
 ];
 
-const SEGMENTS = [
-    {
-        icon: Building2,
-        who: "Стартапам 10–50",
-        problem: "Нет HR, тимлид завален собеседованиями",
-        solution: "Автоматический скрининг без ручного участия.",
-    },
-    {
-        icon: Briefcase,
-        who: "Продуктовым командам 50–200",
-        problem: "Пики найма и долгие циклы отбора",
-        solution: "Отсеиваем 70% на входе. Остаются только сильные.",
-    },
-    {
-        icon: Users,
-        who: "IT-агентствам",
-        problem: "Клиенты недовольны качеством кандидатов",
-        solution: "Передаёте только проверенных инженеров с отчётом.",
-    },
-];
-
 const COMPARISON = [
     ["Резюме накручиваются", "Метрики + запись теста"],
     ["2–3 недели на скрининг", "3 дня до финалиста"],
@@ -472,71 +451,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 6. SEGMENTS ══════════ */}
-            <section className="py-24 md:py-32">
-                <div className="max-w-[1120px] mx-auto px-4 md:px-8">
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        className="mb-12 md:mb-16 text-center"
-                    >
-                        <motion.h2
-                            variants={fadeUp}
-                            custom={0}
-                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink"
-                        >
-                            Для команд, которые устали нанимать наугад
-                        </motion.h2>
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {SEGMENTS.map((seg, i) => {
-                            const Icon = seg.icon;
-                            return (
-                                <motion.div
-                                    key={i}
-                                    initial="hidden"
-                                    whileInView="visible"
-                                    viewport={{ once: true }}
-                                    variants={fadeUp}
-                                    custom={i}
-                                    className="bg-surface border border-line rounded-2xl p-6 md:p-8 flex flex-col"
-                                >
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-                                            <Icon size={20} />
-                                        </div>
-                                        <div className="text-[15px] font-semibold text-ink">
-                                            {seg.who}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 space-y-4">
-                                        <div>
-                                            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-warn mb-1">
-                                                Проблема
-                                            </div>
-                                            <p className="text-[13px] text-ink-3 leading-relaxed">
-                                                {seg.problem}
-                                            </p>
-                                        </div>
-                                        <div className="pt-4 border-t border-line">
-                                            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent mb-1">
-                                                Решение
-                                            </div>
-                                            <p className="text-[13px] text-ink font-medium leading-relaxed">
-                                                {seg.solution}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            {/* ══════════ 7. FINAL CTA ══════════ */}
+            {/* ══════════ 6. FINAL CTA ══════════ */}
             <section className="py-24 md:py-32 relative overflow-hidden">
                 <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
                 <div className="max-w-[800px] mx-auto px-4 md:px-8 text-center relative z-10">
