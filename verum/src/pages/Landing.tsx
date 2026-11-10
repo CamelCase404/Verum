@@ -165,32 +165,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 3. PROBLEM (Grid) ══════════ */}
-            <section className="py-24 md:py-32">
-                <div className="max-w-[1120px] mx-auto px-4 md:px-8">
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-16 md:mb-20 text-center max-w-[800px] mx-auto">
-                        <motion.div variants={fadeUp} custom={0} className="text-[11px] font-semibold uppercase tracking-[0.14em] text-warn mb-4">Проблема</motion.div>
-                        <motion.h2 variants={fadeUp} custom={1} className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink mb-4">
-                            IT-рынок тонет в кандидатах, <br /> которые не умеют писать код
-                        </motion.h2>
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-                        {PROBLEMS.map((p, i) => (
-                            <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className="flex flex-col">
-                                <div className="text-[40px] md:text-[48px] font-semibold text-warn leading-none tracking-[-0.03em] mb-4 tabular-nums">
-                                    {p.value}
-                                </div>
-                                <div className="text-[13px] md:text-[14px] text-ink-3 leading-relaxed">
-                                    {p.text}
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ══════════ 4. HOW IT WORKS (Vertical Timeline) ══════════ */}
+            {/* ══════════ 3. HOW IT WORKS (Vertical Timeline) ══════════ */}
             <section className="py-24 md:py-32 bg-surface-2/30 border-y border-line">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-16 md:mb-20 text-center max-w-[800px] mx-auto">
@@ -227,7 +202,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 5. FEATURES (Bento Grid) ══════════ */}
+            {/* ══════════ 4. FEATURES (Bento Grid) ══════════ */}
             <section className="py-24 md:py-32">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-12 md:mb-16">
@@ -254,7 +229,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 6. COMPARISON (Split View) ══════════ */}
+            {/* ══════════ 5. COMPARISON (Split View) ══════════ */}
             <section className="py-24 md:py-32 bg-surface-2/30 border-y border-line">
                 <div className="max-w-[1000px] mx-auto px-4 md:px-8">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-12 md:mb-16 text-center">
@@ -296,7 +271,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 7. SEGMENTS ══════════ */}
+            {/* ══════════ 6. SEGMENTS ══════════ */}
             <section className="py-24 md:py-32">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-12 md:mb-16 text-center">
@@ -333,7 +308,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 8. FINAL CTA ══════════ */}
+            {/* ══════════ 7. FINAL CTA ══════════ */}
             <section className="py-24 md:py-32 relative overflow-hidden">
                 <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
                 <div className="max-w-[800px] mx-auto px-4 md:px-8 text-center relative z-10">
