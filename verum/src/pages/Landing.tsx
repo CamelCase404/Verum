@@ -23,7 +23,7 @@ const fadeUp = {
 const METRICS = [
     { value: "70%", label: "Кандидатов отсеивается автоматически" },
     { value: "3 дня", label: "От вакансии до готового шортлиста" },
-    { value: "20ч", label: "Экономии времени тимлида в месяц" },
+    { value: "80%", label: "Экономии времени тимлида на скрининге" },
     { value: "100", label: "Балльная шкала объективной оценки" },
 ];
 
@@ -93,15 +93,7 @@ export function Landing() {
                 />
 
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8 text-center relative z-10">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, ease: EASE }}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-line text-ink-2 text-[11px] font-semibold uppercase tracking-[0.14em] mb-8"
-                    >
-                        <Sparkles size={13} className="text-accent" />
-                        B2B-скрининг IT-кадров
-                    </motion.div>
+                    
 
                     <motion.h1
                         initial={{ opacity: 0, y: 30 }}
@@ -132,13 +124,13 @@ export function Landing() {
                             onClick={goCompany}
                             className="h-[56px] px-8 rounded-xl bg-accent text-white font-medium text-[15px] hover:bg-accent-2 transition-all hover:-translate-y-0.5 shadow-lg shadow-accent/20 flex items-center justify-center gap-2 w-full sm:w-auto"
                         >
-                            Начать найм <ArrowRight size={18} />
+                            Нанять <ArrowRight size={18} />
                         </button>
                         <button
                             onClick={goDev}
-                            className="h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-medium text-[15px] hover:bg-surface-2 transition-colors flex items-center justify-center w-full sm:w-auto"
+                            className="h-[56px] px-6 text-ink-2 font-medium text-[15px] hover:text-ink transition-colors flex items-center justify-center gap-1.5 w-full sm:w-auto"
                         >
-                            Я разработчик
+                            Я разработчик <ChevronRight size={16} className="text-ink-4" />
                         </button>
                     </motion.div>
 
@@ -183,11 +175,15 @@ export function Landing() {
                         </motion.h2>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                         {PROBLEMS.map((p, i) => (
-                            <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className="bg-surface border border-line rounded-2xl p-8 md:p-10">
-                                <div className="text-[48px] md:text-[64px] font-semibold text-warn leading-none tracking-[-0.03em] mb-4 tabular-nums">{p.value}</div>
-                                <div className="text-[15px] md:text-[16px] text-ink-2 leading-relaxed font-medium">{p.text}</div>
+                            <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className="flex flex-col">
+                                <div className="text-[40px] md:text-[48px] font-semibold text-warn leading-none tracking-[-0.03em] mb-4 tabular-nums">
+                                    {p.value}
+                                </div>
+                                <div className="text-[13px] md:text-[14px] text-ink-3 leading-relaxed">
+                                    {p.text}
+                                </div>
                             </motion.div>
                         ))}
                     </div>
