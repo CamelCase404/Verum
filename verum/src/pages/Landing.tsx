@@ -143,7 +143,7 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink selection:bg-accent/30">
             {/* ══════════ 1. HERO ══════════ */}
-            <section className="relative pt-20 pb-24 md:pt-32 md:pb-40 flex items-center justify-center min-h-[80vh]">
+            <section className="relative pt-20 pb-12 md:pt-32 md:pb-20 flex items-center justify-center min-h-[80vh]">
                 {/* Тонкое свечение на фоне (современный motion design) */}
                 <motion.div
                     animate={{
@@ -226,8 +226,15 @@ export function Landing() {
             </section>
 
             {/* ══════════ 2. METRICS (Horizontal Strip) ══════════ */}
-            <section className="border-y border-line bg-surface/50 backdrop-blur-sm">
-                <div className="max-w-[1120px] mx-auto px-4 md:px-8 py-10 md:py-16">
+            <section className="relative py-12 md:py-20">
+                <div className="max-w-[1120px] mx-auto px-4 md:px-8">
+                    <motion.div
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        whileInView={{ scaleX: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.5, ease: EASE }}
+                        className="h-px w-full bg-gradient-to-r from-transparent via-line to-transparent origin-center mb-16"
+                    />
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                         {METRICS.map((m, i) => (
                             <motion.div
@@ -251,8 +258,15 @@ export function Landing() {
             </section>
 
             {/* ══════════ 3. HOW IT WORKS (Vertical Timeline) ══════════ */}
-            <section className="py-24 md:py-32 bg-surface-2/30 border-y border-line">
+            <section className="py-24 md:py-32 relative">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
+                    <motion.div
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        whileInView={{ scaleX: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.5, ease: EASE }}
+                        className="h-px w-full bg-gradient-to-r from-transparent via-line to-transparent origin-center mb-16"
+                    />
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -371,8 +385,15 @@ export function Landing() {
             </section>
 
             {/* ══════════ 5. COMPARISON (Split View) ══════════ */}
-            <section className="py-24 md:py-32 bg-surface-2/30 border-y border-line">
+            <section className="py-24 md:py-32 relative">
                 <div className="max-w-[1000px] mx-auto px-4 md:px-8">
+                    <motion.div
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        whileInView={{ scaleX: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.5, ease: EASE }}
+                        className="h-px w-full bg-gradient-to-r from-transparent via-line to-transparent origin-center mb-16"
+                    />
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
