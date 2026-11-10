@@ -226,7 +226,7 @@ export function Landing() {
             </section>
 
             {/* ══════════ 2. METRICS (Horizontal Strip) ══════════ */}
-            <section className="relative py-12 md:py-20">
+            <section className="relative pt-12 md:pt-20 pb-0">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div
                         initial={{ scaleX: 0, opacity: 0 }}
@@ -281,7 +281,7 @@ export function Landing() {
             </section>
 
             {/* ══════════ 3. HOW IT WORKS (Vertical Timeline) ══════════ */}
-            <section className="py-24 md:py-32 relative">
+            <section className="py-16 md:py-24 relative">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div
                         initial={{ scaleX: 0, opacity: 0 }}
@@ -354,7 +354,7 @@ export function Landing() {
             </section>
 
             {/* ══════════ 4. FEATURES (Bento Grid) ══════════ */}
-            <section className="py-24 md:py-32">
+            <section className="py-16 md:py-24">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div
                         initial="hidden"
@@ -408,7 +408,7 @@ export function Landing() {
             </section>
 
             {/* ══════════ 5. COMPARISON (Split View) ══════════ */}
-            <section className="py-24 md:py-32 relative">
+            <section className="py-16 md:py-24 relative">
                 <div className="max-w-[1000px] mx-auto px-4 md:px-8">
                     <motion.div
                         initial={{ scaleX: 0, opacity: 0 }}
@@ -496,7 +496,7 @@ export function Landing() {
             </section>
 
             {/* ══════════ 6. FINAL CTA ══════════ */}
-            <section className="py-24 md:py-32 relative overflow-hidden">
+            <section className="py-16 md:py-24 relative overflow-hidden">
                 <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
                 <div className="max-w-[800px] mx-auto px-4 md:px-8 text-center relative z-10">
                     <motion.div
