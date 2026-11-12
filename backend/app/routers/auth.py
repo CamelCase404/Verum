@@ -29,8 +29,8 @@ class LoginReq(BaseModel):
     email: str
     password: str
 
-@limiter.limit("5/minute")
 @router.post("/register", response_model=Token)
+@limiter.limit("5/minute")
 async def register(request: Request, data: UserRegister, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.email == data.email))
     existing = result.scalars().first()
@@ -43,8 +43,8 @@ async def register(request: Request, data: UserRegister, db: AsyncSession = Depe
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
 
-@limiter.limit("5/minute")
 @router.post("/login", response_model=Token)
+@limiter.limit("5/minute")
 async def login(request: Request, data: LoginReq, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.email == data.email))
     user = result.scalars().first()
