@@ -1,10 +1,11 @@
 import re
 from typing import Optional
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 import shutil
+import magic
 import uuid
 import os
 import glob
@@ -18,14 +19,19 @@ from ..config import settings
 from ..interview_store import save as save_interview, get as get_interview
 from ..schemas import Token, UserProfile, UserRegister, UpdateProfileReq
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+limiter = Limiter(key_func=get_remote_address)
+
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 class LoginReq(BaseModel):
     email: str
     password: str
 
+@limiter.limit("5/minute")
 @router.post("/register", response_model=Token)
-async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
+async def register(request: Request, data: UserRegister, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.email == data.email))
     existing = result.scalars().first()
     if existing: raise HTTPException(400, "Email already registered")
@@ -37,8 +43,9 @@ async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
 
+@limiter.limit("5/minute")
 @router.post("/login", response_model=Token)
-async def login(data: LoginReq, db: AsyncSession = Depends(get_db)):
+async def login(request: Request, data: LoginReq, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.email == data.email))
     user = result.scalars().first()
     if not user or not verify_password(data.password, user.hashed_password):
@@ -245,6 +252,7 @@ class SkillsReport(BaseModel):
     competency_soft_skills: Optional[int] = None
     interview_id: Optional[str] = None # Добавили для поиска видео
     rejected: Optional[bool] = False
+    job_id: Optional[str] = None
 
 @router.post("/skills")
 async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -287,7 +295,7 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
                 print(f"  ⚠️ Не удалось обновить interview rejected: {e}")
 
             # УДАЛЯЕМ ВИДЕОФАЙЛ С СЕРВЕРА, если финальный грейд Reject
-            files = glob.glob(f"uploads/{report.interview_id}_*.webm")
+            files = glob.glob(f"uploads/{report.interview_id}_*")
             for f in files:
                 try:
                     os.remove(f)
@@ -303,11 +311,18 @@ async def save_skills(report: SkillsReport, user: UserDB = Depends(get_current_u
         user.pending_skills_data = report.model_dump()
         if chat_history:
             user.pending_skills_data["chat_history"] = chat_history
+        if report.interview_id:
+            try:
+                _it_for_job = await get_interview(report.interview_id)
+                if _it_for_job and getattr(_it_for_job, "job_id", None):
+                    user.pending_skills_data["job_id"] = _it_for_job.job_id
+            except Exception as _e:
+                print(f"  ⚠️ save_skills: job_id read failed: {_e}")
         user.test_status = "pending"
 
     # Ищем видео по ID собеседования
     if report.interview_id:
-        files = glob.glob(f"uploads/{report.interview_id}_*.webm")
+        files = glob.glob(f"uploads/{report.interview_id}_*")
         if files:
             user.interview_video_url = f"/{files[0].replace(os.sep, '/')}"
 
@@ -350,9 +365,15 @@ async def update_profile(data: UpdateProfileReq, user: UserDB = Depends(get_curr
 
 @router.post("/upload-avatar")
 async def upload_avatar(file: UploadFile = File(...), user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    if not file.content_type.startswith("image/"): raise HTTPException(400, "Только изображения")
+    ext = file.filename.split('.')[-1].lower() if file.filename else ""
+    if ext not in {"jpg", "jpeg", "png", "webp", "gif"}: 
+        raise HTTPException(400, "Только изображения (jpg, png, webp, gif)")
+    file_head = await file.read(2048)
+    await file.seek(0)
+    if not magic.from_buffer(file_head, mime=True).startswith("image/"):
+        raise HTTPException(400, "Файл не является изображением")
     os.makedirs("uploads/avatars", exist_ok=True)
-    filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
+    filename = f"{uuid.uuid4()}.{ext}"
     filepath = f"uploads/avatars/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
     user.avatar_url = f"{settings.BACKEND_URL}/uploads/avatars/{filename}"
@@ -361,9 +382,17 @@ async def upload_avatar(file: UploadFile = File(...), user: UserDB = Depends(get
 
 @router.post("/upload-image")
 async def upload_image(file: UploadFile = File(...), user: UserDB = Depends(get_current_user)):
-    if not file.content_type.startswith("image/"): raise HTTPException(400, "Только изображения")
+    ext = file.filename.split('.')[-1].lower() if file.filename else ""
+    if ext not in {"jpg", "jpeg", "png", "webp", "gif"}: 
+        raise HTTPException(400, "Только изображения")
+        
+    file_head = await file.read(2048)
+    await file.seek(0)
+    if not magic.from_buffer(file_head, mime=True).startswith("image/"):
+        raise HTTPException(400, "Файл не является изображением")
+        
     os.makedirs("uploads/images", exist_ok=True)
-    filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
+    filename = f"{uuid.uuid4()}.{ext}"
     filepath = f"uploads/images/{filename}"
     with open(filepath, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
     return {"url": f"{settings.BACKEND_URL}/uploads/images/{filename}"}
@@ -472,12 +501,21 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         if conv and (conv.tokens_spent > 0 or current_user.plan == "enterprise"):
             is_unlocked = True
 
+    is_owner = current_user is not None and current_user.id == user.id
+    is_admin = current_user is not None and current_user.role == "admin"
+    safe_skills = user.skills_data
+    if safe_skills and not (is_owner or is_admin):
+        safe_skills = {k: v for k, v in safe_skills.items() if k != "chat_history"}
+
     return UserProfile(
-        id=user.id, email=user.email, role=user.role, full_name=user.full_name,
-        skills=user.skills_data, company_name=user.company_name, website=user.website,
+        id=user.id,
+        email=user.email if is_owner else "",
+        role=user.role, full_name=user.full_name,
+        skills=safe_skills, company_name=user.company_name, website=user.website,
         github_username=user.github_username, github_stats=user.github_stats, bio=user.bio,
         avatar_url=user.avatar_url, projects=user.projects, job_postings=user.job_postings,
-        last_test_at=user.last_test_at, test_status=user.test_status, interview_video_url=user.interview_video_url,
+        last_test_at=user.last_test_at, test_status=user.test_status,
+        interview_video_url=user.interview_video_url if (is_owner or is_admin) else None,
         attempts_used=user.attempts_used or 0,
         blocked_until=user.blocked_until,
         profile_views=user.profile_views or 0,

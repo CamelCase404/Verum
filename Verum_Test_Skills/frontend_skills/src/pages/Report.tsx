@@ -47,6 +47,8 @@ export default function Report({
     report: ReportResponse;
     onRestart?: () => void;
 }) {
+    void onRestart;
+    void onRestart;
     const goToDashboard = () => {
         window.location.href = "https://verumskills.ru/dashboard";
     };

@@ -1,0 +1,71 @@
+=== Verum fix-all (Sat Oct 31 02:08:28 AM MSK 2026) ===
+PROJ=/home/camelcase/GitHubProj/Verum  BK=/home/camelcase/GitHubProj/Verum/.verum_backups/20261031-020828
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/nginx.conf (client_max_body_size 500m)
+OK: /home/camelcase/GitHubProj/Verum/verum/nginx.conf (client_max_body_size 500m)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx (setMsgs history fix)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx (skip seconds=0)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx (code fallback)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx (video retry)
+NO-CHANGE: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Report.tsx (onRestart prop)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Report.tsx (onRestart button)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Processing.tsx (saveSkills rejected)
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/src/pages/Consent.tsx (transcript notice)
+OK: pnpm-lock interview
+OK: /home/camelcase/GitHubProj/Verum/verum/pnpm-workspace.yaml
+OK: /home/camelcase/GitHubProj/Verum/Verum_Test_Skills/frontend_skills/pnpm-workspace.yaml
+OK: package.json pnpm@9.15.0
+OK: AddProjectModal
+OK: ToastContainer
+OK: AdminDashboard
+OK: DeveloperDashboard
+OK: AuthCallback
+OK: useAppStore (stubs + defaultProfile)
+OK: Dashboard (setStoreRole removed)
+OK: api.getPublicUser
+OK: PublicProfile
+
+=== DONE ===
+log: /home/camelcase/GitHubProj/Verum/.verum_backups/20261031-020828/fix.log
+backups: /home/camelcase/GitHubProj/Verum/.verum_backups/20261031-020828
+
+## main...origin/main
+ M Verum_Test_Skills/frontend_skills/nginx.conf
+ M Verum_Test_Skills/frontend_skills/package.json
+ M Verum_Test_Skills/frontend_skills/pnpm-lock.yaml
+ M Verum_Test_Skills/frontend_skills/pnpm-workspace.yaml
+ M Verum_Test_Skills/frontend_skills/src/pages/Consent.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Processing.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Report.tsx
+ M verum/nginx.conf
+ M verum/pnpm-workspace.yaml
+ M verum/src/api.ts
+ M verum/src/components/layout/ToastContainer.tsx
+ M verum/src/components/modals/AddProjectModal.tsx
+ M verum/src/pages/AdminDashboard.tsx
+ M verum/src/pages/AuthCallback.tsx
+ M verum/src/pages/Dashboard.tsx
+ M verum/src/pages/PublicProfile.tsx
+ M verum/src/pages/dashboard/DeveloperDashboard.tsx
+ M verum/src/store/useAppStore.ts
+
+ Verum_Test_Skills/frontend_skills/nginx.conf       |  2 +
+ Verum_Test_Skills/frontend_skills/package.json     |  2 +-
+ Verum_Test_Skills/frontend_skills/pnpm-lock.yaml   |  1 -
+ .../frontend_skills/pnpm-workspace.yaml            |  2 +-
+ .../frontend_skills/src/pages/Consent.tsx          |  2 +-
+ .../frontend_skills/src/pages/Interview.tsx        | 47 +++++++++++++++++-----
+ .../frontend_skills/src/pages/Processing.tsx       |  2 +-
+ .../frontend_skills/src/pages/Report.tsx           |  1 +
+ verum/nginx.conf                                   |  2 +
+ verum/pnpm-workspace.yaml                          |  2 +-
+ verum/src/api.ts                                   |  2 +
+ verum/src/components/layout/ToastContainer.tsx     |  2 +-
+ verum/src/components/modals/AddProjectModal.tsx    |  2 +-
+ verum/src/pages/AdminDashboard.tsx                 |  4 +-
+ verum/src/pages/AuthCallback.tsx                   |  1 -
+ verum/src/pages/Dashboard.tsx                      |  4 +-
+ verum/src/pages/PublicProfile.tsx                  |  5 +--
+ verum/src/pages/dashboard/DeveloperDashboard.tsx   |  4 +-
+ verum/src/store/useAppStore.ts                     | 14 +++----
+ 19 files changed, 64 insertions(+), 37 deletions(-)

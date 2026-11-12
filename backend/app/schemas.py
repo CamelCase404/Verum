@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from typing import Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 Level = Literal["Junior", "Middle", "Senior"]
 
@@ -88,7 +88,7 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 class UserRegister(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     role: UserRole
     full_name: str
@@ -150,7 +150,8 @@ class SubscribeReq(BaseModel):
     plan: str
 
 class TopupReq(BaseModel):
-    verifications: int
+    verifications: int = 0
+    tokens: int = 0
     amount: int | None = None
 
 class UsageItem(BaseModel):

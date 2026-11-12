@@ -21,22 +21,21 @@ export function PublicVacancy() {
     }, [slug]);
 
     const handleApply = () => {
-        localStorage.setItem("verum.pending_job", JSON.stringify(job));
-        
         if (!user) {
+            localStorage.setItem("verum.pending_job", JSON.stringify(job));
             navigate(`/register?role=developer&job=${slug}`);
-        } else {
-            // Пользователь уже зареган. Спрашиваем подтверждение пересдачи
-            const confirmRetake = window.confirm(
-                "Вы уже зарегистрированы на Verum.\n\n" +
-                "Для отклика на эту вакансию вам нужно будет пройти собеседование заново, " +
-                "даже если вы проходили его недавно.\n\n" +
-                "Предыдущие результаты сохранятся в профиле, но в топ этой вакансии попадут новые.\n\n" +
-                "Продолжить?"
-            );
-            if (confirmRetake) {
-                navigate(`/dashboard?action=interview&job=${slug}`);
-            }
+            return;
+        }
+        const confirmRetake = window.confirm(
+            "Вы уже зарегистрированы на Verum.\n\n" +
+            "Для отклика на эту вакансию вам нужно будет пройти собеседование заново, " +
+            "даже если вы проходили его недавно.\n\n" +
+            "Предыдущие результаты сохранятся в профиле, но в топ этой вакансии попадут новые.\n\n" +
+            "Продолжить?"
+        );
+        if (confirmRetake) {
+            localStorage.setItem("verum.pending_job", JSON.stringify(job));
+            navigate(`/dashboard?action=interview&job=${slug}`);
         }
     };
 

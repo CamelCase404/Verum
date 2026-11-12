@@ -26,7 +26,7 @@ export function UniversalSearch() {
     const navigate = useNavigate();
     
     const [isOpen, setIsOpen] = useState(false);
-    const searchRole = "company"; // Теперь ищем только сотрудников
+    const searchRole: string = "company"; // Теперь ищем только сотрудников
     
     const [stack, setStack] = useState("");
     const [level, setLevel] = useState("");

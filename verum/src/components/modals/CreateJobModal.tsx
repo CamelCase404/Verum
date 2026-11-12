@@ -75,7 +75,8 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
               setSalaryFrom(parseInt(numbers[0]).toLocaleString("ru-RU"));
               setSalaryTo(parseInt(numbers[1]).toLocaleString("ru-RU"));
           } else if (numbers && numbers.length === 1) {
-              setSalaryFrom(parseInt(numbers[0]).toLocaleString("ru-RU"));
+              if (sal.toLowerCase().startsWith("до")) setSalaryTo(parseInt(numbers[0]).toLocaleString("ru-RU"));
+              else setSalaryFrom(parseInt(numbers[0]).toLocaleString("ru-RU"));
           }
       }
     }
@@ -138,7 +139,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       
       if (isEditing) {
         const updatedJobs = currentJobs.map((j: any) => 
-          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, is_external: isExternal, slug: isExternal ? finalSlug : null } : j
+          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "), is_external: isExternal, slug: isExternal ? finalSlug : null } : j
         );
         await authApi.updateJobs(updatedJobs);
         toast("Вакансия обновлена", "success");

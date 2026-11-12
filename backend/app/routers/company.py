@@ -75,23 +75,32 @@ async def hire_developer(
     if developer_id == user.id:
         raise HTTPException(400, "Нельзя нанять себя")
 
+    # Блокируем строку разработчика и компанию, чтобы избежать двойного списания
     dev_res = await db.execute(
-        select(UserDB).where(UserDB.id == developer_id, UserDB.role == "developer")
+        select(UserDB).where(UserDB.id == developer_id, UserDB.role == "developer").with_for_update()
     )
     dev = dev_res.scalars().first()
+    
+    comp_res = await db.execute(
+        select(UserDB).where(UserDB.id == user.id).with_for_update()
+    )
+    comp = comp_res.scalars().first()
     if not dev:
         raise HTTPException(404, "Кандидат не найден")
     if dev.banned:
         raise HTTPException(403, "Кандидат заблокирован")
+    if dev.test_status != "approved" or not dev.skills_data:
+        raise HTTPException(403, "Кандидат не прошёл верификацию.")
 
     # Считаем стоимость
     dev_grade = (dev.skills_data or {}).get("final_grade", "Junior")
     cost = GRADE_TOKEN_COST.get(dev_grade, 100)
     
-    is_enterprise = user.plan == "enterprise"
+    is_enterprise = comp.plan == "enterprise"
     if not is_enterprise:
-        if user.tokens < cost:
-            raise HTTPException(402, f"Недостаточно токенов. Нужно {cost}, у вас {user.tokens}.")
+        current_tokens = comp.tokens or 0
+        if current_tokens < cost:
+            raise HTTPException(402, f"Недостаточно токенов. Нужно {cost}, у вас {current_tokens}.")
 
     # Проверяем, есть ли уже чат
     from ..auth import Conversation
@@ -112,7 +121,7 @@ async def hire_developer(
     needs_payment = not conv.tokens_spent
     
     if needs_payment and not is_enterprise:
-        user.tokens -= cost
+        comp.tokens -= cost
         conv.tokens_spent = cost
         from datetime import datetime, timedelta
         conv.refund_deadline = utcnow_naive() + timedelta(days=3)
@@ -128,7 +137,7 @@ async def hire_developer(
     return {
         "status": "ok",
         "conversation_id": conv.id,
-        "tokens_left": user.tokens,
+        "tokens_left": comp.tokens,
         "cost": cost if not is_enterprise else 0
     }
 
@@ -181,7 +190,11 @@ async def get_vacancy_top(
     # Ищем одобренные отклики именно на эту вакансию
     res = await db.execute(
         select(VacancyApplication)
-        .where(VacancyApplication.job_id == job_id, VacancyApplication.company_id == user.id)
+        .where(
+            VacancyApplication.job_id == job_id,
+            VacancyApplication.company_id == user.id,
+            VacancyApplication.status == "approved",
+        )
     )
     apps = res.scalars().all()
     

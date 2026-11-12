@@ -77,12 +77,11 @@ export const api = {
             `/api/interview/${encodeURIComponent(interview_id)}/report`,
         ),
 
-    saveSkills: (report: ReportResponse & { interview_id?: string }) => {
-        
+    saveSkills: (report: ReportResponse & { interview_id?: string; rejected?: boolean; job_id?: string | null }) => {
         return request<{ status: string }>("/api/auth/skills", {
             method: "POST",
             body: JSON.stringify({
-                interview_id: report.interview_id, // <--- ВОТ ОНА, ПЕРЕДАЧА ID
+                interview_id: report.interview_id,
                 final_grade: report.final_grade ?? "Reject",
                 total_score_100: report.total_score_100 ?? 0,
                 stack_id: report.stack_id,
@@ -97,6 +96,8 @@ export const api = {
                 competency_prompting: report.competency_prompting,
                 competency_adaptability: report.competency_adaptability,
                 competency_soft_skills: report.competency_soft_skills,
+                rejected: !!report.rejected,
+                job_id: report.job_id || localStorage.getItem("verum_test_job_id") || null,
             }),
         });
     },

@@ -1,0 +1,74 @@
+=== Verum fixA (Sat Oct 31 02:10:49 AM MSK 2026) ===
+BK=/home/camelcase/GitHubProj/Verum/.verum_backups/20261031-021049
+
+--- ТЕКУЩАЯ СИГНАТУРА Report.tsx ---
+43:export default function Report({
+44-    report,
+45-}: {
+46-    report: ReportResponse;
+47-}) {
+48-    const goToDashboard = () => {
+49-        if (onRestart) { onRestart(); return; }
+50-        window.location.href = "https://verumskills.ru/dashboard";
+51-    };
+OK: Report.tsx — onRestart prop добавлен
+OK: удалён /home/camelcase/GitHubProj/Verum/verum/src/pages/Auth.tsx
+OK: удалён /home/camelcase/GitHubProj/Verum/verum/src/components/layout/Drawer.tsx
+OK: удалён /home/camelcase/GitHubProj/Verum/verum/src/components/layout/ChatWidget.tsx
+OK: удалён /home/camelcase/GitHubProj/Verum/verum/src/components/modals/GithubConnectModal.tsx
+OK: удалён backend/app/store.py
+
+=== DONE ===
+log: /home/camelcase/GitHubProj/Verum/.verum_backups/20261031-021049/fixA.log
+
+## main...origin/main
+ M Verum_Test_Skills/frontend_skills/nginx.conf
+ M Verum_Test_Skills/frontend_skills/package.json
+ M Verum_Test_Skills/frontend_skills/pnpm-lock.yaml
+ M Verum_Test_Skills/frontend_skills/pnpm-workspace.yaml
+ M Verum_Test_Skills/frontend_skills/src/pages/Consent.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Processing.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Report.tsx
+ D backend/app/store.py
+ M verum/nginx.conf
+ M verum/pnpm-workspace.yaml
+ M verum/src/api.ts
+ D verum/src/components/layout/ChatWidget.tsx
+ D verum/src/components/layout/Drawer.tsx
+ M verum/src/components/layout/ToastContainer.tsx
+ M verum/src/components/modals/AddProjectModal.tsx
+ D verum/src/components/modals/GithubConnectModal.tsx
+ M verum/src/pages/AdminDashboard.tsx
+ D verum/src/pages/Auth.tsx
+ M verum/src/pages/AuthCallback.tsx
+ M verum/src/pages/Dashboard.tsx
+ M verum/src/pages/PublicProfile.tsx
+ M verum/src/pages/dashboard/DeveloperDashboard.tsx
+ M verum/src/store/useAppStore.ts
+
+ Verum_Test_Skills/frontend_skills/nginx.conf       |   2 +
+ Verum_Test_Skills/frontend_skills/package.json     |   2 +-
+ Verum_Test_Skills/frontend_skills/pnpm-lock.yaml   |   1 -
+ .../frontend_skills/pnpm-workspace.yaml            |   2 +-
+ .../frontend_skills/src/pages/Consent.tsx          |   2 +-
+ .../frontend_skills/src/pages/Interview.tsx        |  47 ++++--
+ .../frontend_skills/src/pages/Processing.tsx       |   2 +-
+ .../frontend_skills/src/pages/Report.tsx           |   3 +
+ backend/app/store.py                               |  36 -----
+ verum/nginx.conf                                   |   2 +
+ verum/pnpm-workspace.yaml                          |   2 +-
+ verum/src/api.ts                                   |   2 +
+ verum/src/components/layout/ChatWidget.tsx         | 124 ---------------
+ verum/src/components/layout/Drawer.tsx             | 177 ---------------------
+ verum/src/components/layout/ToastContainer.tsx     |   2 +-
+ verum/src/components/modals/AddProjectModal.tsx    |   2 +-
+ verum/src/components/modals/GithubConnectModal.tsx |  67 --------
+ verum/src/pages/AdminDashboard.tsx                 |   4 +-
+ verum/src/pages/Auth.tsx                           |  99 ------------
+ verum/src/pages/AuthCallback.tsx                   |   1 -
+ verum/src/pages/Dashboard.tsx                      |   4 +-
+ verum/src/pages/PublicProfile.tsx                  |   5 +-
+ verum/src/pages/dashboard/DeveloperDashboard.tsx   |   4 +-
+ verum/src/store/useAppStore.ts                     |  14 +-
+ 24 files changed, 66 insertions(+), 540 deletions(-)

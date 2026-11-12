@@ -1,5 +1,5 @@
 export type Level = "junior" | "mid" | "senior";
-export type Role = "developer" | "company";
+export type Role = "developer" | "company" | "admin";
 
 export interface User {
   name: string;

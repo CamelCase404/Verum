@@ -20,8 +20,11 @@ def get_headers():
     return headers
 
 
+from ..auth import get_current_user, UserDB
+from fastapi import Depends
+
 @router.post("/analyze")
-async def analyze_github(data: GithubRequest):
+async def analyze_github(data: GithubRequest, user: UserDB = Depends(get_current_user)):
     username = data.username.strip().replace("https://github.com/", "").strip("/")
     if not username:
         raise HTTPException(400, "Username is required")

@@ -41,7 +41,14 @@ async def subscribe(
         raise HTTPException(403, "Только для компаний")
     if data.plan not in settings.PLANS:
         raise HTTPException(400, "Неизвестный тариф")
+    
+    # ВНИМАНИЕ: В боевом режиме здесь должна быть проверка оплаты через ЮKassa!
+    # Сейчас мы эмулируем успешную оплату. Если ENFORCE_LIMITS=True, то без реального чека
+    # мы блокируем выдачу тарифа (чтобы нельзя было накликать себе Enterprise бесплатно).
+    if settings.ENFORCE_LIMITS:
+        raise HTTPException(402, "Оплата временно недоступна. Подключите ЮKassa.")
 
+    await db.execute(select(UserDB).where(UserDB.id == user.id).with_for_update())
     info = settings.PLANS[data.plan]
     now = utcnow_naive()
 
@@ -94,17 +101,21 @@ async def topup(
 ):
     if user.role != "company":
         raise HTTPException(403, "Только для компаний")
-    if data.verifications <= 0:
-        raise HTTPException(400, "Количество должно быть > 0")
+    if data.verifications <= 0 and data.tokens <= 0:
+        raise HTTPException(400, "Укажите verifications и/или tokens > 0")
     if user.plan == "enterprise" and user.verifications_left is None:
         return {"status": "ok", "message": "У вас безлимит"}
 
+    await db.execute(select(UserDB).where(UserDB.id == user.id).with_for_update())
     info = settings.PLANS.get(user.plan or "start", settings.PLANS["start"])
-    unit = info.get("pay_per_unlock") or 5000
+    unit = 5000
     total = data.amount or (data.verifications * unit)
     now = utcnow_naive()
 
-    user.verifications_left = (user.verifications_left or 0) + data.verifications
+    if data.verifications > 0:
+        user.verifications_left = (user.verifications_left or 0) + data.verifications
+    if data.tokens > 0:
+        user.tokens = (user.tokens or 0) + data.tokens
     db.add(Invoice(
         company_id=user.id, amount=total,
         description=f"Пакет +{data.verifications} верификаций",
@@ -115,7 +126,7 @@ async def topup(
         cost=-total, candidate_id=None, interview_id=None,
     ))
     await db.commit()
-    return {"status": "ok", "verifications_left": user.verifications_left, "amount": total}
+    return {"status": "ok", "verifications_left": user.verifications_left, "tokens": user.tokens, "amount": total}
 
 
 @router.get("/usage", response_model=UsageResponse)

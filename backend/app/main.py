@@ -8,6 +8,12 @@ from .routers import auth, auth_github, billing, catalog, github, interview, med
 
 app = FastAPI(title="Verum API", version="0.1.0")
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from .routers.auth import limiter as _limiter
+app.state.limiter = _limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -51,10 +57,9 @@ from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 @app.exception_handler(Exception)
 async def handle_general_exception(request: Request, exc: Exception):
     # Логируем ошибку для отладки
-    print(f"Unhandled error: {exc}")
+    import traceback; traceback.print_exc()
     # Возвращаем ответ с заголовком CORS, чтобы браузер не блокировал его
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal Server Error", "error": str(exc)},
-        headers={"access-control-allow-origin": "*"}
+        content={"detail": "Internal Server Error"},
     )

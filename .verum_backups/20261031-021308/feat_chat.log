@@ -1,0 +1,67 @@
+=== Verum feat: chat history in profile (Sat Oct 31 02:13:09 AM MSK 2026) ===
+BK=/home/camelcase/GitHubProj/Verum/.verum_backups/20261031-021308
+OK: auth.py — chat_history в save_skills
+OK: admin.py — chat_history из pending_skills_data
+OK: PublicProfile.tsx — ChatHistoryBlock добавлен
+OK: PublicProfile.tsx — ChatHistoryBlock встроен
+OK: DeveloperDashboard.tsx — collapsible встроен
+OK: auth.py — SkillsReport.chat_history
+
+=== DONE ===
+log: /home/camelcase/GitHubProj/Verum/.verum_backups/20261031-021308/feat_chat.log
+
+## main...origin/main
+ M Verum_Test_Skills/frontend_skills/nginx.conf
+ M Verum_Test_Skills/frontend_skills/package.json
+ M Verum_Test_Skills/frontend_skills/pnpm-lock.yaml
+ M Verum_Test_Skills/frontend_skills/pnpm-workspace.yaml
+ M Verum_Test_Skills/frontend_skills/src/pages/Consent.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Interview.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Processing.tsx
+ M Verum_Test_Skills/frontend_skills/src/pages/Report.tsx
+ M backend/app/routers/admin.py
+ M backend/app/routers/auth.py
+ D backend/app/store.py
+ M verum/nginx.conf
+ M verum/pnpm-workspace.yaml
+ M verum/src/api.ts
+ D verum/src/components/layout/ChatWidget.tsx
+ D verum/src/components/layout/Drawer.tsx
+ M verum/src/components/layout/ToastContainer.tsx
+ M verum/src/components/modals/AddProjectModal.tsx
+ D verum/src/components/modals/GithubConnectModal.tsx
+ M verum/src/pages/AdminDashboard.tsx
+ D verum/src/pages/Auth.tsx
+ M verum/src/pages/AuthCallback.tsx
+ M verum/src/pages/Dashboard.tsx
+ M verum/src/pages/PublicProfile.tsx
+ M verum/src/pages/dashboard/DeveloperDashboard.tsx
+ M verum/src/store/useAppStore.ts
+
+ Verum_Test_Skills/frontend_skills/nginx.conf       |   2 +
+ Verum_Test_Skills/frontend_skills/package.json     |   2 +-
+ Verum_Test_Skills/frontend_skills/pnpm-lock.yaml   |   1 -
+ .../frontend_skills/pnpm-workspace.yaml            |   2 +-
+ .../frontend_skills/src/pages/Consent.tsx          |   2 +-
+ .../frontend_skills/src/pages/Interview.tsx        |  47 ++++--
+ .../frontend_skills/src/pages/Processing.tsx       |   2 +-
+ .../frontend_skills/src/pages/Report.tsx           |   3 +
+ backend/app/routers/admin.py                       |   4 +-
+ backend/app/routers/auth.py                        |  15 +-
+ backend/app/store.py                               |  36 -----
+ verum/nginx.conf                                   |   2 +
+ verum/pnpm-workspace.yaml                          |   2 +-
+ verum/src/api.ts                                   |   2 +
+ verum/src/components/layout/ChatWidget.tsx         | 124 ---------------
+ verum/src/components/layout/Drawer.tsx             | 177 ---------------------
+ verum/src/components/layout/ToastContainer.tsx     |   2 +-
+ verum/src/components/modals/AddProjectModal.tsx    |   2 +-
+ verum/src/components/modals/GithubConnectModal.tsx |  67 --------
+ verum/src/pages/AdminDashboard.tsx                 |   4 +-
+ verum/src/pages/Auth.tsx                           |  99 ------------
+ verum/src/pages/AuthCallback.tsx                   |   1 -
+ verum/src/pages/Dashboard.tsx                      |   4 +-
+ verum/src/pages/PublicProfile.tsx                  |  60 ++++++-
+ verum/src/pages/dashboard/DeveloperDashboard.tsx   |  33 +++-
+ verum/src/store/useAppStore.ts                     |  14 +-
+ 26 files changed, 166 insertions(+), 543 deletions(-)

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { cn } from "@/lib/utils";
 const ACTIONS = [
-  { id: "landing", t: "Главная", d: "На главную", ico: "⌂" },
-  { id: "about", t: "О проекте", d: "Миссия", ico: "ℹ" },
-  { id: "how", t: "Как работает", d: "Этапы", ico: "⚙" },
-  { id: "pricing", t: "Тарифы", d: "Цены", ico: "₽" },
-  { id: "dashboard", t: "Кабинет", d: "Профиль", ico: "◫" },
+  { id: "landing", path: "/", t: "Главная", d: "На главную", ico: "⌂" },
+  { id: "about", path: "/about", t: "О проекте", d: "Миссия", ico: "ℹ" },
+  { id: "how", path: "/how", t: "Как работает", d: "Этапы", ico: "⚙" },
+  { id: "pricing", path: "/pricing", t: "Тарифы", d: "Цены", ico: "₽" },
+  { id: "dashboard", path: "/dashboard", t: "Кабинет", d: "Профиль", ico: "◫" },
 ];
 export function CommandPalette() {
-  const { paletteOpen, togglePalette, setView } = useAppStore();
+  const { paletteOpen, togglePalette } = useAppStore();
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -27,7 +29,7 @@ export function CommandPalette() {
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск..." className="border-none px-5 py-4 text-base bg-transparent outline-none border-b border-line" />
         <div className="p-2">
           {items.map((a) => (
-            <button key={a.id} onClick={() => { setView(a.id as any); togglePalette(); }} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-2 w-full text-left">
+            <button key={a.id} onClick={() => { navigate(a.path); togglePalette(); }} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-2 w-full text-left">
               <span className="w-7 h-7 rounded-md bg-surface-3 flex items-center justify-center text-xs">{a.ico}</span>
               <div><div className="text-[13.5px] font-medium">{a.t}</div><div className="text-[11.5px] text-ink-3">{a.d}</div></div>
             </button>

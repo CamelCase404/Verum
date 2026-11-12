@@ -7,6 +7,7 @@ import "./index.css";
 const params = new URLSearchParams(window.location.search);
 const tokenFromUrl = params.get("token");
 const themeFromUrl = params.get("theme");
+const jobIdFromUrl = params.get("job_id");
 
 if (tokenFromUrl) {
     localStorage.setItem("verum_token", tokenFromUrl);
@@ -16,7 +17,11 @@ if (themeFromUrl) {
     localStorage.setItem("theme", themeFromUrl);
     params.delete("theme");
 }
-if (tokenFromUrl || themeFromUrl) {
+if (jobIdFromUrl) {
+    localStorage.setItem("verum_test_job_id", jobIdFromUrl);
+    params.delete("job_id");
+}
+if (tokenFromUrl || themeFromUrl || jobIdFromUrl) {
     const query = params.toString();
     window.history.replaceState(
         {},

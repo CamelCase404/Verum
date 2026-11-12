@@ -40,13 +40,7 @@ export function AddProjectModal({
   const removeImage = (index: number) => {
     // Удаляем из новых файлов (если это новый файл)
     if (index < previews.length - selectedFiles.length) {
-      // Это старое фото, удаляем из массива
       setPreviews(prev => prev.filter((_, i) => i !== index));
-      // Обновляем projectToEdit, чтобы при сохранении знать, какие фото остались
-      if (projectToEdit) {
-        projectToEdit.images = previews.filter((_, i) => i !== index);
-        projectToEdit.cover = projectToEdit.images[0] || "";
-      }
     } else {
       // Это новое фото
       const fileIndex = index - (previews.length - selectedFiles.length);

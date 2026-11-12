@@ -1,4 +1,11 @@
-export const Anim = {
+type EaseFn = (t: number) => number;
+type AnimType = {
+  ease: { outCubic: EaseFn; outExpo: EaseFn; outBack: EaseFn };
+  tween: (from: number, to: number, dur: number, cb: (v: number, t: number) => void, easeFn?: keyof AnimType['ease']) => void;
+  countUp: (el: HTMLElement, to: number, opts?: { dur?: number; start?: number; prefix?: string; suffix?: string; decimals?: number }) => void;
+};
+
+export const Anim: AnimType = {
   ease: {
     outCubic: (t: number) => 1 - Math.pow(1 - t, 3),
     outExpo: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
@@ -29,7 +36,7 @@ export const Anim = {
     opts: { dur?: number; start?: number; prefix?: string; suffix?: string; decimals?: number } = {}
   ) {
     const { dur = 1500, start = 0, prefix = "", suffix = "", decimals = 0 } = opts;
-    Anim.tween(start, to, dur, (v) => {
+    Anim.tween(start, to, dur, (v: number) => {
       el.textContent = prefix + v.toFixed(decimals) + suffix;
     }, "outExpo");
   },

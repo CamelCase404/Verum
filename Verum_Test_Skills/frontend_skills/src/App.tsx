@@ -79,11 +79,13 @@ export default function App() {
 
     const handleReportReady = (report: ReportResponse) => {
         clear();
+        localStorage.removeItem("verum_test_job_id");
         setView({ kind: "report", report });
     };
 
     const handleRestart = () => {
         clear();
+        localStorage.removeItem("verum_test_job_id");
         setView({ kind: "landing" });
     };
 

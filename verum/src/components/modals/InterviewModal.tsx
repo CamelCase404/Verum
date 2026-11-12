@@ -31,7 +31,8 @@ export function InterviewModal({
         
         // Перекидываем на боевой домен (или на localhost, если мы в режиме разработки)
         const testAppUrl = import.meta.env.VITE_TEST_APP_URL || "https://test.verumskills.ru";
-        window.location.href = `${testAppUrl}/?token=${token}&theme=${theme}`;
+        const jid = jobId ? `&job_id=${encodeURIComponent(jobId)}` : "";
+        window.location.href = `${testAppUrl}/?token=${token}&theme=${theme}${jid}`;
     };
 
   return (

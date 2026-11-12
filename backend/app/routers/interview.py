@@ -201,9 +201,7 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
         await db.commit()
 
     langs_str = ", ".join(req.language_ids)
-    it = await create(req.level, req.stack_id, langs_str, user_id=user.id)
-    if getattr(req, 'job_id', None):
-        it.job_id = req.job_id
+    it = await create(req.level, req.stack_id, langs_str, user_id=user.id, job_id=req.job_id)
     try:
         q = await _generate_pure_question(0, it, [])
     except Exception as e:

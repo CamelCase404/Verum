@@ -75,10 +75,10 @@ class Interview:
     turns: list[TurnData] = field(default_factory=list)
 
 
-async def create(level: Level, stack_id: str, language_id: str, user_id: int | None = None) -> Interview:
+async def create(level: Level, stack_id: str, language_id: str, user_id: int | None = None, job_id: str | None = None) -> Interview:
     async with SessionLocal() as db:
         new_it = DBInterview(
-            id=str(uuid.uuid4()), user_id=user_id, level=level, stack_id=stack_id, language_id=language_id
+            id=str(uuid.uuid4()), user_id=user_id, level=level, stack_id=stack_id, language_id=language_id, job_id=job_id
         )
         db.add(new_it)
         await db.commit()
@@ -128,6 +128,7 @@ async def save(interview: Interview):
             db_it.finished = interview.finished
             db_it.rejected = interview.rejected
             db_it.reject_reason = interview.reject_reason
+            db_it.job_id = interview.job_id
 
             await db.execute(delete(DBTurn).where(DBTurn.interview_id == interview.id))
             for t in interview.turns:

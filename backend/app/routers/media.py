@@ -1,11 +1,12 @@
 import os
 import uuid
+import magic
 from pathlib import Path
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile, Depends
 from sqlalchemy import select
 
-from ..auth import SessionLocal, UserDB
+from ..auth import SessionLocal, UserDB, get_current_user
 from ..interview_store import get as get_interview
 
 router = APIRouter(prefix="/api/media", tags=["media"])
@@ -14,24 +15,36 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 MAX_VIDEO_BYTES = 500 * 1024 * 1024
+ALLOWED_VIDEO_EXT = {"webm", "mp4", "ogg"}
 
 
 @router.post("/upload")
-async def upload_video(interview_id: str, file: UploadFile = File(...)):
+async def upload_video(interview_id: str, file: UploadFile = File(...), user: UserDB = Depends(get_current_user)):
     if not interview_id or not interview_id.strip():
         raise HTTPException(400, "interview_id is required")
 
     if not file.content_type or not file.content_type.startswith(("video/", "audio/")):
         raise HTTPException(400, "Разрешены только видео или аудио файлы")
+        
+    # Проверка реального содержимого (защита от подделки расширений)
+    file_head = await file.read(2048)
+    await file.seek(0)
+    mime = magic.from_buffer(file_head, mime=True)
+    if not mime.startswith(("video/", "audio/")):
+        raise HTTPException(400, "Файл не является видео/аудио (обнаружена подделка)")
 
     it = await get_interview(interview_id)
     if not it:
         raise HTTPException(404, "Interview not found")
+    if it.user_id and it.user_id != user.id:
+        raise HTTPException(403, "Это интервью принадлежит другому пользователю")
 
     if it.rejected:
         return {"status": "ignored", "message": "Interview rejected. Video discarded."}
 
-    ext = file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else "webm"
+    ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename and "." in file.filename else "webm"
+    if ext not in ALLOWED_VIDEO_EXT:
+        raise HTTPException(400, "Недопустимый формат видео. Разрешены: webm, mp4.")
     filename = f"{interview_id}_{uuid.uuid4().hex[:8]}.{ext}"
     filepath = UPLOAD_DIR / filename
 

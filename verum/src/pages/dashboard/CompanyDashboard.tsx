@@ -24,7 +24,7 @@ import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
 import { CompareCandidatesModal } from "@/components/modals/CompareCandidatesModal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
-import { authApi, companyApi } from "@/api";
+import { authApi, companyApi, chatApi } from "@/api";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
@@ -97,6 +97,7 @@ export function CompanyDashboard({
             .searchCandidates({
                 grade: filterGrade,
                 stack: filterStack,
+                language: filterLang,
                 job_id: selectedJobId,
             })
             .then((res) => {
@@ -114,7 +115,7 @@ export function CompanyDashboard({
         if (activeTab === "candidates") {
             fetchCandidates();
         }
-    }, [filterGrade, filterStack, selectedJobId, activeTab]);
+    }, [filterGrade, filterStack, filterLang, selectedJobId, activeTab]);
 
     const handleJobClick = (job: any) => {
         setSelectedJobId(job.id);
@@ -499,7 +500,7 @@ export function CompanyDashboard({
 
                                                     {cand.is_unlocked ? (
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); navigate(`/messages?chat=${cand.id}`); }}
+                                                            onClick={async (e) => { e.stopPropagation(); try { const r = await chatApi.startChat(cand.id); navigate(`/messages?chat=${r.data.conversation_id}`); } catch (err: any) { toast(err.message || "Ошибка открытия чата"); } }}
                                                             className="self-center px-4 py-1.5 bg-surface border border-line-2 text-ink-3 text-[12px] font-medium rounded-lg hover:text-ink hover:bg-surface-2 transition-colors whitespace-nowrap"
                                                         >
                                                             В чат

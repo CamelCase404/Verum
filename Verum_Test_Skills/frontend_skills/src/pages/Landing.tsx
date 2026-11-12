@@ -80,6 +80,8 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
     }, []);
 
     const _level: Option | undefined = useMemo(() => catalog?.levels.find((l) => l.id === levelId), [catalog, levelId]);
+    void _level;
+    void _level;
     const stack: StackOption | undefined = useMemo(() => catalog?.stacks.find((s) => s.id === stackId), [catalog, stackId]);
 
     const canStart = Boolean(stackId && languageIds.length > 0) && !loading;

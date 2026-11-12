@@ -6,7 +6,16 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 
 class Settings:
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "change-me-in-prod")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+    _is_prod = os.getenv("ENV", "").lower() == "production"
+    if not SECRET_KEY:
+        if _is_prod:
+            raise ValueError("SECRET_KEY обязателен в продакшене (>=32 символа).")
+        import secrets
+        SECRET_KEY = secrets.token_urlsafe(32)
+        print("⚠️ WARNING: SECRET_KEY не задан, сгенерирован временный (только для разработки).")
+    if _is_prod and len(SECRET_KEY) < 32:
+        raise ValueError("SECRET_KEY должен быть >=32 символов в продакшене.")
 
     GIGACHAT_CREDENTIALS: str = os.getenv("GIGACHAT_CREDENTIALS", "")
     GIGACHAT_SCOPE: str = os.getenv("GIGACHAT_SCOPE", "GIGACHAT_API_PERS")
@@ -23,7 +32,7 @@ class Settings:
 
     # Secure-cookie для OAuth-сессии. В проде за HTTPS → SECURE_COOKIES=true в .env
     SECURE_COOKIES: bool = (
-        os.getenv("SECURE_COOKIES", "false").lower() == "true"
+        os.getenv("SECURE_COOKIES", "true").lower() == "true"
     )
 
     # SaaS-модель (Q3 = чат с нейросетью)

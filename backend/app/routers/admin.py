@@ -175,6 +175,9 @@ async def reject(
     req.moderated_at = now
     req.rejection_reason = "Читерство / нарушение правил"
 
+    if req.reserved_credit:
+        req.reserved_credit = False
+
     if dev:
         dev.banned = True
         dev.test_status = "rejected"

@@ -14,6 +14,7 @@ export function Nav() {
         return;
     }
     const fetchUnread = async () => {
+        if (document.visibilityState !== "visible") return;
         try {
             const res = await chatApi.getConversations();
             const total = res.data.reduce((sum: number, c: any) => sum + (c.unread || 0), 0);
@@ -21,8 +22,10 @@ export function Nav() {
         } catch (e) {}
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 15000); // Каждые 15 сек
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchUnread, 15000);
+    const onVis = () => { if (document.visibilityState === "visible") fetchUnread(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearInterval(interval); document.removeEventListener("visibilitychange", onVis); };
   }, [user]);
   const location = useLocation();
 

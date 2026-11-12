@@ -36,7 +36,7 @@ export function Messages() {
       }
       setLoading(false);
     }).catch(console.error);
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!activeConv) return;
@@ -81,6 +81,7 @@ export function Messages() {
   };
 
   const clearImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     setSelectedImage(null);
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";

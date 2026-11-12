@@ -6,6 +6,7 @@ from sqlalchemy import select, update
 from typing import List
 import os
 import shutil
+import magic
 import uuid
 
 from ..config import settings
@@ -32,6 +33,11 @@ async def start_chat(req: StartChatReq, user: UserDB = Depends(get_current_user)
     conv = res_conv.scalars().first()
     
     if not conv:
+        if user.role != "company" or user.plan != "enterprise":
+            raise HTTPException(
+                402,
+                "Чат не оплачен. Используйте POST /api/company/hire/{developer_id} для списания токенов.",
+            )
         conv = Conversation(company_id=company_id, developer_id=developer_id)
         db.add(conv)
         await db.commit()
@@ -104,8 +110,14 @@ async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: Us
     if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
         raise HTTPException(status_code=403, detail="Access denied")
     
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Только изображения")
+    ext = file.filename.split('.')[-1].lower() if file.filename else ""
+    if ext not in {"jpg", "jpeg", "png", "webp", "gif"}: 
+        raise HTTPException(400, "Только изображения")
+        
+    file_head = await file.read(2048)
+    await file.seek(0)
+    if not magic.from_buffer(file_head, mime=True).startswith("image/"):
+        raise HTTPException(400, "Файл не является изображением")
     
     # Проверка размера (2 MB)
     file.file.seek(0, 2)
@@ -114,7 +126,6 @@ async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: Us
     if file_size > 2 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="Файл слишком большой (максимум 2 МБ)")
 
-    ext = file.filename.split(".")[-1]
     filename = f"chat_{uuid.uuid4()}.{ext}"
     os.makedirs("uploads/chat", exist_ok=True)
     filepath = f"uploads/chat/{filename}"

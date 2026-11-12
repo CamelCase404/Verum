@@ -59,8 +59,8 @@ class UserDB(Base):
 
     # ── SaaS-модель (Блок 2.0) ──
     plan = Column(String(20), nullable=True)  # 'start' / 'pro' / 'enterprise' / NULL
-    verifications_left = Column(Integer, default=0, nullable=False)
-    tokens = Column(Integer, default=0, nullable=False)  # единый пул (Q2=C)
+    verifications_left = Column(Integer, default=0, nullable=True)
+    tokens = Column(Integer, default=0, nullable=True)  # единый пул (Q2=C)
     subscription_until = Column(DateTime, nullable=True)
     banned = Column(Boolean, default=False, nullable=False)  # для разработчиков-читеров
 
