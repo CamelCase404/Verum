@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Request
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Request, BackgroundTasks
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 import shutil
@@ -34,15 +34,27 @@ class LoginReq(BaseModel):
 
 @router.post("/register", response_model=Token)
 @limiter.limit("5/minute")
-async def register(request: Request, data: UserRegister, db: AsyncSession = Depends(get_db)):
+async def register(request: Request, background_tasks: BackgroundTasks, data: UserRegister, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserDB).where(UserDB.email == data.email))
     existing = result.scalars().first()
     if existing: raise HTTPException(400, "Email already registered")
     
     user = UserDB(email=data.email, hashed_password=get_password_hash(data.password), role=data.role.value, full_name=data.full_name)
+    
+    # Генерируем токен для почты
+    token_verify = secrets.token_urlsafe(32)
+    user.verification_token = token_verify
+    user.token_expires_at = utcnow_naive() + timedelta(hours=24)
+    
     db.add(user)
     await db.commit()
     await db.refresh(user)
+    
+    # Отправляем письмо в фоне
+    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token_verify}"
+    body = f"Привет, {user.full_name}!\n\nПодтвердите вашу почту для завершения регистрации на платформе Verum.\nСсылка действительна 24 часа.\n\n{verify_url}\n\nЕсли вы не регистрировались, просто проигнорируйте это письмо."
+    background_tasks.add_task(send_email, user.email, "Подтверждение почты на Verum", body)
+    
     token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
 
