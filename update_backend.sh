@@ -3,7 +3,7 @@
 # --- НАСТРОЙКИ ---
 SERVER_IP="130.49.149.109"
 SERVER_USER="root"
-PROJECT_DIR="/home/camelcase/GitHubProj/Verum"
+PROJECT_DIR="/home/camelcase/GitHubProjs/Verum"
 LOCAL_BACKEND_PATH="$PROJECT_DIR/backend"
 SERVER_PROJECT_PATH="/root/Verum"
 
