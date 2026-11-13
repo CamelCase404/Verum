@@ -27,6 +27,7 @@ export default function RegisterPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [githubLoading, setGithubLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +39,7 @@ export default function RegisterPage() {
             setToken(res.data.access_token);
             const me = await authApi.getMe();
             setUser({ name: fullName || me.data.full_name, email: email, role: me.data.role });
-            navigate("/dashboard");
+            setIsSuccess(true);
         } catch (err: any) {
             setError(err.message || "Ошибка регистрации");
         } finally {
@@ -47,6 +48,31 @@ export default function RegisterPage() {
     };
 
     const isCompany = role === "company";
+
+
+    if (isSuccess) {
+        return (
+            <div className="min-h-screen bg-bg flex items-center justify-center p-4 sm:p-8 font-sans text-ink relative">
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md bg-surface rounded-[22px] p-8 md:p-10 shadow-2xl border border-line text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent/20 via-accent to-accent/20" />
+                    
+                    <div className="w-20 h-20 bg-accent/10 text-accent rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Mail size={36} />
+                    </div>
+                    
+                    <h1 className="text-2xl font-bold text-ink mb-3">Проверьте вашу почту</h1>
+                    <p className="text-ink-3 text-[14px] leading-relaxed mb-8">
+                        Мы отправили ссылку для активации профиля на <br/><b className="text-ink">{email}</b>.<br/>
+                        Перейдите по ней, чтобы получить доступ к кабинету.
+                    </p>
+                    
+                    <button onClick={() => navigate("/")} className="w-full py-3 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 transition-colors">
+                        На главную
+                    </button>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-bg flex items-center justify-center p-4 sm:p-8 font-sans text-ink relative">
