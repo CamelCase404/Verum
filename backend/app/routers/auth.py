@@ -7,6 +7,7 @@ import smtplib
 import uuid
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
+from email.utils import make_msgid
 from typing import Optional
 
 import magic
@@ -750,6 +751,7 @@ def send_email(to_email: str, subject: str, text_body: str, html_body: str = Non
         msg["From"] = settings.SMTP_USER
         msg["To"] = to_email
         msg["Reply-To"] = settings.SMTP_USER
+        msg["Message-ID"] = make_msgid(domain="verumskills.ru")
 
         # Текстовая версия
         msg.set_content(text_body)
