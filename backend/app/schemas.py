@@ -131,6 +131,7 @@ class UserProfile(BaseModel):
     tokens: int | None = None  # None = безлимит (enterprise)
     subscription_until: datetime | None = None
     banned: bool = False
+    is_verified: bool = False
 
 
 # ── Billing-схемы ──

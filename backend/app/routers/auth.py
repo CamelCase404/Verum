@@ -9,6 +9,9 @@ import magic
 import uuid
 import os
 import glob
+import smtplib
+import secrets
+from email.message import EmailMessage
 from pydantic import BaseModel
 
 from ..auth import (
@@ -82,6 +85,7 @@ async def me(user: UserDB = Depends(get_current_user), db: AsyncSession = Depend
         tokens=user.tokens,
         subscription_until=user.subscription_until,
         banned=bool(user.banned),
+        is_verified=bool(user.is_verified),
     )
 
 
@@ -527,5 +531,66 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
         tokens=user.tokens,
         subscription_until=user.subscription_until,
         banned=bool(user.banned),
+        is_verified=bool(user.is_verified),
         is_unlocked=is_unlocked,
     )
+
+class VerifyEmailReq(BaseModel):
+    token: str
+
+def send_email(to_email: str, subject: str, body: str):
+    if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
+        print("⚠️ SMTP не настроен в .env")
+        return
+    try:
+        msg = EmailMessage()
+        msg.set_content(body)
+        msg["Subject"] = subject
+        msg["From"] = settings.SMTP_USER
+        msg["To"] = to_email
+        
+        with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.send_message(msg)
+        print(f"📧 Письмо отправлено на {to_email}")
+    except Exception as e:
+        print(f"❌ Ошибка отправки письма: {e}")
+
+@router.post("/send-verify-email")
+async def send_verify_email(user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    if user.is_verified:
+        return {"status": "ok", "message": "Почта уже подтверждена"}
+    
+    token = secrets.token_urlsafe(32)
+    user.verification_token = token
+    user.token_expires_at = utcnow_naive() + timedelta(hours=24)
+    await db.commit()
+    
+    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+    body = f"""Привет, {user.full_name}!
+
+Пожалуйста, подтвердите вашу почту для завершения регистрации на платформе Verum.
+Ссылка действительна 24 часа.
+
+{verify_url}
+
+Если вы не регистрировались, просто проигнорируйте это письмо.
+"""
+    send_email(user.email, "Подтверждение почты на Verum", body)
+    return {"status": "ok"}
+
+@router.post("/verify-email")
+async def verify_email(req: VerifyEmailReq, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserDB).where(UserDB.verification_token == req.token))
+    user = result.scalars().first()
+    
+    if not user:
+        raise HTTPException(400, "Неверный токен подтверждения")
+    if user.token_expires_at and user.token_expires_at < utcnow_naive():
+        raise HTTPException(400, "Срок действия токена истек. Запросите новое письмо.")
+        
+    user.is_verified = True
+    user.verification_token = None
+    user.token_expires_at = None
+    await db.commit()
+    return {"status": "ok", "message": "Почта успешно подтверждена"}

@@ -23,6 +23,11 @@ class Settings:
         "GIGACHAT_BASE_URL", "https://gigachat.devices.sberbank.ru/api/v1"
     )
     GIGACHAT_MODEL: str = os.getenv("GIGACHAT_MODEL", "GigaChat")
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.yandex.ru")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "465"))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+
     BACKEND_URL: str = os.getenv("BACKEND_URL", "https://api.verumskills.ru")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://verumskills.ru")
 

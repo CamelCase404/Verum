@@ -62,7 +62,10 @@ class UserDB(Base):
     verifications_left = Column(Integer, default=0, nullable=True)
     tokens = Column(Integer, default=0, nullable=True)  # единый пул (Q2=C)
     subscription_until = Column(DateTime, nullable=True)
-    banned = Column(Boolean, default=False, nullable=False)  # для разработчиков-читеров
+    banned = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verification_token = Column(String(255), nullable=True)
+    token_expires_at = Column(DateTime, nullable=True)
 
 
 
