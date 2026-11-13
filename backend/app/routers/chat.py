@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, WebSocket, WebSocketDisconnect, Query, WebSocket, WebSocketDisconnect, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
@@ -10,9 +10,41 @@ import magic
 import uuid
 
 from ..config import settings
-from ..auth import get_db, get_current_user, UserDB, Conversation, Message
+from ..auth import get_db, get_current_user, UserDB, Conversation, Message, SECRET_KEY, ALGORITHM, SessionLocal
+from jose import JWTError, jwt
+from sqlalchemy import func, SECRET_KEY, ALGORITHM, SessionLocal
+from jose import JWTError, jwt
+from sqlalchemy import func
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: dict[int, list[WebSocket]] = {}
+
+    async def connect(self, websocket: WebSocket, conv_id: int):
+        await websocket.accept()
+        if conv_id not in self.active_connections:
+            self.active_connections[conv_id] = []
+        self.active_connections[conv_id].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, conv_id: int):
+        if conv_id in self.active_connections:
+            if websocket in self.active_connections[conv_id]:
+                self.active_connections[conv_id].remove(websocket)
+            if not self.active_connections[conv_id]:
+                del self.active_connections[conv_id]
+
+    async def broadcast(self, conv_id: int, message: dict):
+        if conv_id in self.active_connections:
+            for connection in self.active_connections[conv_id]:
+                try:
+                    await connection.send_json(message)
+                except Exception:
+                    pass
+
+manager = ConnectionManager()
+
 
 class StartChatReq(BaseModel):
     target_user_id: int
@@ -62,12 +94,14 @@ async def get_conversations(user: UserDB = Depends(get_current_user), db: AsyncS
         
         res_msg = await db.execute(select(Message).where(Message.conversation_id == c.id).order_by(Message.created_at.desc()))
         last_msg = res_msg.scalars().first()
-        res_unread = await db.execute(select(Message).where(
-            Message.conversation_id == c.id, 
-            Message.is_read == False, 
-            Message.sender_id != user.id
-        ))
-        unread_count = len(res_unread.scalars().all())
+        unread_res = await db.execute(
+            select(func.count(Message.id)).where(
+                Message.conversation_id == c.id, 
+                Message.is_read == False, 
+                Message.sender_id != user.id
+            )
+        )
+        unread_count = unread_res.scalar() or 0
         
         # Определяем текст последнего сообщения (текст или "Фото")
         last_text = "Нет сообщений"
@@ -86,22 +120,31 @@ async def get_conversations(user: UserDB = Depends(get_current_user), db: AsyncS
     return result
 
 @router.get("/{conv_id}/messages")
-async def get_messages(conv_id: int, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def get_messages(conv_id: int, before_id: int = None, limit: int = 50, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     res_conv = await db.execute(select(Conversation).where(Conversation.id == conv_id))
     conv = res_conv.scalars().first()
     if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
         raise HTTPException(status_code=403, detail="Access denied")
     
-    await db.execute(update(Message).where(
-        Message.conversation_id == conv_id, 
-        Message.sender_id != user.id, 
-        Message.is_read == False
-    ).values(is_read=True))
-    await db.commit()
+    if not before_id:
+        await db.execute(update(Message).where(
+            Message.conversation_id == conv_id, 
+            Message.sender_id != user.id, 
+            Message.is_read == False
+        ).values(is_read=True))
+        await db.commit()
+        await manager.broadcast(conv_id, {"type": "read", "user_id": user.id})
     
-    res_msgs = await db.execute(select(Message).where(Message.conversation_id == conv_id).order_by(Message.created_at.asc()))
-    msgs = res_msgs.scalars().all()
-    return [{"id": m.id, "text": m.text, "image_url": m.image_url, "is_mine": m.sender_id == user.id, "created_at": m.created_at.isoformat()} for m in msgs]
+    query = select(Message).where(Message.conversation_id == conv_id)
+    if before_id:
+        query = query.where(Message.id < before_id)
+        
+    query = query.order_by(Message.id.desc()).limit(limit)
+    res_msgs = await db.execute(query)
+    msgs = list(res_msgs.scalars().all())
+    msgs.reverse()
+    
+    return [{"id": m.id, "text": m.text, "image_url": m.image_url, "is_mine": m.sender_id == user.id, "created_at": m.created_at.isoformat(), "is_read": m.is_read} for m in msgs]
 
 @router.post("/{conv_id}/upload")
 async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -144,8 +187,64 @@ async def send_message(conv_id: int, req: SendMessageReq, user: UserDB = Depends
     
     if not req.text.strip() and not req.image_url:
         raise HTTPException(status_code=400, detail="Сообщение не может быть пустым")
-    
+        
+    if len(req.text) > 5000:
+        raise HTTPException(status_code=400, detail="Сообщение слишком длинное (макс 5000 символов)")
+
     msg = Message(conversation_id=conv_id, sender_id=user.id, text=req.text.strip(), image_url=req.image_url)
     db.add(msg)
     await db.commit()
+    await db.refresh(msg)
+    
+    await manager.broadcast(conv_id, {
+        "type": "message",
+        "data": {
+            "id": msg.id, 
+            "text": msg.text, 
+            "image_url": msg.image_url, 
+            "is_mine": False, 
+            "sender_id": user.id,
+            "created_at": msg.created_at.isoformat()
+        }
+    })
+    
     return {"status": "ok"}
+
+
+@router.websocket("/ws/{conv_id}")
+async def websocket_endpoint(websocket: WebSocket, conv_id: int, token: str = Query(...)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            await websocket.close(code=1008)
+            return
+    except JWTError:
+        await websocket.close(code=1008)
+        return
+
+    async with SessionLocal() as db:
+        result = await db.execute(select(UserDB).where(UserDB.email == email))
+        user = result.scalars().first()
+        if not user:
+            await websocket.close(code=1008)
+            return
+            
+        res_conv = await db.execute(select(Conversation).where(Conversation.id == conv_id))
+        conv = res_conv.scalars().first()
+        if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
+            await websocket.close(code=1008)
+            return
+
+    await manager.connect(websocket, conv_id)
+    try:
+        while True:
+            data = await websocket.receive_json()
+            if data.get("type") == "typing":
+                await manager.broadcast(conv_id, {
+                    "type": "typing",
+                    "user_id": user.id,
+                    "is_typing": data.get("is_typing", False)
+                })
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, conv_id)

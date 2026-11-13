@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { chatApi, getToken } from "@/api";
+import { useAppStore } from "@/store/useAppStore";
 import { Send, ArrowLeft, Image as ImageIcon, Loader2, X } from "lucide-react";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function Messages() {
+  const currentUserId = useAppStore((s) => s.backendUser?.id);
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeConv, setActiveConv] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -15,6 +17,10 @@ export function Messages() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [typingTimeout, setTypingTimeout] = useState<any>(null);
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -41,33 +47,83 @@ export function Messages() {
   useEffect(() => {
     if (!activeConv) return;
     
-    const fetchMessages = () => {
-      chatApi.getMessages(activeConv.id).then(res => {
-        setMessages(prev => {
-          // Если данные не изменились — не перерендериваем список
-          if (
-            prev.length === res.data.length &&
-            prev[prev.length - 1]?.id === res.data[res.data.length - 1]?.id
-          ) {
-            return prev;
-          }
-          // Скроллим вниз ТОЛЬКО если пользователь находится внизу
-          if (isAtBottomRef.current) {
-            setTimeout(() => {
-              if (messagesContainerRef.current) {
-                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-              }
-            }, 100);
-          }
-          return res.data;
-        });
-      }).catch(console.error);
-    };
+    // Первичная загрузка
+    chatApi.getMessages(activeConv.id).then(res => {
+      setMessages(res.data);
+      setHasMore(res.data.length === 50);
+      setTimeout(() => {
+        if (messagesContainerRef.current) messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      }, 100);
+    });
+
+    // Подключение WS
+    const token = getToken();
+    const wsUrl = `${(import.meta.env.VITE_API_URL || "https://api.verumskills.ru").replace(/^http/, 'ws')}/api/chat/ws/${activeConv.id}?token=${token}`;
+    const socket = new WebSocket(wsUrl);
     
-    fetchMessages();
-    const interval = setInterval(fetchMessages, 3000);
-    return () => clearInterval(interval);
-  }, [activeConv]);
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === "message") {
+        if (data.data.sender_id !== currentUserId) {
+           setMessages(prev => [...prev, { ...data.data, is_mine: false }]);
+           isAtBottomRef.current = true;
+           setTimeout(() => {
+             if (messagesContainerRef.current) messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+           }, 100);
+        }
+      } else if (data.type === "typing") {
+        setIsOtherTyping(data.is_typing);
+      } else if (data.type === "read") {
+        setMessages(prev => prev.map(m => ({ ...m, is_read: true })));
+      }
+    };
+
+    setWs(socket);
+    return () => {
+      socket.close();
+    };
+  }, [activeConv, currentUserId]);
+
+  const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      if (!typingTimeout) {
+        ws.send(JSON.stringify({ type: "typing", is_typing: true }));
+      } else {
+        clearTimeout(typingTimeout);
+      }
+      const timeout = setTimeout(() => {
+        ws.send(JSON.stringify({ type: "typing", is_typing: false }));
+        setTypingTimeout(null);
+      }, 1500);
+      setTypingTimeout(timeout);
+    }
+  };
+
+  const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    isAtBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < 60;
+
+    if (target.scrollTop === 0 && hasMore && !loading && messages.length > 0) {
+      setLoading(true);
+      const oldestId = messages[0].id;
+      try {
+        const res = await chatApi.getMessages(activeConv.id, oldestId);
+        if (res.data.length < 50) setHasMore(false);
+        
+        const prevHeight = target.scrollHeight;
+        setMessages(prev => [...res.data, ...prev]);
+        setTimeout(() => {
+          target.scrollTop = target.scrollHeight - prevHeight;
+        }, 0);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,13 +155,12 @@ export function Messages() {
       }
       
       await chatApi.sendMessage(activeConv.id, text, imageUrl);
+      const localMsg = { id: Date.now(), text, image_url: imageUrl, is_mine: true, created_at: new Date().toISOString(), is_read: false };
+      setMessages(prev => [...prev, localMsg]);
       setText("");
       clearImage();
-      
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: "typing", is_typing: false}));
       isAtBottomRef.current = true; // Принудительно скроллим при отправке
-      const res = await chatApi.getMessages(activeConv.id);
-      setMessages(res.data);
-      
       // Не трогаем focus — на мобильных принудительный focus() после await "мигает" клавиатурой
       // Скроллим сам контейнер, а не window
       setTimeout(() => {
@@ -171,11 +226,7 @@ export function Messages() {
             <div 
               ref={messagesContainerRef}
               className="flex-1 overflow-y-auto p-4 space-y-4"
-              onScroll={(e) => {
-                  const target = e.currentTarget;
-                  // Считаем, что мы внизу, если до конца осталось меньше 60px
-                  isAtBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < 60;
-              }}
+              onScroll={handleScroll}
             >
               {messages.map((m, idx) => (
                 <motion.div 
@@ -196,6 +247,7 @@ export function Messages() {
                 </motion.div>
               ))}
               <div ref={messagesEndRef} />
+              {isOtherTyping && <div className="text-xs text-ink-3 italic p-2">Собеседник печатает...</div>}
             </div>
 
             {/* Превью выбранного фото */}
@@ -223,7 +275,7 @@ export function Messages() {
               <textarea 
                 ref={textareaRef}
                 value={text} 
-                onChange={e => setText(e.target.value)} 
+                onChange={handleTyping} 
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                 placeholder="Написать сообщение..." 
                 rows={1}

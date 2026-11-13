@@ -88,7 +88,8 @@ export const chatApi = {
   startChat: (target_user_id: number) =>
     request("/api/chat/start", { method: "POST", body: JSON.stringify({ target_user_id }) }),
   getConversations: () => request("/api/chat/conversations"),
-  getMessages: (conv_id: number) => request(`/api/chat/${conv_id}/messages`),
+  getMessages: (conv_id: number, before_id?: number) => 
+    request(`/api/chat/${conv_id}/messages${before_id ? `?before_id=${before_id}` : ''}`),
   uploadChatImage: async (conv_id: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
