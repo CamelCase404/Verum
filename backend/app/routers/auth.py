@@ -762,15 +762,11 @@ def send_email(to_email: str, subject: str, text_body: str, html_body: str = Non
 
         # Поддержка как 465 (SSL), так и 587 (STARTTLS) портов
         if settings.SMTP_PORT == 465:
-            with smtplib.SMTP_SSL(
-                settings.SMTP_HOST, settings.SMTP_PORT, timeout=10
-            ) as server:
+            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10, local_hostname="mail.verumskills.ru") as server:
                 server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
                 server.send_message(msg)
         else:
-            with smtplib.SMTP(
-                settings.SMTP_HOST, settings.SMTP_PORT, timeout=10
-            ) as server:
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10, local_hostname="mail.verumskills.ru") as server:
                 server.starttls()  # Обязательно для 587 порта
                 server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
                 server.send_message(msg)
@@ -818,7 +814,8 @@ async def send_verify_email(
     </div>
     """
 
-    send_email(user.email, "Подтверждение почты на платформе Верум", body, html_body)
+    if not send_email(user.email, "Подтверждение почты на платформе Верум", body, html_body):
+        raise HTTPException(500, "Не удалось отправить письмо. Проверьте логи сервера.")
     return {"status": "ok"}
 
 

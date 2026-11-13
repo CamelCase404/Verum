@@ -156,8 +156,10 @@ async def get_db():
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    # pwdlib сам разберется с форматом и вернет True/False
-    return password_hash.verify(plain, hashed)
+    try:
+        return password_hash.verify(plain, hashed)
+    except Exception:
+        return False
 
 
 def get_password_hash(password: str) -> str:
