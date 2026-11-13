@@ -47,7 +47,6 @@ export function Messages() {
   useEffect(() => {
     if (!activeConv) return;
     
-    // Первичная загрузка
     chatApi.getMessages(activeConv.id).then(res => {
       setMessages(res.data);
       setHasMore(res.data.length === 50);
@@ -56,7 +55,6 @@ export function Messages() {
       }, 100);
     });
 
-    // Подключение WS
     const token = getToken();
     const wsUrl = `${(import.meta.env.VITE_API_URL || "https://api.verumskills.ru").replace(/^http/, 'ws')}/api/chat/ws/${activeConv.id}?token=${token}`;
     const socket = new WebSocket(wsUrl);
@@ -157,14 +155,18 @@ export function Messages() {
       }
       
       await chatApi.sendMessage(activeConv.id, text, imageUrl);
+      
       const localMsg = { id: Date.now(), text, image_url: imageUrl, is_mine: true, created_at: new Date().toISOString(), is_read: false };
       setMessages(prev => [...prev, localMsg]);
+      
       setText("");
       clearImage();
-      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: "typing", is_typing: false}));
-      isAtBottomRef.current = true; // Принудительно скроллим при отправке
-      // Не трогаем focus — на мобильных принудительный focus() после await "мигает" клавиатурой
-      // Скроллим сам контейнер, а не window
+      
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({type: "typing", is_typing: false}));
+      }
+      
+      isAtBottomRef.current = true;
       setTimeout(() => {
         if (messagesContainerRef.current) {
           messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
@@ -179,8 +181,6 @@ export function Messages() {
 
   return (
     <div className="flex w-full h-full overflow-hidden bg-bg">
-      
-      {/* ЛЕВАЯ КОЛОНКА */}
       <div className={`w-full md:w-[320px] lg:w-[380px] border-r border-line-2 flex-col bg-surface shadow-[2px_0_12px_rgba(0,0,0,0.04)] dark:shadow-[2px_0_12px_rgba(0,0,0,0.4)] z-10 h-full ${activeConv ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-line bg-surface">
           <h1 className="text-xl font-bold tracking-tight">Сообщения</h1>
@@ -208,7 +208,6 @@ export function Messages() {
         </div>
       </div>
 
-      {/* ПРАВАЯ КОЛОНКА */}
       <div className={`flex-1 flex flex-col bg-bg relative h-full min-h-0 overflow-hidden ${activeConv ? "flex" : "hidden md:flex"}`}>
         {activeConv ? (
           <>
@@ -220,7 +219,11 @@ export function Messages() {
                 </div>
                 <div className="text-left">
                   <div className="font-semibold text-sm">{activeConv.other_name}</div>
-                  <div className="text-[11px] text-accent">Перейти в профиль</div>
+                  {isOtherTyping ? (
+                    <div className="text-[11px] text-accent animate-pulse">печатает...</div>
+                  ) : (
+                    <div className="text-[11px] text-accent">Перейти в профиль</div>
+                  )}
                 </div>
               </button>
             </div>
@@ -249,10 +252,8 @@ export function Messages() {
                 </motion.div>
               ))}
               <div ref={messagesEndRef} />
-              {isOtherTyping && <div className="text-xs text-ink-3 italic p-2">Собеседник печатает...</div>}
             </div>
 
-            {/* Превью выбранного фото */}
             {imagePreview && (
               <div className="px-3 pt-3 bg-surface flex items-center gap-2">
                 <div className="relative">
