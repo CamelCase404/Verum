@@ -32,4 +32,3 @@ backend/uploads/
 Thumbs.db
 .idea/
 .vscode/
-update_backend.sh
