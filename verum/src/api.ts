@@ -37,6 +37,8 @@ export const authApi = {
     request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password: pass }) }),
 
   getMe: () => request("/api/auth/me"),
+  sendVerifyEmail: () => request("/api/auth/send-verify-email", { method: "POST" }),
+  verifyEmail: (token: string) => request("/api/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }),
   
   deleteAccount: () => request("/api/auth/me", { method: "DELETE" }),
 

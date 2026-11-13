@@ -73,7 +73,9 @@ export function Messages() {
            }, 100);
         }
       } else if (data.type === "typing") {
-        setIsOtherTyping(data.is_typing);
+        if (data.user_id !== currentUserId) {
+          setIsOtherTyping(data.is_typing);
+        }
       } else if (data.type === "read") {
         setMessages(prev => prev.map(m => ({ ...m, is_read: true })));
       }

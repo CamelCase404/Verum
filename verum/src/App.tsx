@@ -35,6 +35,7 @@ import { Roadmap } from "@/pages/Roadmap";
 import RegisterPage from "@/pages/Register";
 import LoginPage from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
+import { VerifyEmail } from "@/pages/VerifyEmail";
 import { Dashboard } from "@/pages/Dashboard";
 import { Messages } from "@/pages/Messages";
 import { PublicProfile } from "@/pages/PublicProfile";
@@ -101,6 +102,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         <Route element={<Layout />}>
           <Route path="/" element={<Landing />} />
