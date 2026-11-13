@@ -550,23 +550,30 @@ async def get_public_profile(user_id: int, db: AsyncSession = Depends(get_db), c
 class VerifyEmailReq(BaseModel):
     token: str
 
-def send_email(to_email: str, subject: str, body: str):
+def send_email(to_email: str, subject: str, text_body: str, html_body: str = None):
     if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
-        print("⚠️ SMTP не настроен в .env")
-        return
+        raise HTTPException(500, "SMTP не настроен в .env")
     try:
         msg = EmailMessage()
-        msg.set_content(body)
         msg["Subject"] = subject
         msg["From"] = settings.SMTP_USER
         msg["To"] = to_email
+        msg["Reply-To"] = settings.SMTP_USER
         
+        # Текстовая версия (fallback)
+        msg.set_content(text_body)
+        
+        # HTML-версия (помогает обходить спам-фильтры)
+        if html_body:
+            msg.add_alternative(html_body, subtype="html")
+            
         with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
             server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             server.send_message(msg)
         print(f"📧 Письмо отправлено на {to_email}")
     except Exception as e:
         print(f"❌ Ошибка отправки письма: {e}")
+        raise HTTPException(500, "Не удалось отправить письмо. Проверьте логи сервера.")
 
 @router.post("/send-verify-email")
 async def send_verify_email(user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -588,7 +595,21 @@ async def send_verify_email(user: UserDB = Depends(get_current_user), db: AsyncS
 
 Если вы не регистрировались, просто проигнорируйте это письмо.
 """
-    send_email(user.email, "Подтверждение почты на Verum", body)
+    html_body = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f4f2ee; border-radius: 12px;">
+        <div style="background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e4e1db; text-align: center;">
+            <h2 style="color: #1e4d3a; margin-top: 0;">Добро пожаловать в Верум!</h2>
+            <p style="color: #56575d; font-size: 15px; line-height: 1.5;">Привет, <b>{user.full_name}</b>!</p>
+            <p style="color: #56575d; font-size: 15px; line-height: 1.5;">Пожалуйста, подтвердите вашу почту, чтобы получить доступ к личному кабинету и платформе.</p>
+            <div style="margin: 30px 0;">
+                <a href="{verify_url}" style="background-color: #1e4d3a; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">Подтвердить почту</a>
+            </div>
+            <p style="color: #8e8f95; font-size: 13px; margin-bottom: 0;">Ссылка действительна 24 часа. Если вы не регистрировались, просто проигнорируйте это письмо.</p>
+        </div>
+    </div>
+    """
+    
+    send_email(user.email, "Подтверждение почты на платформе Верум", body, html_body)
     return {"status": "ok"}
 
 @router.post("/verify-email")
