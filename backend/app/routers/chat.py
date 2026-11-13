@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, WebSocket, WebSocketDisconnect, Query, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, WebSocket, WebSocketDisconnect, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
@@ -11,8 +11,6 @@ import uuid
 
 from ..config import settings
 from ..auth import get_db, get_current_user, UserDB, Conversation, Message, SECRET_KEY, ALGORITHM, SessionLocal
-from jose import JWTError, jwt
-from sqlalchemy import func
 from jose import JWTError, jwt
 from sqlalchemy import func
 
