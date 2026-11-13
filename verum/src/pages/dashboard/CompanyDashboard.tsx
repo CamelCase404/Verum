@@ -229,6 +229,25 @@ export function CompanyDashboard({
 
     return (
         <div className="max-w-[1280px] w-full overflow-hidden mx-auto px-3 md:px-8 py-4 md:py-10 relative">
+            {backendUser?.is_verified === false && (
+                <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <div className="font-semibold text-[15px]">Подтвердите вашу почту</div>
+                        <div className="text-[13px] opacity-80">Это нужно для безопасности аккаунта и получения уведомлений.</div>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            try {
+                                await authApi.sendVerifyEmail();
+                                toast("Письмо отправлено! Проверьте почту.", "success");
+                            } catch (e: any) { toast(e.message); }
+                        }}
+                        className="px-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors whitespace-nowrap"
+                    >
+                        Отправить письмо
+                    </button>
+                </div>
+            )}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">Кабинет компании</h1>
