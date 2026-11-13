@@ -12,7 +12,7 @@ import uuid
 from ..config import settings
 from ..auth import get_db, get_current_user, UserDB, Conversation, Message, SECRET_KEY, ALGORITHM, SessionLocal
 from jose import JWTError, jwt
-from sqlalchemy import func, SECRET_KEY, ALGORITHM, SessionLocal
+from sqlalchemy import func
 from jose import JWTError, jwt
 from sqlalchemy import func
 
