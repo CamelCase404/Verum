@@ -17,6 +17,7 @@
   --blue: #2a4f7a; --blue-soft: #e8eef6;
   --violet: #4a3a8a; --violet-soft: #ede9f7;
 }
+
 [data-theme="dark"] {
   --bg: #0f0f12; --bg-2: #16161a;
   --surface: #1a1a1f; --surface-2: #1f1f25; --surface-3: #24242b;
@@ -29,42 +30,68 @@
   --blue: #6b9ec9; --blue-soft: #1a2533;
   --violet: #9b8dd6; --violet-soft: #251f38;
 }
-html, body {
-  margin: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-  scroll-behavior: smooth;
-  background-color: var(--bg);
-  color: var(--ink);
-  font-family: "Manrope", -apple-system, sans-serif;
-  overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  -webkit-font-smoothing: antialiased;
+
+/* Глобальный базовый слой */
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    scroll-behavior: smooth;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Manrope", -apple-system, sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+
+  /* ЖЁСТКО убираем синюю обводку при фокусе */
+  *,
+  *::before,
+  *::after {
+    outline: none !important;
+    box-shadow: none;
+    /* Убираем дефолтный синий ring у Tailwind */
+    --tw-ring-color: transparent !important;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-ring-offset-shadow: 0 0 #0000;
+  }
+
+  /* Убираем курсив везде */
+  i, em, .italic, .font-italic {
+    font-style: normal !important;
+  }
+
+  /* Заголовки — Sora */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Sora", sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  /* Кнопки и лейблы — Montserrat */
+  button, .btn, label {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+  }
+
+  /* Ссылки */
+  a { color: inherit; text-decoration: none; }
 }
 
-/* Убираем все лишние оверрайды, чтобы работали цвета из :root */
+/* Убираем скроллбар у горизонтальных списков */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Плавная смена цветов темы */
 .bg-bg, .bg-surface, .bg-surface-2, .bg-surface-3, 
 .text-ink, .text-ink-2, .text-ink-3, .text-ink-4,
 .border-line, .border-line-2 {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
-button { font-family: inherit; cursor: pointer; }
-a { color: inherit; text-decoration: none; }
-
-@layer base {
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
-    scroll-behavior: smooth;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: "Sora", sans-serif;
-    letter-spacing: -0.02em;
-  }
-}
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
