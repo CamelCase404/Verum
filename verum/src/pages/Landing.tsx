@@ -538,63 +538,78 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="text-center mb-14 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Найм и интеграции</div>
-                                        <AccentTitle>Как нанимать и сколько это стоит</AccentTitle>
+                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Два способа найма</div>
+                                        <AccentTitle>Как нанимать через Верум</AccentTitle>
                                         <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
-                                            Полный цикл от вакансии до оффера. Платите только за открытие контактов.
+                                            Ищите готовых инженеров в базе или прогоняйте своих кандидатов через тест под вакансию.
                                         </p>
                                     </div>
+
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                        <div className="bg-surface border border-line rounded-2xl p-8">
-                                            <div className="flex items-center gap-3 mb-6">
-                                                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                                        {/* Способ 1 */}
+                                        <div className="bg-surface border-2 border-accent rounded-2xl p-8 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
+                                            <div className="flex items-center gap-3 mb-5 relative">
+                                                <div className="w-12 h-12 rounded-xl bg-accent text-white flex items-center justify-center shrink-0">
                                                     <UserPlus size={22} />
                                                 </div>
-                                                <h3 className="font-heading text-[20px] font-bold text-ink">Как проходит найм</h3>
+                                                <div>
+                                                    <div className="text-[11px] font-bold uppercase tracking-wider text-accent font-heading">Способ 1</div>
+                                                    <h3 className="font-heading text-[20px] font-bold text-ink">Найм из базы Верум</h3>
+                                                </div>
                                             </div>
-                                            <ol className="space-y-4">
+                                            <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-5 relative">
+                                                Алгоритм сам подбирает кандидатов по вашим требованиям. Вы открываете контакты только тех, кто подошёл.
+                                            </p>
+                                            <ol className="space-y-3 relative">
                                                 {[
-                                                    "Создаёте вакансию в ЛК: стек, грейд, вилка",
-                                                    "Получаете короткую ссылку /v/abc123",
-                                                    "Кандидат проходит ИИ-тест за 45–60 минут",
-                                                    "Профиль уходит на ручную модерацию",
-                                                    "После одобрения — балл, грейд, видео",
-                                                    "Открываете контакты — списываются токены",
+                                                    "Заполняете профиль компании в Веруме",
+                                                    "В поиске указываете стек, грейд, вилку",
+                                                    "Алгоритм подбирает по 7 осям матчинга",
+                                                    "Смотрите профили: балл, видео, компетенции",
+                                                    "Открываете контакты за токены",
+                                                    "Связываетесь с кандидатом напрямую",
                                                 ].map((text, i) => (
                                                     <li key={i} className="flex items-start gap-3">
                                                         <span className="w-6 h-6 rounded-full bg-accent text-white text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
-                                                        <span className="text-[14.5px] text-ink-2 font-medium leading-relaxed">{text}</span>
+                                                        <span className="text-[14px] text-ink-2 font-medium leading-relaxed">{text}</span>
                                                     </li>
                                                 ))}
                                             </ol>
                                         </div>
-                                        <div className="bg-surface border-2 border-accent rounded-2xl p-8 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
-                                            <div className="flex items-center gap-3 mb-6">
-                                                <div className="w-12 h-12 rounded-xl bg-accent text-white flex items-center justify-center">
+
+                                        {/* Способ 2 */}
+                                        <div className="bg-surface border border-line rounded-2xl p-8">
+                                            <div className="flex items-center gap-3 mb-5">
+                                                <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
                                                     <ExternalLink size={22} />
                                                 </div>
-                                                <h3 className="font-heading text-[20px] font-bold text-accent">Интеграция с hh.ru</h3>
+                                                <div>
+                                                    <div className="text-[11px] font-bold uppercase tracking-wider text-ink-3 font-heading">Способ 2</div>
+                                                    <h3 className="font-heading text-[20px] font-bold text-ink">Интеграция для своих кандидатов</h3>
+                                                </div>
                                             </div>
-                                            <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-4">
-                                                Публикуйте вакансии на hh.ru с той же ссылкой на ИИ-тест — кандидаты проходят его прямо со страницы вакансии.
+                                            <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-5">
+                                                Уже нашли человека сами (на hh.ru, по рекомендациям)? Отправьте ему ссылку на тест — он пройдёт его заново под вашу вакансию.
                                             </p>
-                                            <ul className="space-y-3">
+                                            <ol className="space-y-3">
                                                 {[
-                                                    "Создаёте вакансию в Веруме",
-                                                    "Копируете публичную ссылку /v/...",
-                                                    "Вставляете её в описание на hh.ru",
-                                                    "Кандидаты проходят тест автоматически",
-                                                    "Одобренные профили сразу у вас",
+                                                    "Создаёте вакансию в ЛК Верума",
+                                                    "Получаете короткую ссылку /v/abc123",
+                                                    "Отправляете ссылку кандидату",
+                                                    "Кандидат проходит тест за 45–60 минут",
+                                                    "Составляется топ откликов на вакансию",
+                                                    "Открываете контакты только прошедших",
                                                 ].map((text, i) => (
-                                                    <li key={i} className="flex items-start gap-2.5">
-                                                        <Check size={16} className="text-accent shrink-0 mt-1" />
+                                                    <li key={i} className="flex items-start gap-3">
+                                                        <span className="w-6 h-6 rounded-full bg-surface-2 border border-line text-ink-2 text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                                                         <span className="text-[14px] text-ink-2 font-medium leading-relaxed">{text}</span>
                                                     </li>
                                                 ))}
-                                            </ul>
+                                            </ol>
                                         </div>
                                     </div>
+
                                     <div className="bg-surface border border-line rounded-2xl p-8">
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
@@ -603,7 +618,7 @@ export function Landing() {
                                             <h3 className="font-heading text-[20px] font-bold text-ink">Стоимость открытия контактов</h3>
                                         </div>
                                         <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-6">
-                                            Токены списываются только когда вы открываете контакты кандидата из базы. Тестирование внешних кандидатов считается отдельно по количеству верификаций.
+                                            Токены списываются только когда вы открываете контакты кандидата. Тестирование своих кандидатов считается отдельно по количеству верификаций.
                                         </p>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             {[
@@ -618,7 +633,7 @@ export function Landing() {
                                             ))}
                                         </div>
                                         <p className="text-[13px] text-ink-3 font-medium leading-relaxed mt-5 pt-4 border-t border-line">
-                                            Токены входят в подписку. Например, на тарифе Pro (20 000 токенов) хватит на 57 открытий Senior-контактов или 200 Junior.
+                                            Токены входят в подписку. На тарифе Pro (20 000 токенов) хватит на 57 открытий Senior-контактов или 200 Junior.
                                         </p>
                                     </div>
                                 </div>
@@ -651,30 +666,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: FAQ ===== */}
-                            <SectionDivider icon={MessageSquare} />
-                            <section className="py-16 md:py-20 bg-bg">
-                                <div className="max-w-[1200px] mx-auto px-6">
-                                    <div className="text-center mb-12 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
-                                        <AccentTitle>Частые вопросы</AccentTitle>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                                        {FAQ_COMPANY.map((f, i) => (
-                                            <div key={i} className="bg-surface border border-line rounded-2xl p-6 md:p-7">
-                                                <div className="flex items-start gap-3 mb-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                                        <Lightbulb size={16} />
-                                                    </div>
-                                                    <h3 className="font-heading text-[17px] font-bold text-ink leading-tight">{f.q}</h3>
-                                                </div>
-                                                <p className="text-[14.5px] text-ink-3 leading-relaxed font-medium pl-11">{f.a}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </section>
-                        </>
+                            </>
                     ) : (
                         <>
                             {/* ===== РАЗРАБОТЧИКАМ: Что происходит за 45-60 минут ===== */}
@@ -821,30 +813,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== РАЗРАБОТЧИКАМ: FAQ ===== */}
-                            <SectionDivider icon={MessageSquare} />
-                            <section className="py-16 md:py-20 bg-bg">
-                                <div className="max-w-[1200px] mx-auto px-6">
-                                    <div className="text-center mb-12 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
-                                        <AccentTitle>Частые вопросы</AccentTitle>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                                        {FAQ_DEV.map((f, i) => (
-                                            <div key={i} className="bg-surface border border-line rounded-2xl p-6 md:p-7">
-                                                <div className="flex items-start gap-3 mb-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                                                        <Lightbulb size={16} />
-                                                    </div>
-                                                    <h3 className="font-heading text-[17px] font-bold text-ink leading-tight">{f.q}</h3>
-                                                </div>
-                                                <p className="text-[14.5px] text-ink-3 leading-relaxed font-medium pl-11">{f.a}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </section>
-                        </>
+                            </>
                     )}
                 </motion.div>
             </AnimatePresence>
