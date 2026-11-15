@@ -45,10 +45,7 @@ function SectionDivider({ icon: Icon }: { icon: any }) {
 function AccentTitle({ children }: { children: ReactNode }) {
     return (
         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
-            <span className="relative inline-block pb-2">
-                {children}
-                <span className="absolute bottom-0 left-0 w-12 h-1 bg-accent rounded-full" />
-            </span>
+            {children}
         </h2>
     );
 }
@@ -204,43 +201,94 @@ export function Landing() {
                             Скрининг через ИИ-интервью с античитом и записью видео. Отсеиваем 70% кандидатов и экономим до 1.5 млн ₽ в год.
                         </motion.p>
 
-                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
-                            <button onClick={goCompany} className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
-                                Проверить кандидатов <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                            </button>
-                            <button onClick={goDev} className="group h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-heading font-bold text-[15px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2">
-                                Я разработчик <ChevronRight size={18} />
+                        <motion.div variants={itemVariants}>
+                            <button
+                                onClick={() => navigate(user ? "/dashboard" : "/register")}
+                                className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2"
+                            >
+                                Начать бесплатно <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                             </button>
                         </motion.div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* ===== ПЕРЕКЛЮЧАТЕЛЬ КОМПАНИЯ / РАЗРАБОТЧИК ===== */}
-            <section className="py-10 md:py-14">
-                <div className="max-w-[900px] mx-auto px-6">
-                    <div className="grid grid-cols-2 gap-3 md:gap-4 p-2 rounded-2xl bg-surface border border-line">
+            {/* ===== ВЫБОР РОЛИ (отдельный блок) ===== */}
+            <section className="py-16 md:py-20 relative">
+                <div className="max-w-[1100px] mx-auto px-6">
+                    <div className="text-center mb-10 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Кто вы?</div>
+                        <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-extrabold leading-tight text-ink mb-3">
+                            Выберите свою роль
+                        </h2>
+                        <p className="text-[15px] md:text-[16px] text-ink-3 font-medium leading-relaxed">
+                            Мы покажем только то, что важно именно для вас.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                         <button
                             onClick={() => setAudience('company')}
-                            className={`relative flex items-center justify-center gap-3 h-[64px] rounded-xl transition-all duration-300 font-heading font-bold text-[14px] md:text-[15px] ${
+                            className={`group relative text-left p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
                                 audience === 'company'
-                                    ? "bg-accent text-white shadow-lg shadow-accent/20"
-                                    : "text-ink-3 hover:text-ink"
+                                    ? "border-accent bg-surface shadow-xl shadow-accent/10"
+                                    : "border-line bg-surface hover:border-accent/40"
                             }`}
                         >
-                            <Building2 size={20} />
-                            <span>Я компания</span>
+                            {audience === 'company' && (
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+                            )}
+                            <div className={`relative w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-colors ${
+                                audience === 'company'
+                                    ? "bg-accent text-white"
+                                    : "bg-accent/10 text-accent"
+                            }`}>
+                                <Building2 size={26} />
+                            </div>
+                            <h3 className="relative font-heading text-[22px] font-bold text-ink mb-2">
+                                Ищу разработчика
+                            </h3>
+                            <p className="relative text-[14px] text-ink-3 font-medium leading-relaxed mb-4">
+                                Хочу быстро находить проверенных инженеров и экономить время на скрининге.
+                            </p>
+                            <div className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading transition-colors ${
+                                audience === 'company' ? "text-accent" : "text-ink-3"
+                            }`}>
+                                {audience === 'company' ? "Выбрано" : "Выбрать"}
+                                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                            </div>
                         </button>
+
                         <button
                             onClick={() => setAudience('developer')}
-                            className={`relative flex items-center justify-center gap-3 h-[64px] rounded-xl transition-all duration-300 font-heading font-bold text-[14px] md:text-[15px] ${
+                            className={`group relative text-left p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
                                 audience === 'developer'
-                                    ? "bg-accent text-white shadow-lg shadow-accent/20"
-                                    : "text-ink-3 hover:text-ink"
+                                    ? "border-accent bg-surface shadow-xl shadow-accent/10"
+                                    : "border-line bg-surface hover:border-accent/40"
                             }`}
                         >
-                            <User size={20} />
-                            <span>Я разработчик</span>
+                            {audience === 'developer' && (
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+                            )}
+                            <div className={`relative w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-colors ${
+                                audience === 'developer'
+                                    ? "bg-accent text-white"
+                                    : "bg-accent/10 text-accent"
+                            }`}>
+                                <User size={26} />
+                            </div>
+                            <h3 className="relative font-heading text-[22px] font-bold text-ink mb-2">
+                                Ищу работу
+                            </h3>
+                            <p className="relative text-[14px] text-ink-3 font-medium leading-relaxed mb-4">
+                                Хочу попасть в базу проверенных инженеров и получать предложения напрямую.
+                            </p>
+                            <div className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading transition-colors ${
+                                audience === 'developer' ? "text-accent" : "text-ink-3"
+                            }`}>
+                                {audience === 'developer' ? "Выбрано" : "Выбрать"}
+                                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                            </div>
                         </button>
                     </div>
                 </div>
