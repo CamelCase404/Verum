@@ -6,7 +6,7 @@ import {ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
     Cloud, Gamepad2, BarChart3, Lock, Zap, Gauge, Target, Sparkles,
-    MessageSquare, Lightbulb, Star, Code, Layers, Terminal, Route, GitMerge, CircleDollarSign, Scale, Rocket, ExternalLink, UserPlus, Coins } from "lucide-react";
+    MessageSquare, Lightbulb, Star, Code, Layers, Terminal, Route, GitMerge, CircleDollarSign, Scale, Rocket, ExternalLink, UserPlus, Coins, Timer, ClipboardCheck, UserCheck } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
@@ -85,7 +85,7 @@ const PRICING = [
         price: "30 000 ₽",
         period: "/мес",
         desc: "Для небольших команд и стартапов.",
-        features: ["20 тестов в месяц", "3 000 токенов для доступа к базе", "Базовый античит-контроль", "Доступ к базе верифицированных"],
+        features: ["50 тестов в месяц", "5 000 токенов для доступа к базе", "Базовый античит-контроль", "Доступ к базе верифицированных"],
         featured: false,
     },
     {
@@ -93,7 +93,7 @@ const PRICING = [
         price: "75 000 ₽",
         period: "/мес",
         desc: "Для растущих компаний с активным наймом.",
-        features: ["60 тестов в месяц", "10 000 токенов", "Приоритетная поддержка", "Расширенная аналитика"],
+        features: ["200 тестов в месяц", "20 000 токенов", "Приоритетная поддержка", "Расширенная аналитика"],
         featured: true,
     },
     {
@@ -151,15 +151,48 @@ export function Landing() {
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
 
             {/* ===== HERO ===== */}
-            <section className="relative pt-24 pb-20 md:pt-32 md:pb-28">
-                <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-10" />
-                <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
+            <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 overflow-hidden">
+                <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none -z-10" />
+                <div className="absolute inset-0 pointer-events-none -z-10">
                     <motion.div
-                        animate={{ scale: [1, 1.05, 1], opacity: [0.04, 0.08, 0.04] }}
+                        animate={{ scale: [1, 1.05, 1], opacity: [0.05, 0.1, 0.05] }}
                         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                        className="w-[800px] h-[800px] bg-accent rounded-full blur-[120px]"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-accent rounded-full blur-[140px]"
+                    />
+                    <motion.div
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                        className="absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-accent-2 rounded-full blur-[100px]"
+                    />
+                    <motion.div
+                        animate={{ scale: [1.1, 1, 1.1], opacity: [0.02, 0.05, 0.02] }}
+                        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-accent-3 rounded-full blur-[120px]"
                     />
                 </div>
+
+                {/* Декоративные sparkle-иконки */}
+                <motion.div
+                    animate={{ y: [0, -10, 0], opacity: [0.4, 0.8, 0.4] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-[25%] left-[12%] text-accent/40 pointer-events-none hidden md:block"
+                >
+                    <Sparkles size={28} />
+                </motion.div>
+                <motion.div
+                    animate={{ y: [0, 12, 0], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute top-[35%] right-[10%] text-accent/40 pointer-events-none hidden md:block"
+                >
+                    <Star size={22} />
+                </motion.div>
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.7, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    className="absolute bottom-[25%] left-[18%] text-accent/30 pointer-events-none hidden md:block"
+                >
+                    <Zap size={20} />
+                </motion.div>
 
                 <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10">
                     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col items-center">
@@ -186,8 +219,9 @@ export function Landing() {
             <SectionDivider icon={Route} />
 
 {/* ===== STEPS (статичная дорожка) ===== */}
-            <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[1400px] mx-auto px-6">
+            <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="max-w-[1400px] mx-auto px-6 relative">
                     <div className="text-center mb-16 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Как это работает</div>
                         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
@@ -253,12 +287,13 @@ export function Landing() {
                         {CATEGORIES.map((cat, i) => {
                             const Icon = cat.icon;
                             return (
-                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
-                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                                <motion.div key={i} variants={itemVariants} className="relative bg-surface border border-line rounded-xl p-6 hover:border-accent/40 transition-all duration-300 group overflow-hidden">
+                                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                    <div className="relative w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:bg-accent group-hover:text-white transition-colors duration-300">
                                         <Icon size={22} />
                                     </div>
-                                    <h3 className="font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
-                                    <p className="text-[14px] text-ink-3 font-medium">{cat.desc}</p>
+                                    <h3 className="relative font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
+                                    <p className="relative text-[14px] text-ink-3 font-medium">{cat.desc}</p>
                                 </motion.div>
                             );
                         })}
@@ -269,8 +304,9 @@ export function Landing() {
 <SectionDivider icon={TrendingUp} />
 
 {/* ===== METRICS ===== */}
-            <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[1400px] mx-auto px-6">
+            <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="max-w-[1400px] mx-auto px-6 relative">
                     <div className="text-center mb-14 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Цифры</div>
                         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
@@ -330,6 +366,52 @@ export function Landing() {
                 </div>
             </section>
 
+            <SectionDivider icon={Timer} />
+
+            {/* ===== ЧТО ПРОИСХОДИТ ЗА 45-60 МИНУТ ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="mb-12 max-w-2xl">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Внутри теста</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Что происходит за 45–60 минут
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Кандидат проходит 5 этапов разной сложности. Каждый этап — новая тема, без повторов.
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                        {[
+                            { num: "01", title: "Общие знания", desc: "8 вопросов по стеку и грейду", time: "15 мин" },
+                            { num: "02", title: "Code Review", desc: "Поиск багов в реальном коде", time: "10 мин" },
+                            { num: "03", title: "Продакшен-инцидент", desc: "Как починить сломанный код", time: "10 мин" },
+                            { num: "04", title: "Code Review 2", desc: "Другие баги и уязвимости", time: "10 мин" },
+                            { num: "05", title: "Вторая проблема", desc: "Новая ситуация из продакшена", time: "10 мин" },
+                        ].map((s, i) => (
+                            <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-5 relative">
+                                <div className="text-[11px] font-bold text-accent mb-2 font-mono">{s.num}</div>
+                                <h3 className="font-heading text-[15px] font-bold text-ink mb-1.5 leading-tight">{s.title}</h3>
+                                <p className="text-[12.5px] text-ink-3 font-medium leading-relaxed mb-3">{s.desc}</p>
+                                <div className="text-[11px] font-bold text-ink-4 uppercase tracking-wider">{s.time}</div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+
+                    <div className="bg-surface border border-line rounded-2xl p-6 md:p-7 flex flex-col md:flex-row items-start md:items-center gap-5">
+                        <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                            <ShieldCheck size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-heading text-[17px] font-bold text-ink mb-1">Античит работает всё время</h3>
+                            <p className="text-[14px] text-ink-3 font-medium leading-relaxed">
+                                Камера и микрофон записываются, детектируется переключение вкладок, блокируются DevTools, копирование и контекстное меню. Любое нарушение — стоп-кадр с тайм-кодом для модератора.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <SectionDivider icon={GitMerge} />
 
             {/* ===== КАК ПОДБИРАЕТСЯ ===== */}
@@ -362,6 +444,45 @@ export function Landing() {
                 </div>
             </section>
 
+            <SectionDivider icon={ClipboardCheck} />
+
+            {/* ===== ЧТО ВЫ ПОЛУЧАЕТЕ ПОСЛЕ ТЕСТА ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="text-center mb-12 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Результат</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Что вы получаете после теста
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Полный отчёт с обоснованием каждого балла. Никаких «оценил на глаз».
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        {[
+                            { icon: Gauge, title: "Итоговый балл 0–100", desc: "Сводная оценка по всем 5 этапам собеседования." },
+                            { icon: Star, title: "Грейд кандидата", desc: "Junior, Middle, Senior или Reject — по реальным ответам, а не самооценке." },
+                            { icon: Layers, title: "Разбивка по компетенциям", desc: "5 осей: архитектура, код, работа с ИИ, adaptability, soft skills." },
+                            { icon: MessageSquare, title: "Резюме и рекомендация", desc: "Текст от ИИ-судьи: сильные стороны, пробелы, вердикт hire/no_hire." },
+                            { icon: Eye, title: "Запись видео", desc: "Полное видео собеседования с записью экрана и камеры кандидата." },
+                            { icon: Clock, title: "Тайм-коды аномалий", desc: "Модератор видит только подозрительные секунды, а не всё видео целиком." },
+                        ].map((f, i) => {
+                            const Icon = f.icon;
+                            return (
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
+                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                                        <Icon size={22} />
+                                    </div>
+                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{f.title}</h3>
+                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">{f.desc}</p>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
             <SectionDivider icon={CircleDollarSign} />
 
             {/* ===== ТАРИФЫ ===== */}
@@ -382,16 +503,19 @@ export function Landing() {
                             <motion.div
                                 key={i}
                                 variants={itemVariants}
-                                className={`rounded-2xl p-8 flex flex-col ${
+                                className={`rounded-2xl p-8 flex flex-col relative overflow-hidden ${
                                     plan.featured
-                                        ? "bg-surface border-2 border-accent shadow-xl relative"
+                                        ? "bg-gradient-to-br from-accent/5 via-surface to-surface border-2 border-accent shadow-2xl shadow-accent/10"
                                         : "bg-surface border border-line"
                                 }`}
                             >
                                 {plan.featured && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider font-heading">
-                                        Популярный
-                                    </div>
+                                    <>
+                                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl pointer-events-none" />
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider font-heading relative z-10">
+                                            Популярный
+                                        </div>
+                                    </>
                                 )}
                                 <h3 className="font-heading text-[20px] font-bold text-ink mb-2">{plan.name}</h3>
                                 <p className="text-[13px] text-ink-3 font-medium mb-6">{plan.desc}</p>
@@ -420,82 +544,6 @@ export function Landing() {
                             </motion.div>
                         ))}
                     </motion.div>
-                </div>
-            </section>
-
-            <SectionDivider icon={ShieldCheck} />
-
-            {/* ===== WHY US ===== */}
-            <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[1400px] mx-auto px-6">
-                    <div className="mb-12 max-w-2xl">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Почему мы</div>
-                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
-                            Технология, которая заменяет 20 часов рутинных собеседований
-                        </h2>
-                    </div>
-
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.05 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-                        {WHY_US.map((f, i) => {
-                            const Icon = f.icon;
-                            return (
-                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
-                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
-                                        <Icon size={22} />
-                                    </div>
-                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{f.title}</h3>
-                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">{f.desc}</p>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
-                </div>
-            </section>
-
-            <SectionDivider icon={Scale} />
-
-            {/* ===== COMPARISON ===== */}
-            <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[1200px] mx-auto px-6">
-                    <div className="text-center mb-12 max-w-2xl mx-auto">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
-                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink">
-                            Верум vs Обычный найм
-                        </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div className="bg-surface border border-line rounded-2xl p-6 md:p-8">
-                            <h3 className="font-heading text-[18px] font-bold text-ink-3 mb-6 pb-4 border-b border-line">Обычный найм</h3>
-                            <ul className="space-y-4">
-                                {COMPARISON.map((row, i) => (
-                                    <li key={i} className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5">
-                                            <XCircle size={14} className="text-ink-4" />
-                                        </div>
-                                        <span className="text-[15px] text-ink-3 font-medium leading-relaxed">{row[0]}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="bg-surface border-2 border-accent rounded-2xl p-6 md:p-8 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
-                            <h3 className="font-heading text-[18px] font-bold text-accent mb-6 pb-4 border-b border-line flex items-center gap-2">
-                                <ShieldCheck size={20} /> С Верум
-                            </h3>
-                            <ul className="space-y-4">
-                                {COMPARISON.map((row, i) => (
-                                    <li key={i} className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                                            <Check size={14} className="text-accent" />
-                                        </div>
-                                        <span className="text-[15px] text-ink font-semibold leading-relaxed">{row[1]}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -592,6 +640,126 @@ export function Landing() {
                         <p className="text-[13px] text-ink-3 font-medium leading-relaxed mt-5 pt-4 border-t border-line">
                             Токены входят в подписку. Например, на тарифе Pro (10 000 токенов) хватит на 28 открытий Senior-контактов или 100 Junior.
                         </p>
+                    </div>
+                </div>
+            </section>
+
+            <SectionDivider icon={ShieldCheck} />
+
+            {/* ===== WHY US ===== */}
+            <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-2/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="max-w-[1400px] mx-auto px-6 relative">
+                    <div className="mb-12 max-w-2xl">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Почему мы</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Технология, которая заменяет 20 часов рутинных собеседований
+                        </h2>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.05 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        {WHY_US.map((f, i) => {
+                            const Icon = f.icon;
+                            return (
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
+                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                                        <Icon size={22} />
+                                    </div>
+                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{f.title}</h3>
+                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">{f.desc}</p>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
+            <SectionDivider icon={Scale} />
+
+            {/* ===== COMPARISON ===== */}
+            <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="max-w-[1200px] mx-auto px-6 relative">
+                    <div className="text-center mb-12 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink">
+                            Верум vs Обычный найм
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div className="bg-surface border border-line rounded-2xl p-6 md:p-8">
+                            <h3 className="font-heading text-[18px] font-bold text-ink-3 mb-6 pb-4 border-b border-line">Обычный найм</h3>
+                            <ul className="space-y-4">
+                                {COMPARISON.map((row, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5">
+                                            <XCircle size={14} className="text-ink-4" />
+                                        </div>
+                                        <span className="text-[15px] text-ink-3 font-medium leading-relaxed">{row[0]}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="bg-surface border-2 border-accent rounded-2xl p-6 md:p-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
+                            <h3 className="font-heading text-[18px] font-bold text-accent mb-6 pb-4 border-b border-line flex items-center gap-2">
+                                <ShieldCheck size={20} /> С Верум
+                            </h3>
+                            <ul className="space-y-4">
+                                {COMPARISON.map((row, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                                            <Check size={14} className="text-accent" />
+                                        </div>
+                                        <span className="text-[15px] text-ink font-semibold leading-relaxed">{row[1]}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <SectionDivider icon={UserCheck} />
+
+            {/* ===== РАЗРАБОТЧИКАМ ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <div className="bg-surface border-2 border-accent rounded-3xl p-8 md:p-12 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-bl-full pointer-events-none" />
+                        <div className="grid lg:grid-cols-2 gap-10 items-center relative z-10">
+                            <div>
+                                <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Разработчикам</div>
+                                <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                                    Хотите в базу проверенных инженеров?
+                                </h2>
+                                <p className="text-[16px] md:text-[17px] text-ink-2 font-medium leading-relaxed mb-6">
+                                    Пройдите бесплатный тест и получите верифицированный профиль с баллами. Компании сами найдут вас.
+                                </p>
+                                <button onClick={goDev} className="group h-[52px] px-7 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
+                                    Пройти тест <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                {[
+                                    "Бесплатное прохождение теста",
+                                    "Верифицированный профиль в базе",
+                                    "Прямые контакты с компаниями",
+                                    "Никаких резюме и самопрезентаций",
+                                    "Тест всего за 45–60 минут",
+                                ].map((item, i) => (
+                                    <div key={i} className="flex items-start gap-3 bg-surface-2 border border-line rounded-xl p-4">
+                                        <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                                            <Check size={14} className="text-accent" />
+                                        </div>
+                                        <span className="text-[14.5px] text-ink-2 font-semibold leading-relaxed">{item}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
