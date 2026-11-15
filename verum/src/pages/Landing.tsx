@@ -220,6 +220,16 @@ export function Landing() {
             {/* ===== METRICS ===== */}
             <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="text-center mb-14 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Цифры</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Результаты, которые видно в деньгах и времени
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Средние показатели по компаниям, которые уже используют Верум для найма инженеров.
+                        </p>
+                    </div>
+
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                         {METRICS.map((m, i) => {
                             const Icon = m.icon;
@@ -258,7 +268,7 @@ export function Landing() {
                                         <div className="relative mb-6">
                                             {/* Маркер на дорожке */}
                                             <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-accent/5" />
-                                            <div className="w-20 h-20 rounded-full bg-surface border-2 border-accent/30 flex items-center justify-center relative z-10 shadow-sm">
+                                            <div className="w-20 h-20 rounded-full bg-surface border-2 border-line flex items-center justify-center relative z-10 shadow-sm">
                                                 <Icon size={30} style={{ color: step.color }} />
                                             </div>
                                             <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[12px] font-bold shadow-md z-20">
@@ -275,9 +285,9 @@ export function Landing() {
 
                                         {/* Соединительная линия со стрелкой между шагами */}
                                         {i < STEPS.length - 1 && (
-                                            <div className="hidden md:flex absolute top-[40px] -right-[28px] w-14 items-center gap-1 z-0">
-                                                <div className="flex-1 h-[2px] bg-gradient-to-r from-accent/40 to-accent/60" />
-                                                <ChevronRight size={16} className="text-accent" />
+                                            <div className="hidden md:flex absolute top-[32px] -right-[40px] w-24 items-center z-0">
+                                                <div className="flex-1 h-[2px] bg-accent/60" />
+                                                <div className="w-2 h-2 rotate-45 border-t-2 border-r-2 border-accent ml-[-2px]" />
                                             </div>
                                         )}
                                     </motion.div>
@@ -308,13 +318,8 @@ export function Landing() {
                             const Icon = c.icon;
                             return (
                                 <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
-                                            <Icon size={22} />
-                                        </div>
-                                        <div className="px-3 py-1 rounded-lg bg-accent text-white text-[12px] font-bold font-mono">
-                                            {c.score}%
-                                        </div>
+                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                                        <Icon size={22} />
                                     </div>
                                     <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{c.title}</h3>
                                     <p className="text-[14px] text-ink-3 leading-relaxed font-medium">{c.desc}</p>
