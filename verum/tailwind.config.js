@@ -29,20 +29,24 @@ export default {
         violet: "var(--violet)",
         "violet-soft": "var(--violet-soft)",
       },
-      borderRadius: { sm: "6px", DEFAULT: "10px", lg: "16px", xl: "24px", "2xl": "32px", "3xl": "40px" },
+      // Возвращаем твои старые радиусы
+      borderRadius: { sm: "6px", DEFAULT: "10px", lg: "16px", xl: "22px", "2xl": "32px", "3xl": "40px" },
       fontFamily: {
-        sans: ["Manrope", "sans-serif"], // Основной текст (читаемый)
-        display: ["Sora", "sans-serif"], // Заголовки (футуристичный)
-        heading: ["Montserrat", "sans-serif"], // Подзаголовки
+        // Миксуем шрифты как ты просил
+        sans: ["Manrope", "-apple-system", "BlinkMacSystemFont", "sans-serif"], // Основной текст
+        display: ["Sora", "sans-serif"], // Для крупных заголовков
+        heading: ["Montserrat", "sans-serif"], // Для подзаголовков
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       animation: {
         float: "float 6s ease-in-out infinite",
         "pulse-slow": "pulse-slow 8s ease-in-out infinite",
+        "slide-up": "slide-up 0.6s cubic-bezier(0.16, 0.84, 0.44, 1) forwards",
       },
       keyframes: {
         float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-10px)" } },
-        "pulse-slow": { "0%, 100%": { opacity: "0.2", transform: "scale(1)" }, "50%": { opacity: "0.4", transform: "scale(1.05)" } },
+        "pulse-slow": { "0%, 100%": { opacity: "0.2", transform: "scale(1)" }, "50%": { opacity: 0.4, transform: "scale(1.05)" } },
+        "slide-up": { from: { opacity: "0", transform: "translateY(20px)" }, to: { opacity: "1", transform: "translateY(0)" } },
       },
     },
   },

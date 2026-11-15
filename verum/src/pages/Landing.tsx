@@ -1,22 +1,22 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 import {
     ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
-    Clock, TrendingUp, Wallet, Users, Zap
+    Clock, TrendingUp, Wallet
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
 const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 40 },
+    hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } }
 };
 
@@ -52,11 +52,6 @@ const COMPARISON = [
 export function Landing() {
     const navigate = useNavigate();
     const user = useAppStore((s) => s.user);
-    
-    // Параллакс эффект для hero-секции
-    const { scrollY } = useScroll();
-    const heroY = useTransform(scrollY, [0, 500], [0, 100]);
-    const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
 
     const goCompany = () => {
         if (!user) navigate("/register?role=company");
@@ -73,19 +68,18 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink selection:bg-accent/30 font-sans">
             
-            {/* 1. HERO (Огромный шрифт, параллакс) */}
+            {/* 1. HERO */}
             <section className="relative pt-24 pb-32 md:pt-40 md:pb-48 flex flex-col items-center justify-center min-h-[90vh]">
-                <motion.div style={{ y: heroY, opacity: heroOpacity }} className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
-                    <div className="w-[800px] h-[800px] bg-accent/10 rounded-full blur-[120px] mix-blend-normal" />
-                </motion.div>
+                <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
+                    <motion.div 
+                        animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-[800px] h-[800px] bg-accent rounded-full blur-[120px] mix-blend-normal" 
+                    />
+                </div>
 
                 <div className="max-w-[1400px] mx-auto px-6 text-center relative z-10">
                     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col items-center">
-                        <motion.div variants={itemVariants} className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface ring-1 ring-line/50 text-ink-2 text-sm font-medium">
-                            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                            Платформа проверенных IT-специалистов
-                        </motion.div>
-
                         <motion.h1 variants={itemVariants} className="font-display font-bold text-[clamp(48px,7vw,96px)] leading-[1.05] text-ink mb-8 max-w-[1100px]">
                             Нанимайте тех, кто <span className="text-accent italic">реально</span> пишет код
                         </motion.h1>
@@ -106,10 +100,10 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* 2. METRICS / MONEY (Стеклянные карточки с деньгами) */}
+            {/* 2. METRICS / MONEY */}
             <section className="relative z-20 -mt-20">
                 <div className="max-w-[1400px] mx-auto px-6">
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={containerVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={containerVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                         {METRICS.map((m, i) => {
                             const Icon = m.icon;
                             return (
@@ -126,23 +120,35 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* 3. WHY US (Bento Grid, без разделителей) */}
+            {/* 3. WHY US (Исправленные анимации) */}
             <section className="py-24 md:py-40 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={containerVariants} className="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div className="max-w-2xl">
-                            <motion.div variants={itemVariants} className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-4">Почему мы</motion.div>
+                            <motion.div variants={itemVariants} className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-4 font-heading">Почему мы</motion.div>
                             <motion.h2 variants={itemVariants} className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-tight text-ink">
                                 Технология, которая заменяет 20 часов рутинных собеседований
                             </motion.h2>
                         </div>
                     </motion.div>
 
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Плавное появление с задержкой */}
+                    <motion.div 
+                        initial="hidden" 
+                        whileInView="visible" 
+                        viewport={{ once: true, amount: 0.2 }} 
+                        variants={containerVariants} 
+                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    >
                         {WHY_US.map((f, i) => {
                             const Icon = f.icon;
                             return (
-                                <motion.div key={i} variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-surface rounded-[32px] p-10 md:p-12 ring-1 ring-line/50 hover:ring-accent/30 transition-all duration-500 group relative overflow-hidden">
+                                <motion.div 
+                                    key={i} 
+                                    variants={itemVariants} 
+                                    whileHover={{ scale: 1.01 }} 
+                                    className="bg-surface rounded-[32px] p-10 md:p-12 ring-1 ring-line/50 hover:ring-accent/30 transition-all duration-500 group relative overflow-hidden"
+                                >
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-bl-full pointer-events-none group-hover:scale-150 transition-transform duration-700" />
                                     <div className="w-16 h-16 rounded-2xl bg-surface-2 ring-1 ring-line flex items-center justify-center text-accent mb-8 group-hover:rotate-6 transition-transform duration-300">
                                         <Icon size={32} />
@@ -156,16 +162,16 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* 4. STEPS (Как это работает) */}
+            {/* 4. STEPS */}
             <section className="py-24 md:py-40 bg-surface-2/30">
                 <div className="max-w-[1400px] mx-auto px-6">
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={containerVariants} className="mb-16 md:mb-24 text-center">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="mb-16 md:mb-24 text-center">
                         <motion.h2 variants={itemVariants} className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-tight text-ink max-w-3xl mx-auto">
                             От вакансии до финалиста за 3 дня
                         </motion.h2>
                     </motion.div>
 
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {STEPS.map((step, i) => {
                             const Icon = step.icon;
                             return (
@@ -186,14 +192,14 @@ export function Landing() {
             {/* 5. COMPARISON */}
             <section className="py-24 md:py-40 bg-bg">
                 <div className="max-w-[1200px] mx-auto px-6">
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={containerVariants} className="mb-16 md:mb-24 text-center">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="mb-16 md:mb-24 text-center">
                         <motion.h2 variants={itemVariants} className="font-display text-[clamp(36px,5vw,64px)] font-bold leading-tight text-ink">
                             Верум vs Обычный найм
                         </motion.h2>
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                        <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE }} className="bg-surface rounded-[40px] p-10 md:p-14 ring-1 ring-line/50">
+                        <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, ease: EASE }} className="bg-surface rounded-[40px] p-10 md:p-14 ring-1 ring-line/50">
                             <h3 className="font-heading text-[24px] font-bold text-ink-3 mb-8 pb-6 border-b border-line/50">Обычный найм</h3>
                             <ul className="space-y-6">
                                 {COMPARISON.map((row, i) => (
@@ -207,7 +213,7 @@ export function Landing() {
                             </ul>
                         </motion.div>
 
-                        <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE, delay: 0.1 }} className="bg-surface rounded-[40px] p-10 md:p-14 ring-2 ring-accent shadow-2xl shadow-accent/10 relative overflow-hidden">
+                        <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, ease: EASE, delay: 0.1 }} className="bg-surface rounded-[40px] p-10 md:p-14 ring-2 ring-accent shadow-2xl shadow-accent/10 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-bl-full pointer-events-none" />
                             <h3 className="font-heading text-[24px] font-bold text-accent mb-8 pb-6 border-b border-accent/20 flex items-center gap-3">
                                 <ShieldCheck size={28} /> С Верум
@@ -231,7 +237,7 @@ export function Landing() {
             <section className="py-32 md:py-48 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-accent/10 pointer-events-none" />
                 <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10">
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={containerVariants}>
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants}>
                         <motion.h2 variants={itemVariants} className="font-display text-[clamp(40px,6vw,80px)] font-bold leading-[1.1] text-ink mb-8">
                             Перестаньте тратить часы на собеседования
                         </motion.h2>
