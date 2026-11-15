@@ -6,7 +6,7 @@ import {ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
     Cloud, Gamepad2, BarChart3, Lock, Zap, Gauge, Target, Sparkles,
-    MessageSquare, Lightbulb, Star, Code, Layers, Terminal} from "lucide-react";
+    MessageSquare, Lightbulb, Star, Code, Layers, Terminal, Route, GitMerge, CircleDollarSign, Scale, Rocket} from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
@@ -20,14 +20,16 @@ const itemVariants = {
 };
 
 /* ===== Красивый статичный разделитель ===== */
-function SectionDivider() {
+function SectionDivider({ icon: Icon }: { icon: any }) {
     return (
         <div className="relative py-14 md:py-20 flex items-center justify-center">
             <div className="max-w-[1400px] mx-auto px-6 w-full flex items-center gap-6">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-line-2/70 to-line-2" />
                 <div className="relative flex items-center justify-center shrink-0">
-                    <div className="w-2.5 h-2.5 rotate-45 bg-accent" />
-                    <div className="absolute inset-0 w-2.5 h-2.5 rotate-45 bg-accent blur-[8px] opacity-60" />
+                    <div className="absolute inset-0 w-12 h-12 rounded-full bg-accent/10 blur-[10px]" />
+                    <div className="relative w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center text-accent shadow-sm">
+                        <Icon size={20} />
+                    </div>
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-l from-transparent via-line-2/70 to-line-2" />
             </div>
@@ -181,7 +183,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={Code2} />
 
             {/* ===== CATEGORIES (без счётчика) ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -213,7 +215,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={TrendingUp} />
 
             {/* ===== METRICS ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -235,7 +237,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={Route} />
 
             {/* ===== STEPS (статичная дорожка) ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -248,16 +250,15 @@ export function Landing() {
                     </div>
 
                     <div className="relative">
-                        {/* Статичная дорожка */}
-                        <div className="hidden md:block absolute top-[40px] left-[12.5%] right-[12.5%] h-[2px] rounded-full bg-gradient-to-r from-line-2/30 via-accent/50 to-line-2/30" />
-
-                        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
+                        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-8 relative">
                             {STEPS.map((step, i) => {
                                 const Icon = step.icon;
                                 return (
                                     <motion.div key={i} variants={itemVariants} className="relative flex flex-col items-center text-center">
                                         <div className="relative mb-6">
-                                            <div className="w-20 h-20 rounded-full bg-bg border-4 border-line flex items-center justify-center relative z-10 shadow-sm">
+                                            {/* Маркер на дорожке */}
+                                            <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-accent/5" />
+                                            <div className="w-20 h-20 rounded-full bg-surface border-2 border-accent/30 flex items-center justify-center relative z-10 shadow-sm">
                                                 <Icon size={30} style={{ color: step.color }} />
                                             </div>
                                             <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[12px] font-bold shadow-md z-20">
@@ -271,6 +272,14 @@ export function Landing() {
                                         <p className="text-[13.5px] text-ink-3 leading-relaxed font-medium max-w-[220px]">
                                             {step.desc}
                                         </p>
+
+                                        {/* Соединительная линия со стрелкой между шагами */}
+                                        {i < STEPS.length - 1 && (
+                                            <div className="hidden md:flex absolute top-[40px] -right-[28px] w-14 items-center gap-1 z-0">
+                                                <div className="flex-1 h-[2px] bg-gradient-to-r from-accent/40 to-accent/60" />
+                                                <ChevronRight size={16} className="text-accent" />
+                                            </div>
+                                        )}
                                     </motion.div>
                                 );
                             })}
@@ -279,7 +288,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={Target} />
 
             {/* ===== ЧТО ОЦЕНИВАЕТСЯ ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -316,7 +325,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={GitMerge} />
 
             {/* ===== КАК ПОДБИРАЕТСЯ ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -348,7 +357,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={CircleDollarSign} />
 
             {/* ===== ТАРИФЫ ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -409,7 +418,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={ShieldCheck} />
 
             {/* ===== WHY US ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -438,7 +447,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={Scale} />
 
             {/* ===== COMPARISON ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -485,7 +494,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={MessageSquare} />
 
             {/* ===== FAQ (карточками) ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -513,7 +522,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider />
+            <SectionDivider icon={Rocket} />
 
             {/* ===== FINAL CTA ===== */}
             <section className="py-20 md:py-28 bg-bg">
