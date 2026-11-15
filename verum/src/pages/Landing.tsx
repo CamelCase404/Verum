@@ -6,7 +6,7 @@ import {
     ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
-    Cloud, Gamepad2, BarChart3, Star, Quote, Zap, Lock
+    Cloud, Gamepad2, BarChart3, Lock, Zap
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
@@ -21,8 +21,6 @@ const itemVariants = {
 };
 
 /* ===== DATA ===== */
-const TRUSTED_BY = ["Яндекс", "Сбер", "Тинькофф", "Ozon", "Wildberries", "VK"];
-
 const CATEGORIES = [
     { icon: Code2, title: "Frontend", count: "2 400+ кандидатов", desc: "React, Vue, Angular, TypeScript" },
     { icon: Server, title: "Backend", count: "3 100+ кандидатов", desc: "Python, Go, Java, Node.js" },
@@ -40,10 +38,10 @@ const METRICS = [
 ];
 
 const STEPS = [
-    { num: "01", title: "Создайте вакансию", desc: "Укажите стек, грейд и вилку зарплаты. Получите короткую ссылку для кандидатов.", icon: FileText },
-    { num: "02", title: "Кандидат проходит ИИ-тест", desc: "12 вопросов, 5 этапов, запись экрана и камеры. Античит блокирует списывание.", icon: Search },
-    { num: "03", title: "Модерация по тайм-кодам", desc: "Модератор видит только подозрительные секунды, а не всё видео целиком.", icon: Eye },
-    { num: "04", title: "Получите чистый шортлист", desc: "Готовые профили с баллами, грейдом и подтверждёнными контактами.", icon: CheckCircle2 },
+    { num: "01", title: "Создайте вакансию", desc: "Укажите стек, грейд и вилку зарплаты. Получите короткую ссылку для кандидатов.", icon: FileText, color: "var(--accent)" },
+    { num: "02", title: "Кандидат проходит ИИ-тест", desc: "12 вопросов, 5 этапов, запись экрана и камеры. Античит блокирует списывание.", icon: Search, color: "var(--blue)" },
+    { num: "03", title: "Модерация по тайм-кодам", desc: "Модератор видит только подозрительные секунды, а не всё видео целиком.", icon: Eye, color: "var(--violet)" },
+    { num: "04", title: "Получите чистый шортлист", desc: "Готовые профили с баллами, грейдом и подтверждёнными контактами.", icon: CheckCircle2, color: "var(--amber)" },
 ];
 
 const WHY_US = [
@@ -61,12 +59,6 @@ const COMPARISON = [
     ["Тимлид на 20 собеседованиях", "Только финальные 2–3 встречи"],
     ["Вайбкодеры проходят фильтр", "Античит + ручная модерация"],
     ["Субъективное мнение", "100-балльная шкала по 5 осям"],
-];
-
-const REVIEWS = [
-    { text: "Закрыли 3 senior-вакансии за неделю. Раньше на это уходило по месяцу и десятки собеседований.", name: "Анна К.", role: "Head of HR, финтех", rating: 5 },
-    { text: "Кандидаты приходят уже с записью теста и баллами. Тимлиды перестали тратить время на скрининг.", name: "Дмитрий М.", role: "CTO, SaaS-стартап", rating: 5 },
-    { text: "Античит реально работает — отсеяли несколько вайбкодеров, которые красиво говорили, но не писали код.", name: "Игорь С.", role: "Tech Lead, e-commerce", rating: 5 },
 ];
 
 const FAQ = [
@@ -94,24 +86,27 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
 
-            {/* ===== HERO ===== */}
-            <section className="relative pt-20 pb-16 md:pt-28 md:pb-24">
-                <div className="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
-                    <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-                        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 rounded-full border border-line text-[13px] font-medium text-ink-2 font-heading">
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                            Платформа проверенных IT-специалистов
-                        </motion.div>
+            {/* ===== HERO (по центру, чисто) ===== */}
+            <section className="relative pt-24 pb-20 md:pt-36 md:pb-28">
+                <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
+                    <motion.div
+                        animate={{ scale: [1, 1.08, 1], opacity: [0.04, 0.08, 0.04] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-[700px] h-[700px] bg-accent rounded-full blur-[120px]"
+                    />
+                </div>
 
-                        <motion.h1 variants={itemVariants} className="font-display font-bold text-[clamp(40px,5vw,68px)] leading-[1.05] text-ink mb-6">
+                <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10">
+                    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col items-center">
+                        <motion.h1 variants={itemVariants} className="font-display font-bold text-[clamp(40px,6vw,80px)] leading-[1.05] text-ink mb-6 max-w-[900px]">
                             Наймите инженера, который <span className="text-accent">реально</span> пишет код
                         </motion.h1>
 
-                        <motion.p variants={itemVariants} className="text-[17px] md:text-[20px] text-ink-2 font-medium leading-relaxed mb-8 max-w-[600px]">
+                        <motion.p variants={itemVariants} className="text-[17px] md:text-[21px] text-ink-2 font-medium leading-relaxed mb-10 max-w-[680px]">
                             Скрининг через ИИ-интервью с античитом и записью видео. Отсеиваем 70% кандидатов и экономим до 1.5 млн ₽ в год на HR.
                         </motion.p>
 
-                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 mb-10">
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
                             <button onClick={goCompany} className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
                                 Проверить кандидатов <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                             </button>
@@ -119,98 +114,11 @@ export function Landing() {
                                 Я разработчик <ChevronRight size={18} />
                             </button>
                         </motion.div>
-
-                        <motion.div variants={itemVariants} className="flex items-center gap-4 flex-wrap">
-                            <div className="flex -space-x-2">
-                                {[1,2,3,4].map(i => (
-                                    <div key={i} className="w-9 h-9 rounded-full bg-accent/20 border-2 border-bg flex items-center justify-center text-[12px] font-bold text-accent">
-                                        {String.fromCharCode(64 + i)}
-                                    </div>
-                                ))}
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-1 mb-0.5">
-                                    {[1,2,3,4,5].map(i => <Star key={i} size={14} className="text-amber fill-amber" />)}
-                                </div>
-                                <div className="text-[13px] text-ink-3 font-medium">
-                                    <span className="font-bold text-ink">500+ компаний</span> уже используют Верум
-                                </div>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Правая часть — превью карточки кандидата */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3, ease: EASE }}
-                        className="hidden lg:block relative"
-                    >
-                        <div className="bg-surface border-2 border-line rounded-2xl p-6 shadow-lg">
-                            <div className="flex items-start justify-between mb-6 pb-4 border-b border-line">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                                        <Code2 size={22} className="text-accent" />
-                                    </div>
-                                    <div>
-                                        <div className="text-[14px] font-bold text-ink font-heading">Senior Frontend Engineer</div>
-                                        <div className="text-[12px] text-ink-3 font-medium">React · TypeScript · 6 лет опыта</div>
-                                    </div>
-                                </div>
-                                <div className="px-2.5 py-1 rounded-lg bg-accent text-white text-[11px] font-bold font-heading">SENIOR</div>
-                            </div>
-
-                            <div className="space-y-3 mb-6">
-                                {[
-                                    { label: "Архитектура", score: 92 },
-                                    { label: "Понимание кода", score: 88 },
-                                    { label: "Adaptability", score: 94 },
-                                    { label: "Soft skills", score: 85 },
-                                ].map((c, i) => (
-                                    <div key={i}>
-                                        <div className="flex justify-between mb-1.5">
-                                            <span className="text-[12px] font-medium text-ink-2">{c.label}</span>
-                                            <span className="text-[12px] font-bold text-ink">{c.score}/100</span>
-                                        </div>
-                                        <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${c.score}%` }}
-                                                transition={{ duration: 1.2, delay: 0.6 + i * 0.15, ease: EASE }}
-                                                className="h-full bg-accent rounded-full"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="flex items-center justify-between pt-4 border-t border-line">
-                                <div className="flex items-center gap-1.5">
-                                    <ShieldCheck size={16} className="text-accent" />
-                                    <span className="text-[12px] font-semibold text-ink">Верифицирован</span>
-                                </div>
-                                <div className="text-[12px] text-ink-3 font-medium">Общий балл: <span className="font-bold text-ink">89</span></div>
-                            </div>
-                        </div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* ===== TRUSTED BY ===== */}
-            <section className="border-y border-line bg-surface-2/40 py-6">
-                <div className="max-w-[1400px] mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.15em] text-ink-3 font-heading whitespace-nowrap">Нам доверяют</div>
-                        <div className="flex-1 flex items-center justify-center md:justify-between gap-6 md:gap-10 flex-wrap">
-                            {TRUSTED_BY.map((name, i) => (
-                                <div key={i} className="text-[18px] md:text-[20px] font-bold text-ink-4 font-display whitespace-nowrap">{name}</div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ===== CATEGORIES (Fiverr-style) ===== */}
+            {/* ===== CATEGORIES ===== */}
             <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 md:mb-16 max-w-2xl">
@@ -264,31 +172,56 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== STEPS ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            {/* ===== STEPS (обновлённый дизайн) ===== */}
+            <section className="py-20 md:py-28 bg-bg relative overflow-hidden">
                 <div className="max-w-[1400px] mx-auto px-6">
-                    <div className="text-center mb-12 md:mb-16 max-w-2xl mx-auto">
+                    <div className="text-center mb-16 md:mb-20 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Как это работает</div>
                         <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink mb-4">
                             От вакансии до финалиста — 4 шага
                         </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Весь процесс занимает меньше недели, а не месяц.
+                        </p>
                     </div>
 
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
-                        {STEPS.map((step, i) => {
-                            const Icon = step.icon;
-                            return (
-                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6 relative">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <span className="font-mono text-[14px] font-bold text-accent bg-accent/10 px-3 py-1 rounded-lg">{step.num}</span>
-                                        <Icon size={22} className="text-ink-4" />
-                                    </div>
-                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2 leading-tight">{step.title}</h3>
-                                    <p className="text-[13.5px] text-ink-3 leading-relaxed font-medium">{step.desc}</p>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
+                    <div className="relative">
+                        {/* Соединительная линия (десктоп) */}
+                        <div className="hidden md:block absolute top-[68px] left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-line-2 to-transparent" />
+
+                        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
+                            {STEPS.map((step, i) => {
+                                const Icon = step.icon;
+                                return (
+                                    <motion.div key={i} variants={itemVariants} className="relative flex flex-col items-center text-center">
+                                        {/* Большой номер */}
+                                        <div className="relative mb-6">
+                                            <div className="w-20 h-20 rounded-full bg-surface border-2 border-line flex items-center justify-center relative z-10">
+                                                <Icon size={30} style={{ color: step.color }} />
+                                            </div>
+                                            <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[13px] font-bold shadow-md">
+                                                {step.num}
+                                            </div>
+                                        </div>
+
+                                        <h3 className="font-heading text-[17px] md:text-[18px] font-bold text-ink mb-2 leading-tight max-w-[220px]">
+                                            {step.title}
+                                        </h3>
+                                        <p className="text-[13.5px] text-ink-3 leading-relaxed font-medium max-w-[240px]">
+                                            {step.desc}
+                                        </p>
+
+                                        {/* Стрелка между шагами (десктоп) */}
+                                        {i < STEPS.length - 1 && (
+                                            <div className="hidden md:flex absolute top-[30px] -right-[22px] w-10 h-10 items-center justify-center text-line-2 z-20">
+                                                <ChevronRight size={22} />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -364,38 +297,8 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== REVIEWS ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/40 border-y border-line">
-                <div className="max-w-[1400px] mx-auto px-6">
-                    <div className="text-center mb-12 md:mb-16 max-w-2xl mx-auto">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Отзывы</div>
-                        <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink">
-                            Что говорят компании
-                        </h2>
-                    </div>
-
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-                        {REVIEWS.map((r, i) => (
-                            <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6 relative">
-                                <Quote size={32} className="text-accent/15 absolute top-4 right-4" />
-                                <div className="flex items-center gap-1 mb-4">
-                                    {Array.from({ length: r.rating }).map((_, j) => (
-                                        <Star key={j} size={14} className="text-amber fill-amber" />
-                                    ))}
-                                </div>
-                                <p className="text-[14.5px] text-ink-2 leading-relaxed font-medium mb-5">{r.text}</p>
-                                <div className="pt-4 border-t border-line">
-                                    <div className="text-[14px] font-bold text-ink font-heading">{r.name}</div>
-                                    <div className="text-[12px] text-ink-3 font-medium">{r.role}</div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </div>
-            </section>
-
             {/* ===== FAQ ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <section className="py-20 md:py-28 bg-surface-2/40 border-y border-line">
                 <div className="max-w-[900px] mx-auto px-6">
                     <div className="text-center mb-12 md:mb-16">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
@@ -419,7 +322,7 @@ export function Landing() {
             </section>
 
             {/* ===== FINAL CTA ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/40 border-t border-line">
+            <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[900px] mx-auto px-6 text-center">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants}>
                         <motion.h2 variants={itemVariants} className="font-display text-[clamp(36px,5vw,60px)] font-bold leading-[1.1] text-ink mb-6">
