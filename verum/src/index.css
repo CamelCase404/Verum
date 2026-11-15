@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #f4f2ee;
+  --bg-2: #e8e6e1;
+  --surface: #ffffff;
+  --surface-2: #f9f8f6;
+  --surface-3: #f0eeea;
+  --ink: #1a1a1a;
+  --ink-2: #4a4a4a;
+  --ink-3: #6b6b6b;
+  --ink-4: #9b9b9b;
+  --line: #e0ddd6;
+  --line-2: #d0ccc4;
+  --accent: #1e4d3a;
+  --accent-2: #2a6b52;
+  --accent-3: #3a8b6b;
+  --accent-soft: rgba(30, 77, 58, 0.1);
+  --accent-line: rgba(30, 77, 58, 0.3);
+  --warn: #d97706;
+  --warn-soft: rgba(217, 119, 6, 0.1);
+  --amber: #f59e0b;
+  --amber-soft: rgba(245, 158, 11, 0.1);
+  --blue: #3b82f6;
+  --blue-soft: rgba(59, 130, 246, 0.1);
+  --violet: #8b5cf6;
+  --violet-soft: rgba(139, 92, 246, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg: #121212;
+  --bg-2: #1a1a1a;
+  --surface: #1e1e1e;
+  --surface-2: #252525;
+  --surface-3: #2a2a2a;
+  --ink: #f0f0f0;
+  --ink-2: #b0b0b0;
+  --ink-3: #808080;
+  --ink-4: #606060;
+  --line: #333333;
+  --line-2: #444444;
+  --accent: #4ade80;
+  --accent-2: #22c55e;
+  --accent-3: #16a34a;
+  --accent-soft: rgba(74, 222, 128, 0.15);
+  --accent-line: rgba(74, 222, 128, 0.4);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251, 191, 36, 0.15);
+  --amber: #fcd34d;
+  --amber-soft: rgba(252, 211, 77, 0.15);
+  --blue: #60a5fa;
+  --blue-soft: rgba(96, 165, 250, 0.15);
+  --violet: #a78bfa;
+  --violet-soft: rgba(167, 139, 250, 0.15);
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
@@ -14,17 +68,19 @@
     font-family: "Manrope", sans-serif !important;
     font-size: 16px;
     line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: "Sora", sans-serif;
     letter-spacing: -0.02em;
   }
   
-  /* Плавные тени для темной темы вместо белых бордеров */
-  .dark .border-line, .dark .border-line\/50 {
+  /* Мягкие рамки для темной темы */
+  [data-theme="dark"] .border-line,
+  [data-theme="dark"] .border-line\/50 {
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
-  .dark .ring-line {
+  [data-theme="dark"] .ring-line {
     --tw-ring-color: rgba(255, 255, 255, 0.1) !important;
   }
 }
