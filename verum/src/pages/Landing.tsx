@@ -6,7 +6,8 @@ import {
     ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
-    Cloud, Gamepad2, BarChart3, Lock, Zap
+    Cloud, Gamepad2, BarChart3, Lock, Zap, Gauge, Target, Sparkles,
+    MessageSquare, Lightbulb, Star, Code, Layers
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
@@ -20,24 +21,17 @@ const itemVariants = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } }
 };
 
-/* ===== Animated Divider ===== */
-function AnimatedDivider() {
+/* ===== Красивый статичный разделитель ===== */
+function SectionDivider() {
     return (
-        <div className="relative w-full py-14 md:py-20">
-            <div className="max-w-[1400px] mx-auto px-6">
-                <motion.div
-                    initial={{ scaleX: 0, opacity: 0 }}
-                    whileInView={{ scaleX: 1, opacity: 1 }}
-                    viewport={{ once: true, margin: "-80px" }}
-                    transition={{ duration: 1.4, ease: EASE }}
-                    className="relative h-[2px] origin-center rounded-full overflow-hidden bg-gradient-to-r from-transparent via-line-2 to-transparent"
-                >
-                    <motion.div
-                        animate={{ left: ["-40%", "140%"] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
-                        className="absolute top-0 h-full w-[40%] bg-gradient-to-r from-transparent via-accent/70 to-transparent"
-                    />
-                </motion.div>
+        <div className="relative py-14 md:py-20 flex items-center justify-center">
+            <div className="max-w-[1400px] mx-auto px-6 w-full flex items-center gap-6">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-line-2/70 to-line-2" />
+                <div className="relative flex items-center justify-center shrink-0">
+                    <div className="w-2.5 h-2.5 rotate-45 bg-accent" />
+                    <div className="absolute inset-0 w-2.5 h-2.5 rotate-45 bg-accent blur-[8px] opacity-60" />
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-line-2/70 to-line-2" />
             </div>
         </div>
     );
@@ -45,12 +39,12 @@ function AnimatedDivider() {
 
 /* ===== DATA ===== */
 const CATEGORIES = [
-    { icon: Code2, title: "Frontend", count: "2 400+", desc: "React, Vue, Angular, TS" },
-    { icon: Server, title: "Backend", count: "3 100+", desc: "Python, Go, Java, Node.js" },
-    { icon: Smartphone, title: "Mobile", count: "900+", desc: "iOS, Android, Flutter" },
-    { icon: Cloud, title: "DevOps / SRE", count: "600+", desc: "Kubernetes, Docker, CI/CD" },
-    { icon: BarChart3, title: "Data / ML", count: "700+", desc: "Python, PyTorch, SQL" },
-    { icon: Gamepad2, title: "GameDev", count: "300+", desc: "Unity, Unreal, Godot" },
+    { icon: Code2, title: "Frontend", desc: "React, Vue, Angular, TS" },
+    { icon: Server, title: "Backend", desc: "Python, Go, Java, Node.js" },
+    { icon: Smartphone, title: "Mobile", desc: "iOS, Android, Flutter" },
+    { icon: Cloud, title: "DevOps / SRE", desc: "Kubernetes, Docker, CI/CD" },
+    { icon: BarChart3, title: "Data / ML", desc: "Python, PyTorch, SQL" },
+    { icon: Gamepad2, title: "GameDev", desc: "Unity, Unreal, Godot" },
 ];
 
 const METRICS = [
@@ -65,6 +59,51 @@ const STEPS = [
     { num: "02", title: "ИИ-тест кандидата", desc: "12 вопросов с записью экрана и античитом.", icon: Search, color: "var(--blue)" },
     { num: "03", title: "Ручная модерация", desc: "Проверка видео по тайм-кодам аномалий.", icon: Eye, color: "var(--violet)" },
     { num: "04", title: "Чистый шортлист", desc: "Готовые профили с баллами и контактами.", icon: CheckCircle2, color: "var(--amber)" },
+];
+
+const COMPETENCIES = [
+    { icon: Layers, title: "Архитектурное мышление", score: 35, desc: "Умение проектировать системы, выбирать паттерны и обосновывать trade-offs." },
+    { icon: Code, title: "Понимание кода", score: 30, desc: "Чтение и рефакторинг чужого кода, поиск багов и узких мест." },
+    { icon: Sparkles, title: "Работа с ИИ", score: 15, desc: "Умение формулировать промпты и использовать ИИ-ассистентов в работе." },
+    { icon: Target, title: "Adaptability", score: 10, desc: "Скорость адаптации к новым задачам и продакшен-инцидентам." },
+    { icon: MessageSquare, title: "Soft skills", score: 10, desc: "Ясность изложения, умение объяснять сложное простыми словами." },
+];
+
+const MATCHING = [
+    { icon: Code2, title: "Стек", desc: "Полное совпадение или пересечение по ключевым технологиям." },
+    { icon: Gauge, title: "Грейд", desc: "Точное попадание или разница в одну ступень (Junior → Middle)." },
+    { icon: Terminal, title: "Языки", desc: "Пересечение языков кандидата и требований вакансии." },
+    { icon: Wallet, title: "Зарплата", desc: "Ожидания кандидата вписываются в вилку вакансии." },
+    { icon: Star, title: "GitHub", desc: "Активность, звёзды репозиториев и реальный код на GitHub." },
+    { icon: TrendingUp, title: "Балл теста", desc: "Итоговый балл 0–100 по результатам ИИ-интервью." },
+    { icon: Users, title: "Soft skills", desc: "Оценка коммуникабельности и умения работать в команде." },
+];
+
+const PRICING = [
+    {
+        name: "Start",
+        price: "30 000 ₽",
+        period: "/мес",
+        desc: "Для небольших команд и стартапов.",
+        features: ["20 тестов в месяц", "3 000 токенов для доступа к базе", "Базовый античит-контроль", "Доступ к базе верифицированных"],
+        featured: false,
+    },
+    {
+        name: "Pro",
+        price: "75 000 ₽",
+        period: "/мес",
+        desc: "Для растущих компаний с активным наймом.",
+        features: ["60 тестов в месяц", "10 000 токенов", "Приоритетная поддержка", "Расширенная аналитика"],
+        featured: true,
+    },
+    {
+        name: "Enterprise",
+        price: "200 000 ₽",
+        period: "/мес",
+        desc: "Для крупных компаний с большим потоком.",
+        features: ["Безлимитные тесты", "Безлимит токенов", "Выделенный менеджер", "SLA и кастомные интеграции"],
+        featured: false,
+    },
 ];
 
 const WHY_US = [
@@ -85,10 +124,12 @@ const COMPARISON = [
 ];
 
 const FAQ = [
-    { q: "Сколько стоит подключение?", a: "Первый тест и открытие контакта — бесплатно. Дальше — подписка от 30 000 ₽/мес." },
-    { q: "Что если кандидат не пройдёт тест?", a: "Вы не платите за него. Оплата списывается только при открытии контакта." },
-    { q: "Сколько идёт тест?", a: "Около 45–60 минут. 5 этапов, 12 вопросов, code review и продакшен-кейсы." },
-    { q: "Можно ли использовать для hh.ru?", a: "Да. Создаёте вакансию, получаете ссылку и вставляете в описание." },
+    { q: "Сколько стоит подключение?", a: "Первый тест и открытие контакта — бесплатно. Дальше — подписка от 30 000 ₽/мес в зависимости от объёма." },
+    { q: "Что если кандидат не пройдёт тест?", a: "Вы не платите за него. Оплата списывается только при открытии контакта прошедшего кандидата." },
+    { q: "Сколько идёт тест?", a: "Около 45–60 минут. 5 этапов, 12 вопросов, включая code review и разбор реальных продакшен-кейсов." },
+    { q: "Можно ли использовать для hh.ru?", a: "Да. Вы создаёте вакансию, получаете короткую ссылку и вставляете её в описание вакансии на hh.ru." },
+    { q: "Можно ли проходить тест несколько раз?", a: "Да, но с интервалом 180 дней для обычных тестов. Для тестов под конкретную вакансию — без ограничений." },
+    { q: "Что видит компания в профиле?", a: "Балл, грейд, видео собеседования, разбивку по компетенциям и подтверждённые контакты после оплаты." },
 ];
 
 export function Landing() {
@@ -109,7 +150,7 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
 
-            {/* ===== HERO (Чистый, с фоновой сеткой) ===== */}
+            {/* ===== HERO ===== */}
             <section className="relative pt-24 pb-20 md:pt-32 md:pb-28">
                 <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-10" />
                 <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
@@ -142,9 +183,9 @@ export function Landing() {
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
 
-            {/* ===== CATEGORIES ===== */}
+            {/* ===== CATEGORIES (без счётчика) ===== */}
             <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
@@ -152,19 +193,21 @@ export function Landing() {
                         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
                             База кандидатов по всем стекам
                         </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Только верифицированные инженеры с записью теста и подтверждённым грейдом.
+                        </p>
                     </div>
 
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
                         {CATEGORIES.map((cat, i) => {
                             const Icon = cat.icon;
                             return (
-                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6 transition-colors">
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
                                     <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
                                         <Icon size={22} />
                                     </div>
                                     <h3 className="font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
-                                    <p className="text-[13px] text-ink-3 font-medium mb-3">{cat.desc}</p>
-                                    <div className="text-[12px] font-bold text-accent font-heading">{cat.count} кандидатов</div>
+                                    <p className="text-[14px] text-ink-3 font-medium">{cat.desc}</p>
                                 </motion.div>
                             );
                         })}
@@ -172,7 +215,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
 
             {/* ===== METRICS ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -194,9 +237,9 @@ export function Landing() {
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
 
-            {/* ===== STEPS (видимая анимированная дорожка) ===== */}
+            {/* ===== STEPS (статичная дорожка) ===== */}
             <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="text-center mb-16 max-w-2xl mx-auto">
@@ -207,15 +250,8 @@ export function Landing() {
                     </div>
 
                     <div className="relative">
-                        {/* Дорожка: линия от центра 1-й иконки до центра 4-й */}
-                        <div className="hidden md:block absolute top-[40px] left-[12.5%] right-[12.5%] h-[2px] rounded-full overflow-hidden z-0">
-                            <div className="absolute inset-0 bg-line-2/60" />
-                            <motion.div
-                                animate={{ left: ["-30%", "130%"] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
-                                className="absolute top-0 h-full w-[30%] bg-gradient-to-r from-transparent via-accent to-transparent"
-                            />
-                        </div>
+                        {/* Статичная дорожка */}
+                        <div className="hidden md:block absolute top-[40px] left-[12.5%] right-[12.5%] h-[2px] rounded-full bg-gradient-to-r from-line-2/30 via-accent/50 to-line-2/30" />
 
                         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
                             {STEPS.map((step, i) => {
@@ -245,7 +281,137 @@ export function Landing() {
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
+
+            {/* ===== ЧТО ОЦЕНИВАЕТСЯ ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="mb-12 max-w-2xl">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Что оценивается</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            5 компетенций в 100-балльной шкале
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            ИИ-судья оценивает каждую компетенцию отдельно и выдаёт итоговый балл.
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        {COMPETENCIES.map((c, i) => {
+                            const Icon = c.icon;
+                            return (
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                                            <Icon size={22} />
+                                        </div>
+                                        <div className="px-3 py-1 rounded-lg bg-accent text-white text-[12px] font-bold font-mono">
+                                            {c.score}%
+                                        </div>
+                                    </div>
+                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{c.title}</h3>
+                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">{c.desc}</p>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
+            <SectionDivider />
+
+            {/* ===== КАК ПОДБИРАЕТСЯ ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="mb-12 max-w-2xl">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Как подбирается</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Матчинг по 7 осям
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Алгоритм сравнивает кандидата с вакансией сразу по 7 параметрам, а не только по стеку.
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                        {MATCHING.map((m, i) => {
+                            const Icon = m.icon;
+                            return (
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-5">
+                                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3">
+                                        <Icon size={20} />
+                                    </div>
+                                    <h3 className="font-heading text-[15px] font-bold text-ink mb-2">{m.title}</h3>
+                                    <p className="text-[13px] text-ink-3 leading-relaxed font-medium">{m.desc}</p>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
+            <SectionDivider />
+
+            {/* ===== ТАРИФЫ ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="text-center mb-14 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Тарифы</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Прозрачные цены без скрытых платежей
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Платите только за результат. Первый тест и открытие контакта — бесплатно.
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {PRICING.map((plan, i) => (
+                            <motion.div
+                                key={i}
+                                variants={itemVariants}
+                                className={`rounded-2xl p-8 flex flex-col ${
+                                    plan.featured
+                                        ? "bg-surface border-2 border-accent shadow-xl relative"
+                                        : "bg-surface border border-line"
+                                }`}
+                            >
+                                {plan.featured && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider font-heading">
+                                        Популярный
+                                    </div>
+                                )}
+                                <h3 className="font-heading text-[20px] font-bold text-ink mb-2">{plan.name}</h3>
+                                <p className="text-[13px] text-ink-3 font-medium mb-6">{plan.desc}</p>
+                                <div className="flex items-baseline gap-1 mb-6">
+                                    <span className="font-heading text-[36px] font-extrabold text-ink">{plan.price}</span>
+                                    <span className="text-[14px] text-ink-3 font-medium">{plan.period}</span>
+                                </div>
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    {plan.features.map((f, j) => (
+                                        <li key={j} className="flex items-start gap-2.5">
+                                            <Check size={16} className="text-accent shrink-0 mt-0.5" />
+                                            <span className="text-[14px] text-ink-2 font-medium leading-relaxed">{f}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button
+                                    onClick={goCompany}
+                                    className={`h-[48px] rounded-xl font-heading font-bold text-[14px] transition-colors flex items-center justify-center gap-2 ${
+                                        plan.featured
+                                            ? "bg-accent text-white hover:bg-accent-2"
+                                            : "bg-surface-2 border border-line text-ink hover:bg-surface-3"
+                                    }`}
+                                >
+                                    Подключить <ArrowRight size={16} />
+                                </button>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            <SectionDivider />
 
             {/* ===== WHY US ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -274,7 +440,7 @@ export function Landing() {
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
 
             {/* ===== COMPARISON ===== */}
             <section className="py-16 md:py-20 bg-bg">
@@ -321,33 +487,35 @@ export function Landing() {
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
 
-            {/* ===== FAQ ===== */}
+            {/* ===== FAQ (карточками) ===== */}
             <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[900px] mx-auto px-6">
-                    <div className="text-center mb-12">
+                <div className="max-w-[1200px] mx-auto px-6">
+                    <div className="text-center mb-12 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
                         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink">
                             Частые вопросы
                         </h2>
                     </div>
 
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="space-y-3">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                         {FAQ.map((f, i) => (
-                            <motion.details key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-5 group">
-                                <summary className="flex items-center justify-between cursor-pointer list-none">
-                                    <span className="text-[16px] font-bold text-ink font-heading pr-4">{f.q}</span>
-                                    <ChevronRight size={18} className="text-ink-4 transition-transform group-open:rotate-90 shrink-0" />
-                                </summary>
-                                <p className="text-[14.5px] text-ink-3 leading-relaxed font-medium mt-3 pt-3 border-t border-line">{f.a}</p>
-                            </motion.details>
+                            <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-2xl p-6 md:p-7">
+                                <div className="flex items-start gap-3 mb-3">
+                                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                                        <Lightbulb size={16} />
+                                    </div>
+                                    <h3 className="font-heading text-[17px] font-bold text-ink leading-tight">{f.q}</h3>
+                                </div>
+                                <p className="text-[14.5px] text-ink-3 leading-relaxed font-medium pl-11">{f.a}</p>
+                            </motion.div>
                         ))}
                     </motion.div>
                 </div>
             </section>
 
-            <AnimatedDivider />
+            <SectionDivider />
 
             {/* ===== FINAL CTA ===== */}
             <section className="py-20 md:py-28 bg-bg">
