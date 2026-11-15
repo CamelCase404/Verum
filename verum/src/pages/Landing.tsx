@@ -6,7 +6,7 @@ import {ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
     Cloud, Gamepad2, BarChart3, Lock, Zap, Gauge, Target, Sparkles,
-    MessageSquare, Lightbulb, Star, Code, Layers, Terminal, Route, GitMerge, CircleDollarSign, Scale, Rocket} from "lucide-react";
+    MessageSquare, Lightbulb, Star, Code, Layers, Terminal, Route, GitMerge, CircleDollarSign, Scale, Rocket, ExternalLink, UserPlus, Coins } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
@@ -127,7 +127,7 @@ const FAQ = [
     { q: "Сколько стоит подключение?", a: "Первый тест и открытие контакта — бесплатно. Дальше — подписка от 30 000 ₽/мес в зависимости от объёма." },
     { q: "Что если кандидат не пройдёт тест?", a: "Вы не платите за него. Оплата списывается только при открытии контакта прошедшего кандидата." },
     { q: "Сколько идёт тест?", a: "Около 45–60 минут. 5 этапов, 12 вопросов, включая code review и разбор реальных продакшен-кейсов." },
-    { q: "Можно ли использовать для hh.ru?", a: "Да. Вы создаёте вакансию, получаете короткую ссылку и вставляете её в описание вакансии на hh.ru." },
+    { q: "Есть ли гарантия возврата?", a: "Да. Если кандидат отклонён на модерации — кредит возвращается. Списываем токены только за одобренных кандидатов." },
     { q: "Можно ли проходить тест несколько раз?", a: "Да, но с интервалом 180 дней для обычных тестов. Для тестов под конкретную вакансию — без ограничений." },
     { q: "Что видит компания в профиле?", a: "Балл, грейд, видео собеседования, разбивку по компетенциям и подтверждённые контакты после оплаты." },
 ];
@@ -183,73 +183,9 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider icon={Code2} />
-
-            {/* ===== CATEGORIES (без счётчика) ===== */}
-            <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[1400px] mx-auto px-6">
-                    <div className="mb-12 max-w-2xl">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Категории</div>
-                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
-                            База кандидатов по всем стекам
-                        </h2>
-                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
-                            Только верифицированные инженеры с записью теста и подтверждённым грейдом.
-                        </p>
-                    </div>
-
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-                        {CATEGORIES.map((cat, i) => {
-                            const Icon = cat.icon;
-                            return (
-                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
-                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
-                                        <Icon size={22} />
-                                    </div>
-                                    <h3 className="font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
-                                    <p className="text-[14px] text-ink-3 font-medium">{cat.desc}</p>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
-                </div>
-            </section>
-
-            <SectionDivider icon={TrendingUp} />
-
-            {/* ===== METRICS ===== */}
-            <section className="py-16 md:py-20 bg-bg">
-                <div className="max-w-[1400px] mx-auto px-6">
-                    <div className="text-center mb-14 max-w-2xl mx-auto">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Цифры</div>
-                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
-                            Результаты, которые видно в деньгах и времени
-                        </h2>
-                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
-                            Средние показатели по компаниям, которые уже используют Верум для найма инженеров.
-                        </p>
-                    </div>
-
-                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-                        {METRICS.map((m, i) => {
-                            const Icon = m.icon;
-                            return (
-                                <motion.div key={i} variants={itemVariants} className="text-center">
-                                    <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mx-auto mb-4">
-                                        <Icon size={26} />
-                                    </div>
-                                    <div className="font-heading text-[36px] md:text-[44px] font-extrabold text-ink leading-none mb-2">{m.value}</div>
-                                    <div className="text-[13px] md:text-[14px] font-semibold text-ink-3">{m.label}</div>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
-                </div>
-            </section>
-
             <SectionDivider icon={Route} />
 
-            {/* ===== STEPS (статичная дорожка) ===== */}
+{/* ===== STEPS (статичная дорожка) ===== */}
             <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="text-center mb-16 max-w-2xl mx-auto">
@@ -298,9 +234,73 @@ export function Landing() {
                 </div>
             </section>
 
-            <SectionDivider icon={Target} />
+<SectionDivider icon={Code2} />
 
-            {/* ===== ЧТО ОЦЕНИВАЕТСЯ ===== */}
+{/* ===== CATEGORIES (без счётчика) ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="mb-12 max-w-2xl">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Категории</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            База кандидатов по всем стекам
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Только верифицированные инженеры с записью теста и подтверждённым грейдом.
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        {CATEGORIES.map((cat, i) => {
+                            const Icon = cat.icon;
+                            return (
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6">
+                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                                        <Icon size={22} />
+                                    </div>
+                                    <h3 className="font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
+                                    <p className="text-[14px] text-ink-3 font-medium">{cat.desc}</p>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
+<SectionDivider icon={TrendingUp} />
+
+{/* ===== METRICS ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="text-center mb-14 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Цифры</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Результаты, которые видно в деньгах и времени
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Средние показатели по компаниям, которые уже используют Верум для найма инженеров.
+                        </p>
+                    </div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+                        {METRICS.map((m, i) => {
+                            const Icon = m.icon;
+                            return (
+                                <motion.div key={i} variants={itemVariants} className="text-center">
+                                    <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mx-auto mb-4">
+                                        <Icon size={26} />
+                                    </div>
+                                    <div className="font-heading text-[36px] md:text-[44px] font-extrabold text-ink leading-none mb-2">{m.value}</div>
+                                    <div className="text-[13px] md:text-[14px] font-semibold text-ink-3">{m.label}</div>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
+<SectionDivider icon={Target} />
+
+{/* ===== ЧТО ОЦЕНИВАЕТСЯ ===== */}
             <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
@@ -495,6 +495,103 @@ export function Landing() {
                                 ))}
                             </ul>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <SectionDivider icon={ExternalLink} />
+
+            {/* ===== НАЙМ И ИНТЕГРАЦИЯ ===== */}
+            <section className="py-16 md:py-20 bg-bg">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="text-center mb-14 max-w-2xl mx-auto">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Найм и интеграции</div>
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
+                            Как нанимать на Веруме и сколько это стоит
+                        </h2>
+                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
+                            Полный цикл от вакансии до оффера. Платите только за открытие контактов прошедших кандидатов.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div className="bg-surface border border-line rounded-2xl p-8">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                                    <UserPlus size={22} />
+                                </div>
+                                <h3 className="font-heading text-[20px] font-bold text-ink">Как проходит найм</h3>
+                            </div>
+                            <ol className="space-y-4">
+                                {[
+                                    "Создаёте вакансию в ЛК: стек, грейд, вилка",
+                                    "Получаете короткую ссылку /v/abc123",
+                                    "Кандидат проходит ИИ-тест за 45–60 минут",
+                                    "Профиль уходит на ручную модерацию",
+                                    "После одобрения — балл, грейд, видео",
+                                    "Открываете контакты — списываются токены",
+                                ].map((text, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        <span className="w-6 h-6 rounded-full bg-accent text-white text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                                        <span className="text-[14.5px] text-ink-2 font-medium leading-relaxed">{text}</span>
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+
+                        <div className="bg-surface border-2 border-accent rounded-2xl p-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 rounded-xl bg-accent text-white flex items-center justify-center">
+                                    <ExternalLink size={22} />
+                                </div>
+                                <h3 className="font-heading text-[20px] font-bold text-accent">Интеграция с hh.ru</h3>
+                            </div>
+                            <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-4">
+                                Публикуйте вакансии на hh.ru с той же ссылкой на ИИ-тест — кандидаты проходят его прямо со страницы вакансии.
+                            </p>
+                            <ul className="space-y-3">
+                                {[
+                                    "Создаёте вакансию в Веруме",
+                                    "Копируете публичную ссылку /v/...",
+                                    "Вставляете её в описание на hh.ru",
+                                    "Кандидаты проходят тест автоматически",
+                                    "Одобренные профили сразу у вас",
+                                ].map((text, i) => (
+                                    <li key={i} className="flex items-start gap-2.5">
+                                        <Check size={16} className="text-accent shrink-0 mt-1" />
+                                        <span className="text-[14px] text-ink-2 font-medium leading-relaxed">{text}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="bg-surface border border-line rounded-2xl p-8">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                                <Coins size={22} />
+                            </div>
+                            <h3 className="font-heading text-[20px] font-bold text-ink">Стоимость открытия контактов</h3>
+                        </div>
+                        <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-6">
+                            Токены списываются только когда вы открываете контакты кандидата из базы. Тестирование внешних кандидатов считается отдельно по количеству верификаций.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {[
+                                { grade: "Junior", tokens: "100 токенов" },
+                                { grade: "Middle", tokens: "200 токенов" },
+                                { grade: "Senior", tokens: "350 токенов" },
+                            ].map((item, i) => (
+                                <div key={i} className="bg-surface-2 border border-line rounded-xl p-5 text-center">
+                                    <div className="text-[12px] font-bold uppercase tracking-wider text-accent mb-2 font-heading">{item.grade}</div>
+                                    <div className="font-heading text-[24px] font-extrabold text-ink">{item.tokens}</div>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-[13px] text-ink-3 font-medium leading-relaxed mt-5 pt-4 border-t border-line">
+                            Токены входят в подписку. Например, на тарифе Pro (10 000 токенов) хватит на 28 открытий Senior-контактов или 100 Junior.
+                        </p>
                     </div>
                 </div>
             </section>
