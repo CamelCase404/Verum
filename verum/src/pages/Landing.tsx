@@ -144,7 +144,6 @@ export function Landing() {
         <div className="w-full bg-bg overflow-hidden text-ink selection:bg-accent/30">
             {/* ══════════ 1. HERO ══════════ */}
             <section className="relative pt-20 pb-12 md:pt-32 md:pb-20 flex items-center justify-center min-h-[80vh]">
-                {/* Тонкое свечение на фоне (современный motion design) */}
                 <motion.div
                     animate={{
                         scale: [1, 1.1, 1],
@@ -163,12 +162,12 @@ export function Landing() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
-                        className="font-semibold tracking-[-0.05em] leading-[1.05] text-[clamp(42px,7vw,88px)] text-ink mb-6 max-w-[900px] mx-auto"
+                        className="font-semibold tracking-[-0.05em] leading-[1.05] text-[clamp(42px,7vw,88px)] text-ink mb-6 max-w-[900px] mx-auto text-balance"
                     >
                         Нанимайте тех,
                         <br />
                         кто <span className="text-accent">реально</span> пишет
-                        хуйню
+                        код
                     </motion.h1>
 
                     <motion.p
@@ -190,16 +189,23 @@ export function Landing() {
                     >
                         <button
                             onClick={goCompany}
-                            className="h-[56px] px-8 rounded-xl bg-accent text-white font-medium text-[15px] hover:bg-accent-2 transition-all hover:-translate-y-0.5 shadow-lg shadow-accent/20 flex items-center justify-center gap-2 w-full sm:w-auto"
+                            className="group h-[56px] px-8 rounded-xl bg-accent text-white font-medium text-[15px] hover:bg-accent-2 transition-all hover:-translate-y-0.5 shadow-lg shadow-accent/20 flex items-center justify-center gap-2 w-full sm:w-auto"
                         >
-                            Проверить кандидатов <ArrowRight size={18} />
+                            Проверить кандидатов{" "}
+                            <ArrowRight
+                                size={18}
+                                className="transition-transform duration-300 group-hover:translate-x-0.5"
+                            />
                         </button>
                         <button
                             onClick={goDev}
-                            className="h-[56px] px-6 text-ink-2 font-medium text-[15px] hover:text-ink transition-colors flex items-center justify-center gap-1.5 w-full sm:w-auto"
+                            className="group h-[56px] px-6 text-ink-2 font-medium text-[15px] hover:text-ink transition-colors flex items-center justify-center gap-1.5 w-full sm:w-auto"
                         >
                             Я разработчик{" "}
-                            <ChevronRight size={16} className="text-ink-4" />
+                            <ChevronRight
+                                size={16}
+                                className="text-ink-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                            />
                         </button>
                     </motion.div>
 
@@ -207,25 +213,25 @@ export function Landing() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 0.5 }}
-                        className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-[13px] text-ink-3 font-medium"
+                        className="flex flex-wrap justify-center gap-2.5 sm:gap-3 text-[12.5px] sm:text-[13px] text-ink-2 font-medium"
                     >
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 size={16} className="text-accent" />{" "}
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-surface/60 border border-line rounded-full backdrop-blur-sm">
+                            <CheckCircle2 size={15} className="text-accent" />
                             Первый тест бесплатно
                         </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 size={16} className="text-accent" />{" "}
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-surface/60 border border-line rounded-full backdrop-blur-sm">
+                            <CheckCircle2 size={15} className="text-accent" />
                             Ручная модерация
                         </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 size={16} className="text-accent" />{" "}
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-surface/60 border border-line rounded-full backdrop-blur-sm">
+                            <CheckCircle2 size={15} className="text-accent" />
                             Экономия 20+ часов
                         </div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* ══════════ 2. METRICS (Horizontal Strip) ══════════ */}
+            {/* ══════════ 2. METRICS ══════════ */}
             <section className="relative pt-12 md:pt-20 pb-0">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div
@@ -235,7 +241,7 @@ export function Landing() {
                         transition={{ duration: 1.5, ease: EASE }}
                         className="h-px w-full bg-gradient-to-r from-transparent via-line to-transparent origin-center mb-16"
                     />
-                    
+
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -252,7 +258,7 @@ export function Landing() {
                         <motion.h2
                             variants={fadeUp}
                             custom={1}
-                            className="text-[clamp(24px,4vw,36px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink"
+                            className="text-[clamp(24px,4vw,36px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink text-balance"
                         >
                             Цифры, которые говорят сами за себя
                         </motion.h2>
@@ -267,6 +273,8 @@ export function Landing() {
                                 viewport={{ once: true }}
                                 variants={fadeUp}
                                 custom={i}
+                                whileHover={{ y: -2 }}
+                                transition={{ duration: 0.2 }}
                             >
                                 <div className="text-[40px] md:text-[56px] font-semibold text-ink leading-none tracking-[-0.04em] mb-2 tabular-nums">
                                     {m.value}
@@ -280,7 +288,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 3. HOW IT WORKS (Vertical Timeline) ══════════ */}
+            {/* ══════════ 3. HOW IT WORKS ══════════ */}
             <section className="py-16 md:py-24 relative">
                 <div className="max-w-[1120px] mx-auto px-4 md:px-8">
                     <motion.div
@@ -306,14 +314,13 @@ export function Landing() {
                         <motion.h2
                             variants={fadeUp}
                             custom={1}
-                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink"
+                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink text-balance"
                         >
                             От вакансии до финалиста за 3 дня
                         </motion.h2>
                     </motion.div>
 
                     <div className="max-w-[800px] mx-auto relative">
-                        {/* Вертикальная линия */}
                         <div className="absolute left-[27px] top-4 bottom-4 w-px bg-line hidden md:block" />
 
                         <div className="space-y-12">
@@ -327,12 +334,12 @@ export function Landing() {
                                         viewport={{ once: true }}
                                         variants={fadeUp}
                                         custom={i}
-                                        className="relative flex flex-col md:flex-row gap-6 md:gap-10"
+                                        className="relative flex flex-col md:flex-row gap-6 md:gap-10 group"
                                     >
-                                        <div className="hidden md:flex w-14 h-14 rounded-full bg-surface border-2 border-line items-center justify-center text-accent shrink-0 relative z-10">
+                                        <div className="hidden md:flex w-14 h-14 rounded-full bg-surface border-2 border-line items-center justify-center text-accent shrink-0 relative z-10 transition-colors duration-300 group-hover:border-accent">
                                             <Icon size={22} />
                                         </div>
-                                        <div className="bg-surface border border-line rounded-2xl p-6 md:p-8 flex-1">
+                                        <div className="bg-surface border border-line rounded-2xl p-6 md:p-8 flex-1 transition-all duration-300 hover:border-line-2 hover:shadow-md">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <span className="text-[13px] font-bold text-accent tabular-nums">
                                                     {step.num}
@@ -372,7 +379,7 @@ export function Landing() {
                         <motion.h2
                             variants={fadeUp}
                             custom={1}
-                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink max-w-[600px]"
+                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink max-w-[600px] text-balance"
                         >
                             Четыре уровня защиты от нечестного найма
                         </motion.h2>
@@ -389,7 +396,9 @@ export function Landing() {
                                     viewport={{ once: true }}
                                     variants={fadeUp}
                                     custom={i}
-                                    className={`bg-surface border border-line rounded-2xl p-6 md:p-8 ${f.colSpan}`}
+                                    whileHover={{ y: -4 }}
+                                    transition={{ duration: 0.25, ease: EASE }}
+                                    className={`bg-surface border border-line rounded-2xl p-6 md:p-8 transition-colors duration-300 hover:border-line-2 hover:shadow-lg ${f.colSpan}`}
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-accent mb-6">
                                         <Icon size={22} />
@@ -407,7 +416,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 5. COMPARISON (Split View) ══════════ */}
+            {/* ══════════ 5. COMPARISON ══════════ */}
             <section className="py-16 md:py-24 relative">
                 <div className="max-w-[1000px] mx-auto px-4 md:px-8">
                     <motion.div
@@ -426,14 +435,13 @@ export function Landing() {
                         <motion.h2
                             variants={fadeUp}
                             custom={0}
-                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink"
+                            className="text-[clamp(32px,5vw,48px)] font-semibold tracking-[-0.03em] leading-[1.1] text-ink text-balance"
                         >
                             Верум vs Обычный найм
                         </motion.h2>
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                        {/* Обычный найм */}
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -450,10 +458,12 @@ export function Landing() {
                                         key={i}
                                         className="flex items-start gap-3"
                                     >
-                                        <XCircle
-                                            size={18}
-                                            className="text-ink-4 shrink-0 mt-0.5"
-                                        />
+                                        <div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5">
+                                            <XCircle
+                                                size={14}
+                                                className="text-ink-4"
+                                            />
+                                        </div>
                                         <span className="text-[14px] text-ink-3">
                                             {row[0]}
                                         </span>
@@ -462,7 +472,6 @@ export function Landing() {
                             </ul>
                         </motion.div>
 
-                        {/* С Верум */}
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -480,10 +489,12 @@ export function Landing() {
                                         key={i}
                                         className="flex items-start gap-3"
                                     >
-                                        <Check
-                                            size={18}
-                                            className="text-accent shrink-0 mt-0.5"
-                                        />
+                                        <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                                            <Check
+                                                size={14}
+                                                className="text-accent"
+                                            />
+                                        </div>
                                         <span className="text-[14px] text-ink font-medium">
                                             {row[1]}
                                         </span>
@@ -507,7 +518,7 @@ export function Landing() {
                         <motion.h2
                             variants={fadeUp}
                             custom={0}
-                            className="text-[clamp(36px,6vw,64px)] font-semibold tracking-[-0.04em] leading-[1.05] text-ink mb-6"
+                            className="text-[clamp(36px,6vw,64px)] font-semibold tracking-[-0.04em] leading-[1.05] text-ink mb-6 text-balance"
                         >
                             Перестаньте тратить <br /> часы на собеседования
                         </motion.h2>
@@ -527,15 +538,23 @@ export function Landing() {
                         >
                             <button
                                 onClick={goCompany}
-                                className="h-[56px] px-8 rounded-xl bg-accent text-white font-medium text-[15px] hover:bg-accent-2 transition-all hover:-translate-y-0.5 shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+                                className="group h-[56px] px-8 rounded-xl bg-accent text-white font-medium text-[15px] hover:bg-accent-2 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 hover:ring-2 hover:ring-accent/30 flex items-center justify-center gap-2"
                             >
-                                Подключить компанию <ArrowRight size={18} />
+                                Подключить компанию{" "}
+                                <ArrowRight
+                                    size={18}
+                                    className="transition-transform duration-300 group-hover:translate-x-0.5"
+                                />
                             </button>
                             <button
                                 onClick={goDev}
-                                className="h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-medium text-[15px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2"
+                                className="group h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-medium text-[15px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2"
                             >
-                                Я разработчик <ChevronRight size={18} />
+                                Я разработчик{" "}
+                                <ChevronRight
+                                    size={18}
+                                    className="transition-transform duration-300 group-hover:translate-x-0.5"
+                                />
                             </button>
                         </motion.div>
                     </motion.div>
