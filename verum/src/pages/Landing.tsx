@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
@@ -10,8 +10,7 @@ import {
     Cloud, Gamepad2, BarChart3, Lock, Zap, Gauge, Target, Sparkles,
     MessageSquare, Lightbulb, Star, Code, Layers, Terminal,
     ExternalLink, UserPlus, Coins, Timer, ClipboardCheck, UserCheck,
-    Building2, User
-} from "lucide-react";
+    Building2, User, Route, GitMerge, CircleDollarSign, Scale } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
@@ -43,7 +42,7 @@ function SectionDivider({ icon: Icon }: { icon: any }) {
 }
 
 /* ===== Акцентное подчёркивание под заголовком ===== */
-function AccentTitle({ children }: { children: React.ReactNode }) {
+function AccentTitle({ children }: { children: ReactNode }) {
     return (
         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
             <span className="relative inline-block pb-2">
