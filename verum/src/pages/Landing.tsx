@@ -305,35 +305,6 @@ export function Landing() {
                 >
                     {audience === 'company' ? (
                         <>
-                            {/* ===== КОМПАНИЯМ: Категории ===== */}
-                            <SectionDivider icon={Code2} />
-                            <section className="py-16 md:py-20 bg-bg">
-                                <div className="max-w-[1400px] mx-auto px-6">
-                                    <div className="mb-12 max-w-2xl">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Категории</div>
-                                        <AccentTitle>База кандидатов по всем стекам</AccentTitle>
-                                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
-                                            Только верифицированные инженеры с записью теста и подтверждённым грейдом.
-                                        </p>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-                                        {CATEGORIES.map((cat, i) => {
-                                            const Icon = cat.icon;
-                                            return (
-                                                <div key={i} className="relative bg-surface border border-line rounded-xl p-6 hover:border-accent/40 transition-all duration-300 group overflow-hidden">
-                                                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                                                    <div className="relative w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:bg-accent group-hover:text-white transition-colors duration-300">
-                                                        <Icon size={22} />
-                                                    </div>
-                                                    <h3 className="relative font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
-                                                    <p className="relative text-[14px] text-ink-3 font-medium">{cat.desc}</p>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </section>
-
                             {/* ===== КОМПАНИЯМ: Метрики ===== */}
                             <SectionDivider icon={TrendingUp} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
@@ -359,6 +330,49 @@ export function Landing() {
                                                 </div>
                                             );
                                         })}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* ===== КОМПАНИЯМ: Сравнение ===== */}
+                            <SectionDivider icon={Scale} />
+                            <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                                <div className="max-w-[1200px] mx-auto px-6 relative">
+                                    <div className="text-center mb-12 max-w-2xl mx-auto">
+                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
+                                        <AccentTitle>Верум vs Обычный найм</AccentTitle>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                        <div className="bg-surface border border-line rounded-2xl p-6 md:p-8">
+                                            <h3 className="font-heading text-[18px] font-bold text-ink-3 mb-6 pb-4 border-b border-line">Обычный найм</h3>
+                                            <ul className="space-y-4">
+                                                {COMPARISON.map((row, i) => (
+                                                    <li key={i} className="flex items-start gap-3">
+                                                        <div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                            <XCircle size={14} className="text-ink-4" />
+                                                        </div>
+                                                        <span className="text-[15px] text-ink-3 font-medium leading-relaxed">{row[0]}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                        <div className="bg-surface border-2 border-accent rounded-2xl p-6 md:p-8 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
+                                            <h3 className="font-heading text-[18px] font-bold text-accent mb-6 pb-4 border-b border-line flex items-center gap-2">
+                                                <ShieldCheck size={20} /> С Верум
+                                            </h3>
+                                            <ul className="space-y-4">
+                                                {COMPARISON.map((row, i) => (
+                                                    <li key={i} className="flex items-start gap-3">
+                                                        <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                                                            <Check size={14} className="text-accent" />
+                                                        </div>
+                                                        <span className="text-[15px] text-ink font-semibold leading-relaxed">{row[1]}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
@@ -633,49 +647,6 @@ export function Landing() {
                                                 </div>
                                             );
                                         })}
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* ===== КОМПАНИЯМ: Сравнение ===== */}
-                            <SectionDivider icon={Scale} />
-                            <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
-                                <div className="max-w-[1200px] mx-auto px-6 relative">
-                                    <div className="text-center mb-12 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
-                                        <AccentTitle>Верум vs Обычный найм</AccentTitle>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                        <div className="bg-surface border border-line rounded-2xl p-6 md:p-8">
-                                            <h3 className="font-heading text-[18px] font-bold text-ink-3 mb-6 pb-4 border-b border-line">Обычный найм</h3>
-                                            <ul className="space-y-4">
-                                                {COMPARISON.map((row, i) => (
-                                                    <li key={i} className="flex items-start gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5">
-                                                            <XCircle size={14} className="text-ink-4" />
-                                                        </div>
-                                                        <span className="text-[15px] text-ink-3 font-medium leading-relaxed">{row[0]}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                        <div className="bg-surface border-2 border-accent rounded-2xl p-6 md:p-8 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
-                                            <h3 className="font-heading text-[18px] font-bold text-accent mb-6 pb-4 border-b border-line flex items-center gap-2">
-                                                <ShieldCheck size={20} /> С Верум
-                                            </h3>
-                                            <ul className="space-y-4">
-                                                {COMPARISON.map((row, i) => (
-                                                    <li key={i} className="flex items-start gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                                                            <Check size={14} className="text-accent" />
-                                                        </div>
-                                                        <span className="text-[15px] text-ink font-semibold leading-relaxed">{row[1]}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
                                     </div>
                                 </div>
                             </section>
