@@ -6,7 +6,7 @@ import {
     ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
-    Cloud, Gamepad2, BarChart3, Lock, Zap, Terminal, Sparkles, CheckCircle
+    Cloud, Gamepad2, BarChart3, Lock, Zap
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
@@ -19,6 +19,29 @@ const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } }
 };
+
+/* ===== Animated Divider ===== */
+function AnimatedDivider() {
+    return (
+        <div className="relative w-full py-14 md:py-20">
+            <div className="max-w-[1400px] mx-auto px-6">
+                <motion.div
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    whileInView={{ scaleX: 1, opacity: 1 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 1.4, ease: EASE }}
+                    className="relative h-[2px] origin-center rounded-full overflow-hidden bg-gradient-to-r from-transparent via-line-2 to-transparent"
+                >
+                    <motion.div
+                        animate={{ left: ["-40%", "140%"] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
+                        className="absolute top-0 h-full w-[40%] bg-gradient-to-r from-transparent via-accent/70 to-transparent"
+                    />
+                </motion.div>
+            </div>
+        </div>
+    );
+}
 
 /* ===== DATA ===== */
 const CATEGORIES = [
@@ -86,52 +109,18 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
 
-            {/* ===== HERO (Разбавлен плавающими моделями) ===== */}
-            <section className="relative pt-24 pb-24 md:pt-32 md:pb-32 border-b border-line/30">
+            {/* ===== HERO (Чистый, с фоновой сеткой) ===== */}
+            <section className="relative pt-24 pb-20 md:pt-32 md:pb-28">
                 <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-10" />
                 <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
                     <motion.div
-                        animate={{ scale: [1, 1.05, 1], opacity: [0.03, 0.06, 0.03] }}
+                        animate={{ scale: [1, 1.05, 1], opacity: [0.04, 0.08, 0.04] }}
                         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                         className="w-[800px] h-[800px] bg-accent rounded-full blur-[120px]"
                     />
                 </div>
 
-                <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
-                    
-                    {/* Плавающая карточка 1 (Слева) */}
-                    <motion.div 
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0, y: [0, -15, 0] }}
-                        transition={{ opacity: { duration: 0.8 }, x: { duration: 0.8 }, y: { duration: 6, repeat: Infinity, ease: "easeInOut" } }}
-                        className="hidden lg:flex absolute top-10 left-0 bg-surface border border-line rounded-2xl p-4 shadow-xl items-center gap-4"
-                    >
-                        <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                            <ShieldCheck size={24} />
-                        </div>
-                        <div className="text-left">
-                            <div className="text-[14px] font-bold text-ink font-heading">Кандидат верифицирован</div>
-                            <div className="text-[12px] text-ink-3 font-medium">Оценка ИИ: 92/100</div>
-                        </div>
-                    </motion.div>
-
-                    {/* Плавающая карточка 2 (Справа) */}
-                    <motion.div 
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0, y: [0, 15, 0] }}
-                        transition={{ opacity: { duration: 0.8 }, x: { duration: 0.8 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
-                        className="hidden lg:block absolute bottom-10 right-0 bg-[#1e1e1e] border border-[#333] rounded-xl p-5 shadow-2xl text-left"
-                    >
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        </div>
-                        <pre className="text-[13px] font-mono text-[#4ade80]">
-                            <code>{`const match = await verum.match({\n  stack: "React",\n  grade: "Senior"\n});`}</code>
-                        </pre>
-                    </motion.div>
-
+                <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10">
                     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col items-center">
                         <motion.h1 variants={itemVariants} className="font-heading font-extrabold text-[clamp(40px,6vw,76px)] leading-[1.1] tracking-tight text-ink mb-6 max-w-[900px]">
                             Наймите инженера, который <span className="text-accent">реально</span> пишет код
@@ -153,8 +142,10 @@ export function Landing() {
                 </div>
             </section>
 
+            <AnimatedDivider />
+
             {/* ===== CATEGORIES ===== */}
-            <section className="py-20 md:py-24 bg-surface-2/60 border-b border-line/30">
+            <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Категории</div>
@@ -181,8 +172,10 @@ export function Landing() {
                 </div>
             </section>
 
+            <AnimatedDivider />
+
             {/* ===== METRICS ===== */}
-            <section className="py-16 bg-bg border-b border-line/30">
+            <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                         {METRICS.map((m, i) => {
@@ -201,8 +194,10 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== STEPS (Возвращена красивая дорожка) ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <AnimatedDivider />
+
+            {/* ===== STEPS (видимая анимированная дорожка) ===== */}
+            <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="text-center mb-16 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Как это работает</div>
@@ -212,8 +207,15 @@ export function Landing() {
                     </div>
 
                     <div className="relative">
-                        {/* Красивая градиентная дорожка на фоне */}
-                        <div className="hidden md:block absolute top-[40px] left-[10%] right-[10%] h-1 rounded-full bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+                        {/* Дорожка: линия от центра 1-й иконки до центра 4-й */}
+                        <div className="hidden md:block absolute top-[40px] left-[12.5%] right-[12.5%] h-[2px] rounded-full overflow-hidden z-0">
+                            <div className="absolute inset-0 bg-line-2/60" />
+                            <motion.div
+                                animate={{ left: ["-30%", "130%"] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
+                                className="absolute top-0 h-full w-[30%] bg-gradient-to-r from-transparent via-accent to-transparent"
+                            />
+                        </div>
 
                         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
                             {STEPS.map((step, i) => {
@@ -221,7 +223,7 @@ export function Landing() {
                                 return (
                                     <motion.div key={i} variants={itemVariants} className="relative flex flex-col items-center text-center">
                                         <div className="relative mb-6">
-                                            <div className="w-20 h-20 rounded-full bg-surface border-4 border-line flex items-center justify-center relative z-10 shadow-sm">
+                                            <div className="w-20 h-20 rounded-full bg-bg border-4 border-line flex items-center justify-center relative z-10 shadow-sm">
                                                 <Icon size={30} style={{ color: step.color }} />
                                             </div>
                                             <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[12px] font-bold shadow-md z-20">
@@ -243,8 +245,10 @@ export function Landing() {
                 </div>
             </section>
 
+            <AnimatedDivider />
+
             {/* ===== WHY US ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/60 border-y border-line/30">
+            <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Почему мы</div>
@@ -270,8 +274,10 @@ export function Landing() {
                 </div>
             </section>
 
+            <AnimatedDivider />
+
             {/* ===== COMPARISON ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[1200px] mx-auto px-6">
                     <div className="text-center mb-12 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
@@ -315,8 +321,10 @@ export function Landing() {
                 </div>
             </section>
 
+            <AnimatedDivider />
+
             {/* ===== FAQ ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/60 border-y border-line/30">
+            <section className="py-16 md:py-20 bg-bg">
                 <div className="max-w-[900px] mx-auto px-6">
                     <div className="text-center mb-12">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
@@ -338,6 +346,8 @@ export function Landing() {
                     </motion.div>
                 </div>
             </section>
+
+            <AnimatedDivider />
 
             {/* ===== FINAL CTA ===== */}
             <section className="py-20 md:py-28 bg-bg">
