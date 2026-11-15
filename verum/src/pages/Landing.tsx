@@ -34,7 +34,7 @@ const METRICS = [
     { value: "70%", label: "Кандидатов отсеивается", icon: XCircle },
     { value: "3 дня", label: "До шортлиста", icon: Clock },
     { value: "80%", label: "Экономии времени", icon: TrendingUp },
-    { value: "1.5 млн ₽", label: "Экономия в год", icon: Wallet },
+    { value: "1.5 млн ₽", label: "Экономия в год", icon: Wallet }, // Убрано "на HR"
 ];
 
 const STEPS = [
@@ -86,8 +86,9 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
 
-            {/* ===== HERO ===== */}
-            <section className="relative pt-24 pb-20 md:pt-32 md:pb-28">
+            {/* ===== HERO (Разбавлен сеткой и преимуществами) ===== */}
+            <section className="relative pt-28 pb-24 md:pt-36 md:pb-32">
+                <div className="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none -z-10" />
                 <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
                     <motion.div
                         animate={{ scale: [1, 1.05, 1], opacity: [0.03, 0.06, 0.03] }}
@@ -98,15 +99,15 @@ export function Landing() {
 
                 <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10">
                     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col items-center">
-                        <motion.h1 variants={itemVariants} className="font-display font-bold text-[clamp(40px,6vw,80px)] leading-[1.05] text-ink mb-6 max-w-[900px]">
+                        <motion.h1 variants={itemVariants} className="font-heading font-extrabold text-[clamp(40px,6vw,76px)] leading-[1.1] tracking-tight text-ink mb-6 max-w-[900px]">
                             Наймите инженера, который <span className="text-accent">реально</span> пишет код
                         </motion.h1>
 
                         <motion.p variants={itemVariants} className="text-[17px] md:text-[21px] text-ink-2 font-medium leading-relaxed mb-10 max-w-[680px]">
-                            Скрининг через ИИ-интервью с античитом и записью видео. Отсеиваем 70% кандидатов и экономим до 1.5 млн ₽ в год на HR.
+                            Скрининг через ИИ-интервью с античитом и записью видео. Отсеиваем 70% кандидатов и экономим до 1.5 млн ₽ в год.
                         </motion.p>
 
-                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 mb-10">
                             <button onClick={goCompany} className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
                                 Проверить кандидатов <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                             </button>
@@ -114,16 +115,23 @@ export function Landing() {
                                 Я разработчик <ChevronRight size={18} />
                             </button>
                         </motion.div>
+
+                        {/* Разбавляем пустоту текстовыми преимуществами под кнопками */}
+                        <motion.div variants={itemVariants} className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[14px] font-semibold text-ink-3 font-heading">
+                            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent" /> Первый тест бесплатно</span>
+                            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent" /> Без скрытых комиссий</span>
+                            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent" /> Доступ к базе 24/7</span>
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* ===== CATEGORIES (Fiverr-style) ===== */}
-            <section className="py-20 md:py-24 bg-bg border-t border-line">
+            {/* ===== CATEGORIES (Убрал cursor-pointer) ===== */}
+            <section className="py-20 md:py-24 bg-surface-2/50">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Категории</div>
-                        <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink mb-4">
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
                             База кандидатов по всем стекам
                         </h2>
                         <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
@@ -135,12 +143,11 @@ export function Landing() {
                         {CATEGORIES.map((cat, i) => {
                             const Icon = cat.icon;
                             return (
-                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6 hover:border-accent/40 transition-colors group cursor-pointer">
+                                <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6 transition-colors">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
                                             <Icon size={22} />
                                         </div>
-                                        <ChevronRight size={18} className="text-ink-4 group-hover:text-accent transition-colors" />
                                     </div>
                                     <h3 className="font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
                                     <p className="text-[13px] text-ink-3 font-medium mb-3">{cat.desc}</p>
@@ -153,7 +160,7 @@ export function Landing() {
             </section>
 
             {/* ===== METRICS ===== */}
-            <section className="py-16 bg-surface-2/40 border-y border-line">
+            <section className="py-16 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                         {METRICS.map((m, i) => {
@@ -163,7 +170,7 @@ export function Landing() {
                                     <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mx-auto mb-4">
                                         <Icon size={26} />
                                     </div>
-                                    <div className="font-display text-[36px] md:text-[44px] font-bold text-ink leading-none mb-2">{m.value}</div>
+                                    <div className="font-heading text-[36px] md:text-[44px] font-extrabold text-ink leading-none mb-2">{m.value}</div>
                                     <div className="text-[13px] md:text-[14px] font-semibold text-ink-3">{m.label}</div>
                                 </motion.div>
                             );
@@ -172,12 +179,12 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== STEPS (Красивый таймлайн) ===== */}
-            <section className="py-20 md:py-28 bg-bg relative overflow-hidden">
+            {/* ===== STEPS (Красивый таймлайн без линий) ===== */}
+            <section className="py-20 md:py-28 bg-surface-2/50 relative overflow-hidden">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="text-center mb-16 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Как это работает</div>
-                        <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink mb-4">
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
                             От вакансии до финалиста — 4 шага
                         </h2>
                         <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
@@ -186,8 +193,6 @@ export function Landing() {
                     </div>
 
                     <div className="relative">
-                        <div className="hidden md:block absolute top-[40px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-transparent via-line-2 to-transparent" />
-
                         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
                             {STEPS.map((step, i) => {
                                 const Icon = step.icon;
@@ -217,11 +222,11 @@ export function Landing() {
             </section>
 
             {/* ===== WHY US ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/40 border-y border-line">
+            <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Почему мы</div>
-                        <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink mb-4">
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
                             Технология, которая заменяет 20 часов рутинных собеседований
                         </h2>
                     </div>
@@ -244,11 +249,11 @@ export function Landing() {
             </section>
 
             {/* ===== COMPARISON ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <section className="py-20 md:py-28 bg-surface-2/50">
                 <div className="max-w-[1200px] mx-auto px-6">
                     <div className="text-center mb-12 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
-                        <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink">
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink">
                             Верум vs Обычный найм
                         </h2>
                     </div>
@@ -289,11 +294,11 @@ export function Landing() {
             </section>
 
             {/* ===== FAQ ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/40 border-y border-line">
+            <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[900px] mx-auto px-6">
                     <div className="text-center mb-12">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
-                        <h2 className="font-display text-[clamp(32px,4vw,48px)] font-bold leading-tight text-ink">
+                        <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink">
                             Частые вопросы
                         </h2>
                     </div>
@@ -313,10 +318,10 @@ export function Landing() {
             </section>
 
             {/* ===== FINAL CTA ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <section className="py-20 md:py-28 bg-surface-2/50">
                 <div className="max-w-[900px] mx-auto px-6 text-center">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants}>
-                        <motion.h2 variants={itemVariants} className="font-display text-[clamp(36px,5vw,60px)] font-bold leading-[1.1] text-ink mb-6">
+                        <motion.h2 variants={itemVariants} className="font-heading text-[clamp(36px,5vw,60px)] font-extrabold leading-[1.1] text-ink mb-6">
                             Перестаньте тратить часы на собеседования
                         </motion.h2>
                         <motion.p variants={itemVariants} className="text-[17px] md:text-[20px] text-ink-2 font-medium leading-relaxed mb-10 max-w-[600px] mx-auto">

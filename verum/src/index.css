@@ -47,29 +47,33 @@
     line-height: 1.6;
   }
 
-  /* Убираем синюю обводку при фокусе во всем проекте */
   *:focus, *:focus-visible, *:active {
     outline: none !important;
     box-shadow: none !important;
   }
 
-  /* Убираем курсив */
   i, em, .italic, .font-italic {
     font-style: normal !important;
   }
 
-  /* Заголовки - Sora */
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Sora", sans-serif;
+    font-family: "Montserrat", sans-serif; /* Сменил Sora на Montserrat для заголовков */
     letter-spacing: -0.02em;
-    font-weight: 700;
+    font-weight: 800;
   }
 
-  /* Кнопки и лейблы - Montserrat */
   button, .btn, label, .badge {
     font-family: "Montserrat", sans-serif;
     font-weight: 600;
   }
+}
+
+/* Красивая фоновая сетка для Hero */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: radial-gradient(circle, var(--line) 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
