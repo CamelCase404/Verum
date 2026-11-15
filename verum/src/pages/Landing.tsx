@@ -6,7 +6,7 @@ import {
     ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
-    Cloud, Gamepad2, BarChart3, Lock, Zap
+    Cloud, Gamepad2, BarChart3, Lock, Zap, Terminal, Sparkles, CheckCircle
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
@@ -34,7 +34,7 @@ const METRICS = [
     { value: "70%", label: "Кандидатов отсеивается", icon: XCircle },
     { value: "3 дня", label: "До шортлиста", icon: Clock },
     { value: "80%", label: "Экономии времени", icon: TrendingUp },
-    { value: "1.5 млн ₽", label: "Экономия в год", icon: Wallet }, // Убрано "на HR"
+    { value: "1.5 млн ₽", label: "Экономия в год", icon: Wallet },
 ];
 
 const STEPS = [
@@ -86,9 +86,9 @@ export function Landing() {
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
 
-            {/* ===== HERO (Разбавлен сеткой и преимуществами) ===== */}
-            <section className="relative pt-28 pb-24 md:pt-36 md:pb-32">
-                <div className="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none -z-10" />
+            {/* ===== HERO (Разбавлен плавающими моделями) ===== */}
+            <section className="relative pt-24 pb-24 md:pt-32 md:pb-32 border-b border-line/30">
+                <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-10" />
                 <div className="absolute inset-0 pointer-events-none -z-10 flex justify-center items-center">
                     <motion.div
                         animate={{ scale: [1, 1.05, 1], opacity: [0.03, 0.06, 0.03] }}
@@ -97,7 +97,41 @@ export function Landing() {
                     />
                 </div>
 
-                <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10">
+                <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
+                    
+                    {/* Плавающая карточка 1 (Слева) */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0, y: [0, -15, 0] }}
+                        transition={{ opacity: { duration: 0.8 }, x: { duration: 0.8 }, y: { duration: 6, repeat: Infinity, ease: "easeInOut" } }}
+                        className="hidden lg:flex absolute top-10 left-0 bg-surface border border-line rounded-2xl p-4 shadow-xl items-center gap-4"
+                    >
+                        <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                            <ShieldCheck size={24} />
+                        </div>
+                        <div className="text-left">
+                            <div className="text-[14px] font-bold text-ink font-heading">Кандидат верифицирован</div>
+                            <div className="text-[12px] text-ink-3 font-medium">Оценка ИИ: 92/100</div>
+                        </div>
+                    </motion.div>
+
+                    {/* Плавающая карточка 2 (Справа) */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0, y: [0, 15, 0] }}
+                        transition={{ opacity: { duration: 0.8 }, x: { duration: 0.8 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
+                        className="hidden lg:block absolute bottom-10 right-0 bg-[#1e1e1e] border border-[#333] rounded-xl p-5 shadow-2xl text-left"
+                    >
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <pre className="text-[13px] font-mono text-[#4ade80]">
+                            <code>{`const match = await verum.match({\n  stack: "React",\n  grade: "Senior"\n});`}</code>
+                        </pre>
+                    </motion.div>
+
                     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex flex-col items-center">
                         <motion.h1 variants={itemVariants} className="font-heading font-extrabold text-[clamp(40px,6vw,76px)] leading-[1.1] tracking-tight text-ink mb-6 max-w-[900px]">
                             Наймите инженера, который <span className="text-accent">реально</span> пишет код
@@ -107,7 +141,7 @@ export function Landing() {
                             Скрининг через ИИ-интервью с античитом и записью видео. Отсеиваем 70% кандидатов и экономим до 1.5 млн ₽ в год.
                         </motion.p>
 
-                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 mb-10">
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
                             <button onClick={goCompany} className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2">
                                 Проверить кандидатов <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                             </button>
@@ -115,28 +149,18 @@ export function Landing() {
                                 Я разработчик <ChevronRight size={18} />
                             </button>
                         </motion.div>
-
-                        {/* Разбавляем пустоту текстовыми преимуществами под кнопками */}
-                        <motion.div variants={itemVariants} className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[14px] font-semibold text-ink-3 font-heading">
-                            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent" /> Первый тест бесплатно</span>
-                            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent" /> Без скрытых комиссий</span>
-                            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-accent" /> Доступ к базе 24/7</span>
-                        </motion.div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* ===== CATEGORIES (Убрал cursor-pointer) ===== */}
-            <section className="py-20 md:py-24 bg-surface-2/50">
+            {/* ===== CATEGORIES ===== */}
+            <section className="py-20 md:py-24 bg-surface-2/60 border-b border-line/30">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Категории</div>
                         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
                             База кандидатов по всем стекам
                         </h2>
-                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
-                            Только верифицированные инженеры с записью теста и подтверждённым грейдом.
-                        </p>
                     </div>
 
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
@@ -144,10 +168,8 @@ export function Landing() {
                             const Icon = cat.icon;
                             return (
                                 <motion.div key={i} variants={itemVariants} className="bg-surface border border-line rounded-xl p-6 transition-colors">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
-                                            <Icon size={22} />
-                                        </div>
+                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                                        <Icon size={22} />
                                     </div>
                                     <h3 className="font-heading text-[18px] font-bold text-ink mb-1">{cat.title}</h3>
                                     <p className="text-[13px] text-ink-3 font-medium mb-3">{cat.desc}</p>
@@ -160,7 +182,7 @@ export function Landing() {
             </section>
 
             {/* ===== METRICS ===== */}
-            <section className="py-16 bg-bg">
+            <section className="py-16 bg-bg border-b border-line/30">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
                         {METRICS.map((m, i) => {
@@ -179,20 +201,20 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== STEPS (Красивый таймлайн без линий) ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/50 relative overflow-hidden">
+            {/* ===== STEPS (Возвращена красивая дорожка) ===== */}
+            <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="text-center mb-16 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Как это работает</div>
                         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
                             От вакансии до финалиста — 4 шага
                         </h2>
-                        <p className="text-[16px] md:text-[18px] text-ink-3 font-medium leading-relaxed">
-                            Весь процесс занимает меньше недели, а не месяц.
-                        </p>
                     </div>
 
                     <div className="relative">
+                        {/* Красивая градиентная дорожка на фоне */}
+                        <div className="hidden md:block absolute top-[40px] left-[10%] right-[10%] h-1 rounded-full bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+
                         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={containerVariants} className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
                             {STEPS.map((step, i) => {
                                 const Icon = step.icon;
@@ -222,7 +244,7 @@ export function Landing() {
             </section>
 
             {/* ===== WHY US ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <section className="py-20 md:py-28 bg-surface-2/60 border-y border-line/30">
                 <div className="max-w-[1400px] mx-auto px-6">
                     <div className="mb-12 max-w-2xl">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Почему мы</div>
@@ -249,7 +271,7 @@ export function Landing() {
             </section>
 
             {/* ===== COMPARISON ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/50">
+            <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[1200px] mx-auto px-6">
                     <div className="text-center mb-12 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Сравнение</div>
@@ -294,7 +316,7 @@ export function Landing() {
             </section>
 
             {/* ===== FAQ ===== */}
-            <section className="py-20 md:py-28 bg-bg">
+            <section className="py-20 md:py-28 bg-surface-2/60 border-y border-line/30">
                 <div className="max-w-[900px] mx-auto px-6">
                     <div className="text-center mb-12">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">FAQ</div>
@@ -318,7 +340,7 @@ export function Landing() {
             </section>
 
             {/* ===== FINAL CTA ===== */}
-            <section className="py-20 md:py-28 bg-surface-2/50">
+            <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[900px] mx-auto px-6 text-center">
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={containerVariants}>
                         <motion.h2 variants={itemVariants} className="font-heading text-[clamp(36px,5vw,60px)] font-extrabold leading-[1.1] text-ink mb-6">
