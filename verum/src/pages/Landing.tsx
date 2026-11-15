@@ -168,7 +168,7 @@ export function Landing() {
                         Нанимайте тех,
                         <br />
                         кто <span className="text-accent">реально</span> пишет
-                        код
+                        хуйню
                     </motion.h1>
 
                     <motion.p
