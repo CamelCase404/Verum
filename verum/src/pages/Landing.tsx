@@ -192,7 +192,7 @@ export function Landing() {
                             onClick={goCompany}
                             className="h-[56px] px-8 rounded-xl bg-accent text-white font-medium text-[15px] hover:bg-accent-2 transition-all hover:-translate-y-0.5 shadow-lg shadow-accent/20 flex items-center justify-center gap-2 w-full sm:w-auto"
                         >
-                            Проверить кандидатов/нанять <ArrowRight size={18} />
+                            Проверить кандидатов <ArrowRight size={18} />
                         </button>
                         <button
                             onClick={goDev}
