@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
-import { UniversalSearch } from "@/components/sections/UniversalSearch";
 import {
     ArrowRight,
     ChevronRight,
@@ -14,9 +13,7 @@ import {
     Eye,
     XCircle,
     Check,
-    Building2,
-    Database,
-    Zap
+    Database
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
@@ -101,8 +98,6 @@ const COMPARISON = [
     ["Субъективное мнение", "100-балльная шкала по 5 осям"],
 ];
 
-const POPULAR_TAGS = ["Frontend", "Backend", "DevOps / SRE", "Data / ML"];
-
 /* ═══════ COMPONENTS ═══════ */
 
 export function Landing() {
@@ -123,7 +118,7 @@ export function Landing() {
 
     return (
         <div className="w-full bg-bg overflow-hidden text-ink selection:bg-accent/30">
-            {/* ══════════ 1. HERO (Компактный, как на Kwork) ══════════ */}
+            {/* ══════════ 1. HERO (Широкий контейнер, но текст по центру) ══════════ */}
             <section className="relative pt-10 pb-12 md:pt-16 md:pb-16">
                 <motion.div
                     animate={{ scale: [1, 1.1, 1], opacity: [0.03, 0.08, 0.03] }}
@@ -131,12 +126,12 @@ export function Landing() {
                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[800px] md:h-[800px] bg-accent rounded-full blur-[120px] pointer-events-none -z-10"
                 />
 
-                <div className="max-w-[1000px] mx-auto px-4 md:px-8 text-center relative z-10">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 text-center relative z-10">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-                        className="font-semibold tracking-[-0.04em] leading-[1.1] text-[clamp(32px,5vw,56px)] text-ink mb-4 text-balance"
+                        className="font-semibold tracking-[-0.04em] leading-[1.1] text-[clamp(32px,5vw,56px)] text-ink mb-4 text-balance max-w-[900px] mx-auto"
                     >
                         Нанимайте тех, <br className="hidden sm:block" />
                         кто <span className="text-accent">реально</span> пишет код
@@ -146,45 +141,16 @@ export function Landing() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-                        className="text-[16px] md:text-[18px] text-ink-2 leading-[1.6] max-w-[600px] mx-auto mb-8"
+                        className="text-[16px] md:text-[18px] text-ink-2 leading-[1.6] max-w-[650px] mx-auto mb-8"
                     >
                         Автоматический скрининг инженеров через ИИ-интервью с античитом. Проверяем хард-скиллы и отдаём только тех, кто умеет думать.
                     </motion.p>
 
-                    {/* Вставляем UniversalSearch прямо в Hero (как поле поиска на Kwork) */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
-                        className="mb-6"
-                    >
-                        <UniversalSearch />
-                    </motion.div>
-
-                    {/* Теги популярного (как на Kwork) */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="flex flex-wrap items-center justify-center gap-2 text-[13px] text-ink-3 mb-10"
-                    >
-                        <span className="font-medium mr-1">Популярное:</span>
-                        {POPULAR_TAGS.map((tag) => (
-                            <button
-                                key={tag}
-                                onClick={() => navigate(`/search?type=jobs&stack=${encodeURIComponent(tag)}`)}
-                                className="px-3 py-1.5 bg-surface border border-line rounded-lg hover:border-accent hover:text-accent transition-colors"
-                            >
-                                {tag}
-                            </button>
-                        ))}
-                    </motion.div>
-
-                    {/* Кнопки действий (сделал более компактными) */}
+                    {/* Кнопки действий */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.5, ease: EASE }}
+                        transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
                         className="flex flex-col sm:flex-row items-center justify-center gap-3"
                     >
                         <button
@@ -203,9 +169,9 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 2. METRICS (Плотная полоса, как логотипы на Kwork) ══════════ */}
+            {/* ══════════ 2. METRICS (Широкая полоса) ══════════ */}
             <section className="border-y border-line bg-surface-2 py-6 md:py-8">
-                <div className="max-w-[1120px] mx-auto px-4 md:px-8">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 divide-y lg:divide-y-0 lg:divide-x divide-line text-center">
                         {METRICS.map((m, i) => (
                             <motion.div
@@ -228,9 +194,9 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 3. FEATURES (Подняли наверх, как категории) ══════════ */}
+            {/* ══════════ 3. FEATURES (Bento Grid) ══════════ */}
             <section className="py-12 md:py-16">
-                <div className="max-w-[1120px] mx-auto px-4 md:px-8">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -275,9 +241,9 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 4. STEPS (Сетка вместо длинного таймлайна) ══════════ */}
+            {/* ══════════ 4. STEPS (Сетка) ══════════ */}
             <section className="py-12 md:py-16 bg-surface-2">
-                <div className="max-w-[1120px] mx-auto px-4 md:px-8">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -321,9 +287,9 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ══════════ 5. COMPARISON ══════════ */}
+            {/* ══════════ 5. COMPARISON (Шире, чем раньше, но уже чем 1400) ══════════ */}
             <section className="py-12 md:py-16">
-                <div className="max-w-[1000px] mx-auto px-4 md:px-8">
+                <div className="max-w-[1200px] mx-auto px-4 md:px-8 lg:px-12">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -387,7 +353,7 @@ export function Landing() {
             {/* ══════════ 6. FINAL CTA ══════════ */}
             <section className="py-12 md:py-16 relative overflow-hidden">
                 <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
-                <div className="max-w-[800px] mx-auto px-4 md:px-8 text-center relative z-10">
+                <div className="max-w-[900px] mx-auto px-4 md:px-8 text-center relative z-10">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
