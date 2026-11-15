@@ -2,13 +2,11 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
-import {
-    ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
+import {ArrowRight, ChevronRight, ShieldCheck, FileText, Search,
     CheckCircle2, Brain, Eye, XCircle, Check, Database,
     Clock, TrendingUp, Wallet, Users, Code2, Server, Smartphone,
     Cloud, Gamepad2, BarChart3, Lock, Zap, Gauge, Target, Sparkles,
-    MessageSquare, Lightbulb, Star, Code, Layers
-} from "lucide-react";
+    MessageSquare, Lightbulb, Star, Code, Layers, Terminal} from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
 
