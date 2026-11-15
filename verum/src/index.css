@@ -81,3 +81,12 @@ a { color: inherit; text-decoration: none; }
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+/* === Global Montserrat Font === */
+body, html {
+    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
