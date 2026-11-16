@@ -179,16 +179,16 @@ export function Landing() {
                 </div>
                 <div className="max-w-[1000px] mx-auto px-6 text-center relative z-10 flex flex-col items-center">
                     <h1 className="font-heading font-extrabold text-[clamp(40px,6vw,76px)] leading-[1.1] tracking-tight text-ink mb-6 max-w-[900px]">
-                        Наймите только <span className="text-accent">проверенных</span> разработчиков
+                        Нанимайте только <span className="text-accent">проверенных</span> разработчиков
                     </h1>
                     <p className="text-[17px] md:text-[21px] text-ink-2 font-medium leading-relaxed mb-10 max-w-[680px]">
                         Скрининг через ИИ-интервью с античитом и записью видео. Отсеиваем 70% кандидатов и экономим до 1.5 млн ₽ в год.
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
-                        <button onClick={goCompany} className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-2">
+                        <button onClick={goCompany} className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto shadow-xl shadow-accent/20 hover:-translate-y-0.5">
                             Нанять <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                         </button>
-                        <button onClick={goDev} className="h-[56px] px-8 rounded-xl bg-surface-2 border border-line text-ink font-heading font-bold text-[15px] hover:bg-surface-3 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <button onClick={goDev} className="text-ink-2 hover:text-ink font-medium text-[15px] transition-colors underline-offset-4 hover:underline h-[56px] px-4 w-full sm:w-auto flex items-center justify-center">
                             Я разработчик
                         </button>
                     </div>
