@@ -50,6 +50,8 @@ import {
     Scale,
     Award,
     AlertCircle,
+    Banknote,
+    Github,
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
