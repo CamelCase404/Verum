@@ -171,6 +171,35 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
         raise HTTPException(403, "Собеседование доступно только для разработчиков")
     
     is_job_test = bool(req.job_id)
+
+    # Если тест по вакансии — строго проверяем стек и языки
+    if is_job_test:
+        comp_res = await db.execute(select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None)))
+        target_job = None
+        for comp in comp_res.scalars().all():
+            for job in comp.job_postings:
+                if str(job.get("id")) == str(req.job_id):
+                    target_job = job
+                    break
+            if target_job:
+                break
+                
+        if target_job:
+            job_stack_str = target_job.get("stack", "").lower()
+            stack_map = {
+                "mobile (ios)": "mobile-ios", "mobile (android)": "mobile-android",
+                "frontend": "frontend", "backend": "backend", "gamedev": "gamedev",
+                "devops / sre": "devops", "data / ml": "data", "fullstack": "backend"
+            }
+            expected_stack = stack_map.get(job_stack_str, "backend")
+            if req.stack_id != expected_stack:
+                raise HTTPException(400, f"Выбранный стек не соответствует вакансии. Ожидается: {target_job.get('stack')}")
+            
+            job_langs_str = str(target_job.get("languages", ""))
+            job_langs = [l.strip().lower() for l in job_langs_str.split(",") if l.strip()]
+            for l in req.language_ids:
+                if l.lower() not in job_langs:
+                    raise HTTPException(400, f"Язык {l} не подходит под вакансию. Разрешены: {', '.join(job_langs)}")
     
     # Блокируем старт, пока предыдущее собеседование висит на модерации (только для обычных тестов)
     if not is_job_test and user.test_status == "pending":

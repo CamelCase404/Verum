@@ -64,7 +64,12 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
             fetch(`${API}/api/jobs/id/${jobId}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.stack) setStackId(data.stack);
+                    const STACK_MAP: Record<string, string> = {
+                            "mobile (ios)": "mobile-ios", "mobile (android)": "mobile-android",
+                            "frontend": "frontend", "backend": "backend", "gamedev": "gamedev",
+                            "devops / sre": "devops", "data / ml": "data", "fullstack": "backend"
+                        };
+                        if (data.stack) setStackId(STACK_MAP[data.stack.toLowerCase()] || "backend");
                     if (data.level) setLevelId(data.level.toLowerCase() as LevelId);
                     if (data.languages) {
                         // Разбиваем строку "React, TypeScript" в массив id ["react", "ts"]
@@ -206,91 +211,118 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                         </div>
                     )}
 
-                    <section className="mt-10">
-                        <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted text-center">Уровень</h2>
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            {catalog?.levels.map((l) => {
-                                const active = l.id === levelId;
-                                const Icon = getIcon(l.icon);
-                                return (
-                                    <button
-                                        key={l.id}
-                                        onClick={() => !isJobLocked && setLevelId(l.id as LevelId)}
-                                        disabled={isJobLocked}
-                                        className={`text-left rounded-[22px] border p-4 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
-                                    >
-                                        <div className="flex items-center gap-2 justify-center">
-                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
-                                                <Icon size={16} />
+                    {isJobLocked ? (
+                        <div className="mt-10 bg-surface-2 border border-line rounded-[22px] p-8 text-center space-y-4 shadow-sm">
+                            <h2 className="text-[18px] font-bold text-ink">Собеседование по вакансии</h2>
+                            <p className="text-[14px] text-muted">
+                                Стек и языки автоматически зафиксированы под требования вакансии.
+                            </p>
+                            <div className="flex flex-col items-center gap-3 pt-2">
+                                <div className="flex gap-2 items-center">
+                                    <span className="text-[13px] font-semibold text-ink-3">Стек:</span>
+                                    <span className="px-3 py-1 bg-accent text-white rounded-lg font-medium text-[14px]">
+                                        {stack?.name || stackId}
+                                    </span>
+                                </div>
+                                <div className="flex gap-2 items-center flex-wrap justify-center">
+                                    <span className="text-[13px] font-semibold text-ink-3">Языки:</span>
+                                    {languageIds.map(id => {
+                                        const langName = stack?.languages.find(l => l.id === id)?.name || id;
+                                        return (
+                                            <span key={id} className="px-3 py-1 bg-accent text-white rounded-lg font-medium text-[14px]">
+                                                {langName}
                                             </span>
-                                            <span className="font-semibold text-[15px]">{l.name}</span>
-                                        </div>
-                                        <p className={`text-[12px] mt-3 text-center leading-snug ${active ? "text-white/80" : "text-muted"}`}>{l.description}</p>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-                    <section className="mt-10">
-                        <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted text-center">Стек</h2>
-                        <div className="mt-4 flex flex-wrap justify-center gap-3">
-                            {catalog?.stacks.map((s) => {
-                                const active = s.id === stackId;
-                                const Icon = getIcon(s.icon);
-                                return (
-                                    <button
-                                        key={s.id}
-                                        onClick={() => {
-                                            if (isJobLocked) return;
-                                            setStackId(s.id);
-                                            setLanguageIds([]);
-                                        }}
-                                        disabled={isJobLocked}
-                                        className={`flex items-center gap-3 rounded-[22px] border px-5 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
-                                    >
-                                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
-                                            <Icon size={18} />
-                                        </span>
-                                        <span className="font-semibold text-[14px]">{s.name}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-                    {stack && (
-                        <motion.section 
-                            initial={{ opacity: 0, y: 10 }} 
-                            animate={{ opacity: 1, y: 0 }} 
-                            transition={{ duration: 0.3 }}
-                            className="mt-10"
-                        >
-                            <div className="flex items-center justify-center gap-3">
-                                <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted">Языки (макс. 4)</h2>
-                                <span className="text-[12px] font-medium bg-surface-3 px-2 py-0.5 rounded text-muted">{languageIds.length} / 4</span>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                            <div className="mt-4 flex flex-wrap justify-center gap-3">
-                                {stack.languages.map((lang) => {
-                                    const active = languageIds.includes(lang.id);
-                                    const Icon = getIcon(lang.icon);
-                                    return (
-                                        <button
-                                            key={lang.id}
-                                            onClick={() => !isJobLocked && toggleLanguage(lang.id)}
-                                            disabled={isJobLocked || (!active && languageIds.length >= 4)}
-                                            className={`flex items-center gap-2 rounded-[22px] border px-4 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-md shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"} ${!active && languageIds.length >= 4 ? "opacity-40 cursor-not-allowed" : ""}`}
-                                        >
-                                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white" : "bg-card text-ink"}`}>
-                                                <Icon size={16} />
-                                            </span>
-                                            <span className="font-medium text-[13px]">{lang.name}</span>
-                                            {active && <Check size={14} className="ml-1 text-white" />}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </motion.section>
+                        </div>
+                    ) : (
+                        <>
+                            <section className="mt-10">
+                                <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted text-center">Уровень</h2>
+                                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    {catalog?.levels.map((l) => {
+                                        const active = l.id === levelId;
+                                        const Icon = getIcon(l.icon);
+                                        return (
+                                            <button
+                                                key={l.id}
+                                                onClick={() => setLevelId(l.id as LevelId)}
+                                                className={`text-left rounded-[22px] border p-4 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
+                                            >
+                                                <div className="flex items-center gap-2 justify-center">
+                                                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
+                                                        <Icon size={16} />
+                                                    </span>
+                                                    <span className="font-semibold text-[15px]">{l.name}</span>
+                                                </div>
+                                                <p className={`text-[12px] mt-3 text-center leading-snug ${active ? "text-white/80" : "text-muted"}`}>{l.description}</p>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+
+                            <section className="mt-10">
+                                <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted text-center">Стек</h2>
+                                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                                    {catalog?.stacks.map((s) => {
+                                        const active = s.id === stackId;
+                                        const Icon = getIcon(s.icon);
+                                        return (
+                                            <button
+                                                key={s.id}
+                                                onClick={() => {
+                                                    setStackId(s.id);
+                                                    setLanguageIds([]);
+                                                }}
+                                                className={`flex items-center gap-3 rounded-[22px] border px-5 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
+                                            >
+                                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
+                                                    <Icon size={18} />
+                                                </span>
+                                                <span className="font-semibold text-[14px]">{s.name}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+
+                            {stack && (
+                                <motion.section 
+                                    initial={{ opacity: 0, y: 10 }} 
+                                    animate={{ opacity: 1, y: 0 }} 
+                                    transition={{ duration: 0.3 }}
+                                    className="mt-10"
+                                >
+                                    <div className="flex items-center justify-center gap-3">
+                                        <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted">Языки (макс. 4)</h2>
+                                        <span className="text-[12px] font-medium bg-surface-3 px-2 py-0.5 rounded text-muted">{languageIds.length} / 4</span>
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap justify-center gap-3">
+                                        {stack.languages.map((lang) => {
+                                            const active = languageIds.includes(lang.id);
+                                            const Icon = getIcon(lang.icon);
+                                            return (
+                                                <button
+                                                    key={lang.id}
+                                                    onClick={() => toggleLanguage(lang.id)}
+                                                    disabled={!active && languageIds.length >= 4}
+                                                    className={`flex items-center gap-2 rounded-[22px] border px-4 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-md shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"} ${!active && languageIds.length >= 4 ? "opacity-40 cursor-not-allowed" : ""}`}
+                                                >
+                                                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white" : "bg-card text-ink"}`}>
+                                                        <Icon size={16} />
+                                                    </span>
+                                                    <span className="font-medium text-[13px]">{lang.name}</span>
+                                                    {active && <Check size={14} className="ml-1 text-white" />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.section>
+                            )}
+                        </>
                     )}
 
                     <div className="mt-12 pt-8 border-t border-divider flex flex-col items-center transition-colors duration-300">
