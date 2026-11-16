@@ -80,3 +80,13 @@
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* === Зеленое выделение текста === */
+::selection {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+::-moz-selection {
+  background-color: var(--accent);
+  color: #ffffff;
+}

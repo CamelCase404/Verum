@@ -158,7 +158,7 @@ const MATCHING = [
 const PRICING = [
     {
         name: "Start",
-        price: "30 000 ₽",
+        price: "15 000 ₽",
         desc: "Для небольших команд и стартапов.",
         features: [
             "50 тестов в месяц",
@@ -182,7 +182,7 @@ const PRICING = [
     },
     {
         name: "Enterprise",
-        price: "200 000 ₽",
+        price: "80 000 ₽",
         desc: "Для крупных компаний с большим потоком.",
         features: [
             "Безлимитные тесты",

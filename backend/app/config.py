@@ -50,7 +50,7 @@ class Settings:
     PLANS: dict = {
         "start": {
             "name": "Start",
-            "price_month": 30000,
+            "price_month": 15000,
             "verifications_per_month": 20,
             "tokens_per_month": 3000,
             "features": [
@@ -73,7 +73,7 @@ class Settings:
         },
         "enterprise": {
             "name": "Enterprise",
-            "price_month": 200000,
+            "price_month": 80000,
             "verifications_per_month": None,
             "tokens_per_month": None,
             "features": [
