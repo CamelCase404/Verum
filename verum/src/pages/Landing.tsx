@@ -79,7 +79,7 @@ function SectionDivider({ icon: Icon }: { icon: any }) {
     );
 }
 
-/* ===== Акцентное подчёркивание под заголовком ===== */
+/* ===== Заголовок секции (без подчёркивания) ===== */
 function AccentTitle({ children }: { children: ReactNode }) {
     return (
         <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
@@ -89,15 +89,6 @@ function AccentTitle({ children }: { children: ReactNode }) {
 }
 
 /* ===== DATA ===== */
-const CATEGORIES = [
-    { icon: Code2, title: "Frontend", desc: "React, Vue, Angular, TS" },
-    { icon: Server, title: "Backend", desc: "Python, Go, Java, Node.js" },
-    { icon: Smartphone, title: "Mobile", desc: "iOS, Android, Flutter" },
-    { icon: Cloud, title: "DevOps / SRE", desc: "Kubernetes, Docker, CI/CD" },
-    { icon: BarChart3, title: "Data / ML", desc: "Python, PyTorch, SQL" },
-    { icon: Gamepad2, title: "GameDev", desc: "Unity, Unreal, Godot" },
-];
-
 const METRICS = [
     { value: "70%", label: "Кандидатов отсеивается", icon: XCircle },
     { value: "3 дня", label: "До шортлиста", icon: Clock },
@@ -282,58 +273,109 @@ const COMPARISON = [
     ["Субъективное мнение", "100-балльная шкала"],
 ];
 
-const FAQ_COMPANY = [
+const TEST_STAGES = [
     {
-        q: "Сколько стоит подключение?",
-        a: "Первый тест и открытие контакта — бесплатно. Дальше — подписка от 30 000 ₽/мес в зависимости от объёма.",
+        num: "01",
+        title: "Общие знания",
+        desc: "8 вопросов по стеку и грейду",
+        time: "15 мин",
     },
     {
-        q: "Что если кандидат не пройдёт тест?",
-        a: "Вы не платите за него. Оплата списывается только при открытии контакта прошедшего кандидата.",
+        num: "02",
+        title: "Code Review",
+        desc: "Поиск багов в реальном коде",
+        time: "10 мин",
     },
     {
-        q: "Сколько идёт тест?",
-        a: "Около 45–60 минут. 5 этапов, 12 вопросов, включая code review и разбор реальных продакшен-кейсов.",
+        num: "03",
+        title: "Продакшен-инцидент",
+        desc: "Как починить сломанный код",
+        time: "10 мин",
     },
     {
-        q: "Есть ли гарантия возврата?",
-        a: "Да. Если кандидат отклонён на модерации — кредит возвращается. Списываем токены только за одобренных кандидатов.",
+        num: "04",
+        title: "Code Review 2",
+        desc: "Другие баги и уязвимости",
+        time: "10 мин",
     },
     {
-        q: "Можно ли проходить тест несколько раз?",
-        a: "Да, но с интервалом 180 дней для обычных тестов. Для тестов под конкретную вакансию — без ограничений.",
-    },
-    {
-        q: "Что видит компания в профиле?",
-        a: "Балл, грейд, видео собеседования, разбивку по компетенциям и подтверждённые контакты после оплаты.",
+        num: "05",
+        title: "Вторая проблема",
+        desc: "Новая ситуация из продакшена",
+        time: "10 мин",
     },
 ];
 
-const FAQ_DEV = [
+const TEST_RESULTS = [
     {
-        q: "Сколько стоит пройти тест?",
-        a: "Полностью бесплатно. Вы не платите за прохождение собеседования и попадание в базу.",
+        icon: Gauge,
+        title: "Итоговый балл 0–100",
+        desc: "Сводная оценка по всем 5 этапам собеседования.",
     },
     {
-        q: "Что я получу после теста?",
-        a: "Верифицированный профиль с баллами и грейдом. Компании смогут находить вас и писать напрямую.",
+        icon: Star,
+        title: "Грейд кандидата",
+        desc: "Junior, Middle, Senior или Reject — по реальным ответам.",
     },
     {
-        q: "Сколько идёт тест?",
-        a: "Около 45–60 минут. 5 этапов, 12 вопросов, включая code review и разбор реальных продакшен-кейсов.",
+        icon: Layers,
+        title: "Разбивка по компетенциям",
+        desc: "5 осей: архитектура, код, работа с ИИ, adaptability, soft skills.",
     },
     {
-        q: "Можно ли пройти тест несколько раз?",
-        a: "Да. Если попытка неудачная — можно перепройти через 180 дней. Для теста под конкретную вакансию — без ограничений.",
+        icon: MessageSquare,
+        title: "Резюме и рекомендация",
+        desc: "Текст от ИИ-судьи: сильные стороны, пробелы, вердикт.",
     },
     {
-        q: "Что если я не прошёл тест?",
-        a: "Не страшно. Через 180 дней можно попробовать снова. Для тестов под вакансию ограничений нет.",
+        icon: Eye,
+        title: "Запись видео",
+        desc: "Полное видео собеседования с записью экрана и камеры.",
     },
     {
-        q: "Могут ли компании видеть мои контакты?",
-        a: "Только после того, как компания оплатит открытие контакта. До этого видны только анонимизированный профиль и баллы.",
+        icon: Clock,
+        title: "Тайм-коды аномалий",
+        desc: "Модератор видит только подозрительные секунды.",
     },
+];
+
+const NAV_METHODS = [
+    {
+        badge: "Способ 1",
+        title: "Найм из базы Верум",
+        desc: "Алгоритм сам подбирает кандидатов по вашим требованиям. Вы открываете контакты только тех, кто подошёл.",
+        icon: UserPlus,
+        featured: true,
+        steps: [
+            "Заполняете профиль компании в Веруме",
+            "В поиске указываете стек, грейд, вилку",
+            "Алгоритм подбирает по 7 осям матчинга",
+            "Смотрите профили: балл, видео, компетенции",
+            "Открываете контакты за токены",
+            "Связываетесь с кандидатом напрямую",
+        ],
+    },
+    {
+        badge: "Способ 2",
+        title: "Интеграция для своих кандидатов",
+        desc: "Уже нашли человека сами (на hh.ru, по рекомендациям)? Отправьте ему ссылку на тест — он пройдёт его заново под вашу вакансию.",
+        icon: ExternalLink,
+        featured: false,
+        steps: [
+            "Создаёте вакансию в ЛК Верума",
+            "Получаете короткую ссылку /v/abc123",
+            "Отправляете ссылку кандидату",
+            "Кандидат проходит тест за 45–60 минут",
+            "Составляется топ откликов на вакансию",
+            "Открываете контакты только прошедших",
+        ],
+    },
+];
+
+const TOKEN_COSTS = [
+    { grade: "Junior", tokens: "100 токенов" },
+    { grade: "Middle", tokens: "200 токенов" },
+    { grade: "Senior", tokens: "350 токенов" },
 ];
 
 export function Landing() {
@@ -353,10 +395,14 @@ export function Landing() {
         else if (user.role === "developer") navigate("/dashboard");
         else toast("Для теста нужен аккаунт разработчика");
     };
+    const goStart = () => {
+        if (!user) navigate("/register");
+        else navigate("/dashboard");
+    };
 
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
-            {/* ===== HERO (без летающих иконок) ===== */}
+            {/* ===== HERO ===== */}
             <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
                 <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none -z-10" />
                 <div className="absolute inset-0 pointer-events-none -z-10">
@@ -427,12 +473,10 @@ export function Landing() {
 
                         <motion.div variants={itemVariants}>
                             <button
-                                onClick={() =>
-                                    navigate(user ? "/dashboard" : "/register")
-                                }
+                                onClick={goStart}
                                 className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2"
                             >
-                                Нанять{" "}
+                                Начать бесплатно{" "}
                                 <ArrowRight
                                     size={18}
                                     className="transition-transform group-hover:translate-x-1"
@@ -443,7 +487,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== ВЫБОР РОЛИ (отдельный блок) ===== */}
+            {/* ===== ВЫБОР РОЛИ ===== */}
             <section className="py-16 md:py-20 relative">
                 <div className="max-w-[1100px] mx-auto px-6">
                     <div className="text-center mb-10 max-w-2xl mx-auto">
@@ -487,7 +531,7 @@ export function Landing() {
                                 экономить время на скрининге.
                             </p>
                             <div
-                                className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading transition-colors ${
+                                className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading ${
                                     audience === "company"
                                         ? "text-accent"
                                         : "text-ink-3"
@@ -529,7 +573,7 @@ export function Landing() {
                                 получать предложения напрямую.
                             </p>
                             <div
-                                className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading transition-colors ${
+                                className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading ${
                                     audience === "developer"
                                         ? "text-accent"
                                         : "text-ink-3"
@@ -548,7 +592,7 @@ export function Landing() {
                 </div>
             </section>
 
-            {/* ===== КОНТЕНТ ПО ВЫБРАННОЙ АУДИТОРИИ ===== */}
+            {/* ===== КОНТЕНТ ПО АУДИТОРИИ ===== */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={audience}
@@ -559,7 +603,7 @@ export function Landing() {
                 >
                     {audience === "company" ? (
                         <>
-                            {/* ===== КОМПАНИЯМ: Метрики ===== */}
+                            {/* КОМПАНИЯМ: Метрики */}
                             <SectionDivider icon={TrendingUp} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
@@ -600,7 +644,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Сравнение ===== */}
+                            {/* КОМПАНИЯМ: Сравнение */}
                             <SectionDivider icon={Scale} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
@@ -666,7 +710,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Шаги ===== */}
+                            {/* КОМПАНИЯМ: Шаги */}
                             <SectionDivider icon={Route} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
@@ -725,7 +769,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Что оценивается ===== */}
+                            {/* КОМПАНИЯМ: Что оценивается */}
                             <SectionDivider icon={Target} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -766,7 +810,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Как подбирается ===== */}
+                            {/* КОМПАНИЯМ: Как подбирается */}
                             <SectionDivider icon={GitMerge} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -807,7 +851,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Тарифы ===== */}
+                            {/* КОМПАНИЯМ: Тарифы */}
                             <SectionDivider icon={CircleDollarSign} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -891,7 +935,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Найм и интеграция ===== */}
+                            {/* КОМПАНИЯМ: Найм и интеграция */}
                             <SectionDivider icon={ExternalLink} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -910,98 +954,74 @@ export function Landing() {
                                     </div>
 
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                        {/* Способ 1 */}
-                                        <div className="bg-surface border-2 border-accent rounded-2xl p-8 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
-                                            <div className="flex items-center gap-3 mb-5 relative">
-                                                <div className="w-12 h-12 rounded-xl bg-accent text-white flex items-center justify-center shrink-0">
-                                                    <UserPlus size={22} />
-                                                </div>
-                                                <div>
-                                                    <div className="text-[11px] font-bold uppercase tracking-wider text-accent font-heading">
-                                                        Способ 1
+                                        {NAV_METHODS.map((method, idx) => {
+                                            const Icon = method.icon;
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className={`rounded-2xl p-8 relative overflow-hidden ${
+                                                        method.featured
+                                                            ? "bg-surface border-2 border-accent"
+                                                            : "bg-surface border border-line"
+                                                    }`}
+                                                >
+                                                    {method.featured && (
+                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none" />
+                                                    )}
+                                                    <div className="flex items-center gap-3 mb-5 relative">
+                                                        <div
+                                                            className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                                                                method.featured
+                                                                    ? "bg-accent text-white"
+                                                                    : "bg-accent/10 text-accent"
+                                                            }`}
+                                                        >
+                                                            <Icon size={22} />
+                                                        </div>
+                                                        <div>
+                                                            <div
+                                                                className={`text-[11px] font-bold uppercase tracking-wider font-heading ${
+                                                                    method.featured
+                                                                        ? "text-accent"
+                                                                        : "text-ink-3"
+                                                                }`}
+                                                            >
+                                                                {method.badge}
+                                                            </div>
+                                                            <h3 className="font-heading text-[20px] font-bold text-ink">
+                                                                {method.title}
+                                                            </h3>
+                                                        </div>
                                                     </div>
-                                                    <h3 className="font-heading text-[20px] font-bold text-ink">
-                                                        Найм из базы Верум
-                                                    </h3>
+                                                    <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-5 relative">
+                                                        {method.desc}
+                                                    </p>
+                                                    <ol className="space-y-3 relative">
+                                                        {method.steps.map(
+                                                            (text, i) => (
+                                                                <li
+                                                                    key={i}
+                                                                    className="flex items-start gap-3"
+                                                                >
+                                                                    <span
+                                                                        className={`w-6 h-6 rounded-full text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+                                                                            method.featured
+                                                                                ? "bg-accent text-white"
+                                                                                : "bg-surface-2 border border-line text-ink-2"
+                                                                        }`}
+                                                                    >
+                                                                        {i + 1}
+                                                                    </span>
+                                                                    <span className="text-[14px] text-ink-2 font-medium leading-relaxed">
+                                                                        {text}
+                                                                    </span>
+                                                                </li>
+                                                            ),
+                                                        )}
+                                                    </ol>
                                                 </div>
-                                            </div>
-                                            <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-5 relative">
-                                                Алгоритм сам подбирает
-                                                кандидатов по вашим требованиям.
-                                                Вы открываете контакты только
-                                                тех, кто подошёл.
-                                            </p>
-                                            <ol className="space-y-3 relative">
-                                                {[
-                                                    "Заполняете профиль компании в Веруме",
-                                                    "В поиске указываете стек, грейд, вилку",
-                                                    "Алгоритм подбирает по 7 осям матчинга",
-                                                    "Смотрите профили: балл, видео, компетенции",
-                                                    "Открываете контакты за токены",
-                                                    "Связываетесь с кандидатом напрямую",
-                                                ].map((text, i) => (
-                                                    <li
-                                                        key={i}
-                                                        className="flex items-start gap-3"
-                                                    >
-                                                        <span className="w-6 h-6 rounded-full bg-accent text-white text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                                                            {i + 1}
-                                                        </span>
-                                                        <span className="text-[14px] text-ink-2 font-medium leading-relaxed">
-                                                            {text}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ol>
-                                        </div>
-
-                                        {/* Способ 2 */}
-                                        <div className="bg-surface border border-line rounded-2xl p-8">
-                                            <div className="flex items-center gap-3 mb-5">
-                                                <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
-                                                    <ExternalLink size={22} />
-                                                </div>
-                                                <div>
-                                                    <div className="text-[11px] font-bold uppercase tracking-wider text-ink-3 font-heading">
-                                                        Способ 2
-                                                    </div>
-                                                    <h3 className="font-heading text-[20px] font-bold text-ink">
-                                                        Интеграция для своих
-                                                        кандидатов
-                                                    </h3>
-                                                </div>
-                                            </div>
-                                            <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-5">
-                                                Уже нашли человека сами (на
-                                                hh.ru, по рекомендациям)?
-                                                Отправьте ему ссылку на тест —
-                                                он пройдёт его заново под вашу
-                                                вакансию.
-                                            </p>
-                                            <ol className="space-y-3">
-                                                {[
-                                                    "Создаёте вакансию в ЛК Верума",
-                                                    "Получаете короткую ссылку /v/abc123",
-                                                    "Отправляете ссылку кандидату",
-                                                    "Кандидат проходит тест за 45–60 минут",
-                                                    "Составляется топ откликов на вакансию",
-                                                    "Открываете контакты только прошедших",
-                                                ].map((text, i) => (
-                                                    <li
-                                                        key={i}
-                                                        className="flex items-start gap-3"
-                                                    >
-                                                        <span className="w-6 h-6 rounded-full bg-surface-2 border border-line text-ink-2 text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                                                            {i + 1}
-                                                        </span>
-                                                        <span className="text-[14px] text-ink-2 font-medium leading-relaxed">
-                                                            {text}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ol>
-                                        </div>
+                                            );
+                                        })}
                                     </div>
 
                                     <div className="bg-surface border border-line rounded-2xl p-8">
@@ -1021,20 +1041,7 @@ export function Landing() {
                                             верификаций.
                                         </p>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {[
-                                                {
-                                                    grade: "Junior",
-                                                    tokens: "100 токенов",
-                                                },
-                                                {
-                                                    grade: "Middle",
-                                                    tokens: "200 токенов",
-                                                },
-                                                {
-                                                    grade: "Senior",
-                                                    tokens: "350 токенов",
-                                                },
-                                            ].map((item, i) => (
+                                            {TOKEN_COSTS.map((item, i) => (
                                                 <div
                                                     key={i}
                                                     className="bg-surface-2 border border-line rounded-xl p-5 text-center"
@@ -1058,7 +1065,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== КОМПАНИЯМ: Почему мы ===== */}
+                            {/* КОМПАНИЯМ: Почему мы */}
                             <SectionDivider icon={ShieldCheck} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
@@ -1099,7 +1106,7 @@ export function Landing() {
                         </>
                     ) : (
                         <>
-                            {/* ===== РАЗРАБОТЧИКАМ: Что происходит за 45-60 минут ===== */}
+                            {/* РАЗРАБОТЧИКАМ: Что происходит за 45-60 минут */}
                             <SectionDivider icon={Timer} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -1117,38 +1124,7 @@ export function Landing() {
                                         </p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                                        {[
-                                            {
-                                                num: "01",
-                                                title: "Общие знания",
-                                                desc: "8 вопросов по стеку и грейду",
-                                                time: "15 мин",
-                                            },
-                                            {
-                                                num: "02",
-                                                title: "Code Review",
-                                                desc: "Поиск багов в реальном коде",
-                                                time: "10 мин",
-                                            },
-                                            {
-                                                num: "03",
-                                                title: "Продакшен-инцидент",
-                                                desc: "Как починить сломанный код",
-                                                time: "10 мин",
-                                            },
-                                            {
-                                                num: "04",
-                                                title: "Code Review 2",
-                                                desc: "Другие баги и уязвимости",
-                                                time: "10 мин",
-                                            },
-                                            {
-                                                num: "05",
-                                                title: "Вторая проблема",
-                                                desc: "Новая ситуация из продакшена",
-                                                time: "10 мин",
-                                            },
-                                        ].map((s, i) => (
+                                        {TEST_STAGES.map((s, i) => (
                                             <div
                                                 key={i}
                                                 className="bg-surface border border-line rounded-xl p-5"
@@ -1189,7 +1165,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== РАЗРАБОТЧИКАМ: Что вы получаете после теста ===== */}
+                            {/* РАЗРАБОТЧИКАМ: Что получаете после теста */}
                             <SectionDivider icon={ClipboardCheck} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -1207,38 +1183,7 @@ export function Landing() {
                                         </p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-                                        {[
-                                            {
-                                                icon: Gauge,
-                                                title: "Итоговый балл 0–100",
-                                                desc: "Сводная оценка по всем 5 этапам собеседования.",
-                                            },
-                                            {
-                                                icon: Star,
-                                                title: "Грейд кандидата",
-                                                desc: "Junior, Middle, Senior или Reject — по реальным ответам.",
-                                            },
-                                            {
-                                                icon: Layers,
-                                                title: "Разбивка по компетенциям",
-                                                desc: "5 осей: архитектура, код, работа с ИИ, adaptability, soft skills.",
-                                            },
-                                            {
-                                                icon: MessageSquare,
-                                                title: "Резюме и рекомендация",
-                                                desc: "Текст от ИИ-судьи: сильные стороны, пробелы, вердикт.",
-                                            },
-                                            {
-                                                icon: Eye,
-                                                title: "Запись видео",
-                                                desc: "Полное видео собеседования с записью экрана и камеры.",
-                                            },
-                                            {
-                                                icon: Clock,
-                                                title: "Тайм-коды аномалий",
-                                                desc: "Модератор видит только подозрительные секунды.",
-                                            },
-                                        ].map((f, i) => {
+                                        {TEST_RESULTS.map((f, i) => {
                                             const Icon = f.icon;
                                             return (
                                                 <div
@@ -1261,7 +1206,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== РАЗРАБОТЧИКАМ: Что оценивается ===== */}
+                            {/* РАЗРАБОТЧИКАМ: Что оценивается */}
                             <SectionDivider icon={Target} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
@@ -1302,7 +1247,7 @@ export function Landing() {
                                 </div>
                             </section>
 
-                            {/* ===== РАЗРАБОТЧИКАМ: CTA ===== */}
+                            {/* РАЗРАБОТЧИКАМ: CTA */}
                             <SectionDivider icon={UserCheck} />
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1200px] mx-auto px-6">
@@ -1367,7 +1312,7 @@ export function Landing() {
                 </motion.div>
             </AnimatePresence>
 
-            {/* ===== ФИНАЛЬНЫЙ CTA (общий) ===== */}
+            {/* ===== ФИНАЛЬНЫЙ CTA ===== */}
             <SectionDivider icon={Sparkles} />
             <section className="py-20 md:py-28 bg-bg">
                 <div className="max-w-[900px] mx-auto px-6 text-center">
