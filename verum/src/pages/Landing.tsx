@@ -42,22 +42,34 @@ const viewportSafe = { once: true, amount: 0.2, margin: "0px 0px -100px 0px" };
 function SectionDivider({ icon: Icon }: { icon: any }) {
     return (
         <div className="relative py-12 md:py-16 flex items-center justify-center">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, ease: EASE }}
-                className="max-w-[1400px] mx-auto px-6 w-full flex items-center gap-6"
-            >
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-line-2/70 to-line-2" />
-                <div className="relative flex items-center justify-center shrink-0">
+            <div className="max-w-[1400px] mx-auto px-6 w-full flex items-center gap-6">
+                <motion.div 
+                    initial={{ scaleX: 0, opacity: 0 }} 
+                    whileInView={{ scaleX: 1, opacity: 1 }} 
+                    viewport={{ once: true, margin: "-50px" }} 
+                    transition={{ duration: 0.8, ease: EASE }} 
+                    className="flex-1 h-px bg-gradient-to-r from-transparent via-line-2/70 to-line-2 origin-right" 
+                />
+                <motion.div 
+                    initial={{ scale: 0, opacity: 0 }} 
+                    whileInView={{ scale: 1, opacity: 1 }} 
+                    viewport={{ once: true, margin: "-50px" }} 
+                    transition={{ duration: 0.5, delay: 0.2, ease: EASE }} 
+                    className="relative flex items-center justify-center shrink-0"
+                >
                     <div className="absolute inset-0 w-12 h-12 rounded-full bg-accent/10 blur-[10px]" />
                     <div className="relative w-12 h-12 rounded-full bg-surface border border-line flex items-center justify-center text-accent shadow-sm">
                         <Icon size={20} />
                     </div>
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-line-2/70 to-line-2" />
-            </motion.div>
+                </motion.div>
+                <motion.div 
+                    initial={{ scaleX: 0, opacity: 0 }} 
+                    whileInView={{ scaleX: 1, opacity: 1 }} 
+                    viewport={{ once: true, margin: "-50px" }} 
+                    transition={{ duration: 0.8, ease: EASE }} 
+                    className="flex-1 h-px bg-gradient-to-l from-transparent via-line-2/70 to-line-2 origin-left" 
+                />
+            </div>
         </div>
     );
 }
@@ -188,8 +200,9 @@ export function Landing() {
                         <button onClick={goCompany} className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto shadow-xl shadow-accent/20 hover:-translate-y-0.5">
                             Нанять <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                         </button>
-                        <button onClick={goDev} className="text-ink-2 hover:text-ink font-medium text-[15px] transition-colors underline-offset-4 hover:underline h-[56px] px-4 w-full sm:w-auto flex items-center justify-center">
+                        <button onClick={goDev} className="group text-ink-2 hover:text-ink font-medium text-[15px] transition-colors h-[56px] px-4 w-full sm:w-auto flex items-center justify-center relative">
                             Я разработчик
+                            <span className="absolute bottom-[14px] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] h-px bg-ink scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></span>
                         </button>
                     </div>
                 </div>
