@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { authApi } from "@/api";
 import { useAppStore } from "@/store/useAppStore";
@@ -10,6 +10,7 @@ export function VerifyEmail() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
   const { setBackendUser, backendUser } = useAppStore();
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -19,9 +20,17 @@ export function VerifyEmail() {
       return;
     }
 
+    // Защита от двойного вызова (React StrictMode и обновление стейта)
+    if (hasVerified.current) return;
+    hasVerified.current = true;
+
     authApi.verifyEmail(token).then(() => {
       setStatus("success");
       setMessage("Почта успешно подтверждена! Обновляем профиль...");
+      
+      // Убираем токен из URL, чтобы при обновлении страницы не было ошибки
+      window.history.replaceState({}, document.title, "/verify-email");
+
       if (backendUser) {
         setBackendUser({ ...backendUser, is_verified: true });
       }
