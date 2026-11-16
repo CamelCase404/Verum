@@ -461,7 +461,7 @@ export function DeveloperDashboard({
                         >
                             <Pencil size={12} className="md:w-3.5 md:h-3.5" />
                         </button>
-                        <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-5">
+                        <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-5 pr-10">
                             <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-xl text-white shadow-md overflow-hidden bg-accent shrink-0">
                                 {backendUser?.avatar_url ? (
                                     <img
@@ -473,11 +473,11 @@ export function DeveloperDashboard({
                                     initials
                                 )}
                             </div>
-                            <div>
-                                <h2 className="text-lg md:text-xl font-semibold">
+                            <div className="min-w-0 flex-1">
+                                <h2 className="text-lg md:text-xl font-semibold break-words leading-tight">
                                     {backendUser?.full_name || "Разработчик"}
                                 </h2>
-                                <p className="text-[12px] md:text-sm text-ink-3">
+                                <p className="text-[12px] md:text-sm text-ink-3 truncate mt-0.5">
                                     {backendUser?.github_username
                                         ? `@${backendUser.github_username}`
                                         : "@username"}

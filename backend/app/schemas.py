@@ -91,7 +91,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     role: UserRole
-    full_name: str
+    full_name: str = Field(..., max_length=30)
 
 class UserLogin(BaseModel):
     email: str
@@ -105,7 +105,7 @@ class UserProfile(BaseModel):
     id: int
     email: str
     role: UserRole
-    full_name: str
+    full_name: str = Field(..., max_length=30)
     skills: dict | None = None
     company_name: str | None = None
     website: str | None = None
@@ -171,7 +171,7 @@ class UsageResponse(BaseModel):
     subscription_until: datetime | None
 
 class UpdateProfileReq(BaseModel):
-    full_name: str | None = None
+    full_name: str = Field(..., max_length=30) | None = Field(None, max_length=30)
     bio: str | None = None
     avatar_url: str | None = None
     projects: list[dict] | None = None

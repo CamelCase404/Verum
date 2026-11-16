@@ -249,17 +249,17 @@ export function CompanyDashboard({
                         </button>
                         
                         {/* Шапка профиля: аватар + имя */}
-                        <div className="flex items-center gap-3 md:gap-4 mb-5">
-                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-xl text-white shadow-md overflow-hidden bg-blue-500">
+                        <div className="flex items-start gap-3 md:gap-4 mb-5 pr-10">
+                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-xl text-white shadow-md overflow-hidden bg-blue-500 shrink-0">
                                 {backendUser?.avatar_url ? (
                                     <img src={backendUser.avatar_url} alt="Logo" className="w-full h-full object-cover" />
                                 ) : (
                                     <Building2 size={24} />
                                 )}
                             </div>
-                            <div>
-                                <h2 className="text-lg md:text-xl font-semibold">{backendUser?.full_name}</h2>
-                                <p className="text-[12px] md:text-sm text-ink-3">{backendUser?.email}</p>
+                            <div className="min-w-0 flex-1">
+                                <h2 className="text-lg md:text-xl font-semibold break-words leading-tight">{backendUser?.full_name}</h2>
+                                <p className="text-[12px] md:text-sm text-ink-3 truncate mt-0.5">{backendUser?.email}</p>
                             </div>
                         </div>
 

@@ -60,7 +60,7 @@ export function EditCompanyModal({
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">Название компании</label>
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="ООО Ромашка" />
+            <input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={30} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="ООО Ромашка" />
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">Сайт компании</label>
