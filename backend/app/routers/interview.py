@@ -195,10 +195,7 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
     # Сбрасываем "хвосты" от прошлой попытки, чтобы админ не увидел старое видео с новым чатом
     user.interview_video_url = None
     user.pending_skills_data = None
-    from ..auth import SessionLocal
-    async with SessionLocal() as db:
-        await db.merge(user)
-        await db.commit()
+    await db.commit()
 
     langs_str = ", ".join(req.language_ids)
     it = await create(req.level, req.stack_id, langs_str, user_id=user.id, job_id=req.job_id)

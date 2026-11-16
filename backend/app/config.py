@@ -51,24 +51,25 @@ class Settings:
         "start": {
             "name": "Start",
             "price_month": 15000,
-            "verifications_per_month": 20,
-            "tokens_per_month": 3000,
+            "verifications_per_month": 50,
+            "tokens_per_month": 5000,
             "features": [
-                "20 тестов для внешних кандидатов",
-                "3000 токенов (хватит на 3 Senior, 5 Middle, 10 Junior)",
+                "50 тестов в месяц",
+                "5 000 токенов для доступа к базе",
                 "Базовый античит-контроль",
-                "Доступ к базе верифицированных кадров",
+                "Доступ к базе верифицированных",
             ],
         },
         "pro": {
             "name": "Pro",
-            "price_month": 75000,
-            "verifications_per_month": 60,
-            "tokens_per_month": 10000,
+            "price_month": 30000,
+            "verifications_per_month": 200,
+            "tokens_per_month": 20000,
             "features": [
-                "60 тестов для внешних кандидатов",
-                "10 000 токенов для доступа к базе",
+                "200 тестов в месяц",
+                "20 000 токенов",
                 "Приоритетная поддержка",
+                "Расширенная аналитика",
             ],
         },
         "enterprise": {
@@ -78,8 +79,9 @@ class Settings:
             "tokens_per_month": None,
             "features": [
                 "Безлимитные тесты",
-                "Безлимитный доступ к базе",
+                "Безлимит токенов",
                 "Выделенный менеджер",
+                "SLA и кастомные интеграции",
             ],
         },
     }

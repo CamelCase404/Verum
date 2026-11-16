@@ -113,8 +113,8 @@ export const billingApi = {
   getPlans: () => request("/api/billing/plans"),
   subscribe: (plan: string) =>
     request("/api/billing/subscribe", { method: "POST", body: JSON.stringify({ plan }) }),
-  topup: (verifications: number) =>
-    request("/api/billing/topup", { method: "POST", body: JSON.stringify({ verifications }) }),
+  topup: (payload: { verifications?: number; tokens?: number; amount?: number }) =>
+    request("/api/billing/topup", { method: "POST", body: JSON.stringify(payload) }),
   getUsage: () => request("/api/billing/usage"),
 };
 

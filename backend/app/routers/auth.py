@@ -176,6 +176,7 @@ class CandidateProfile(BaseModel):
     avatar_url: str | None = None
     project_rate: int | None = None
     expected_salary: int | None = None
+    is_unlocked: bool = False
 
 
 @router.post("/search", response_model=list[CandidateProfile])
