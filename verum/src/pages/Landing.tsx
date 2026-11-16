@@ -404,7 +404,7 @@ export function Landing() {
                         <motion.div variants={itemVariants}>
                             <button
                                 onClick={goCompany}
-                                className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2"
+                                className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[16px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2"
                             >
                                 Нанять{" "}
                                 <ArrowRight
@@ -421,13 +421,13 @@ export function Landing() {
             <section className="py-16 md:py-20 relative">
                 <div className="max-w-[1100px] mx-auto px-6">
                     <div className="text-center mb-10 max-w-2xl mx-auto">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                             Кто вы?
                         </div>
                         <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-extrabold leading-tight text-ink mb-3">
                             Выберите свою роль
                         </h2>
-                        <p className="text-[15px] md:text-[16px] text-ink-3 font-medium leading-relaxed">
+                        <p className="text-[16px] md:text-[16px] text-ink-3 font-medium leading-relaxed">
                             Мы покажем только то, что важно именно для вас.
                         </p>
                     </div>
@@ -456,12 +456,12 @@ export function Landing() {
                             <h3 className="relative font-heading text-[22px] font-bold text-ink mb-2">
                                 Ищу разработчика
                             </h3>
-                            <p className="relative text-[14px] text-ink-3 font-medium leading-relaxed mb-4">
+                            <p className="relative text-[16px] text-ink-3 font-medium leading-relaxed mb-4">
                                 Хочу быстро находить проверенных инженеров и
                                 экономить время на скрининге.
                             </p>
                             <div
-                                className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading ${
+                                className={`relative inline-flex items-center gap-2 text-[16px] font-bold font-heading ${
                                     audience === "company"
                                         ? "text-accent"
                                         : "text-ink-3"
@@ -498,12 +498,12 @@ export function Landing() {
                             <h3 className="relative font-heading text-[22px] font-bold text-ink mb-2">
                                 Ищу работу
                             </h3>
-                            <p className="relative text-[14px] text-ink-3 font-medium leading-relaxed mb-4">
+                            <p className="relative text-[16px] text-ink-3 font-medium leading-relaxed mb-4">
                                 Хочу попасть в базу проверенных инженеров и
                                 получать предложения напрямую.
                             </p>
                             <div
-                                className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading ${
+                                className={`relative inline-flex items-center gap-2 text-[16px] font-bold font-heading ${
                                     audience === "developer"
                                         ? "text-accent"
                                         : "text-ink-3"
@@ -539,7 +539,7 @@ export function Landing() {
                                 <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
                                 <div className="max-w-[1400px] mx-auto px-6 relative">
                                     <div className="text-center mb-14 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Цифры
                                         </div>
                                         <AccentTitle>
@@ -564,7 +564,7 @@ export function Landing() {
                                                     <div className="font-heading text-[36px] md:text-[44px] font-extrabold text-ink leading-none mb-2">
                                                         {m.value}
                                                     </div>
-                                                    <div className="text-[13px] md:text-[14px] font-semibold text-ink-3">
+                                                    <div className="text-[16px] md:text-[16px] font-semibold text-ink-3">
                                                         {m.label}
                                                     </div>
                                                 </div>
@@ -580,7 +580,7 @@ export function Landing() {
                                 <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
                                 <div className="max-w-[1200px] mx-auto px-6 relative">
                                     <div className="text-center mb-12 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Сравнение
                                         </div>
                                         <AccentTitle>
@@ -604,7 +604,7 @@ export function Landing() {
                                                                 className="text-ink-4"
                                                             />
                                                         </div>
-                                                        <span className="text-[15px] text-ink-3 font-medium leading-relaxed">
+                                                        <span className="text-[16px] text-ink-3 font-medium leading-relaxed">
                                                             {row[0]}
                                                         </span>
                                                     </li>
@@ -629,7 +629,7 @@ export function Landing() {
                                                                 className="text-accent"
                                                             />
                                                         </div>
-                                                        <span className="text-[15px] text-ink font-semibold leading-relaxed">
+                                                        <span className="text-[16px] text-ink font-semibold leading-relaxed">
                                                             {row[1]}
                                                         </span>
                                                     </li>
@@ -646,7 +646,7 @@ export function Landing() {
                                 <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
                                 <div className="max-w-[1400px] mx-auto px-6 relative">
                                     <div className="text-center mb-16 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Как это работает
                                         </div>
                                         <AccentTitle>
@@ -673,14 +673,14 @@ export function Landing() {
                                                                     }}
                                                                 />
                                                             </div>
-                                                            <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[12px] font-bold shadow-md z-20">
+                                                            <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[16px] font-bold shadow-md z-20">
                                                                 {step.num}
                                                             </div>
                                                         </div>
                                                         <h3 className="font-heading text-[17px] md:text-[18px] font-bold text-ink mb-2 max-w-[200px]">
                                                             {step.title}
                                                         </h3>
-                                                        <p className="text-[13.5px] text-ink-3 leading-relaxed font-medium max-w-[220px]">
+                                                        <p className="text-[15.5px] text-ink-3 leading-relaxed font-medium max-w-[220px]">
                                                             {step.desc}
                                                         </p>
                                                         {i <
@@ -704,7 +704,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="mb-12 max-w-2xl">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Что оценивается
                                         </div>
                                         <AccentTitle>
@@ -725,8 +725,8 @@ export function Landing() {
                                                     <div className="relative w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:scale-110 group-hover:bg-accent group-hover:text-white transition-all">
                                                         <Icon size={26} />
                                                     </div>
-                                                    <h3 className="relative font-heading text-[15px] font-bold text-ink mb-2">{c.title}</h3>
-                                                    <p className="relative text-[13px] text-ink-3 leading-relaxed">{c.desc}</p>
+                                                    <h3 className="relative font-heading text-[16px] font-bold text-ink mb-2">{c.title}</h3>
+                                                    <p className="relative text-[16px] text-ink-3 leading-relaxed">{c.desc}</p>
                                                 </div>
                                             );
                                         })}
@@ -739,7 +739,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="mb-12 max-w-2xl">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Как подбирается
                                         </div>
                                         <AccentTitle>
@@ -759,8 +759,8 @@ export function Landing() {
                                                     <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3">
                                                         <Icon size={20} />
                                                     </div>
-                                                    <h3 className="font-heading text-[15px] font-bold text-ink mb-2">{m.title}</h3>
-                                                    <p className="text-[13px] text-ink-3 leading-relaxed font-medium">{m.desc}</p>
+                                                    <h3 className="font-heading text-[16px] font-bold text-ink mb-2">{m.title}</h3>
+                                                    <p className="text-[16px] text-ink-3 leading-relaxed font-medium">{m.desc}</p>
                                                 </div>
                                             );
                                         })}
@@ -773,7 +773,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="text-center mb-14 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Тарифы
                                         </div>
                                         <AccentTitle>
@@ -803,21 +803,21 @@ export function Landing() {
                                                 </div>
 
                                                 {plan.featured && (
-                                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider font-heading whitespace-nowrap shadow-md z-10">
+                                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[16px] font-bold uppercase tracking-wider font-heading whitespace-nowrap shadow-md z-10">
                                                         Популярный
                                                     </div>
                                                 )}
                                                 <h3 className="font-heading text-[20px] font-bold text-ink mb-2">
                                                     {plan.name}
                                                 </h3>
-                                                <p className="text-[13px] text-ink-3 font-medium mb-6">
+                                                <p className="text-[16px] text-ink-3 font-medium mb-6">
                                                     {plan.desc}
                                                 </p>
                                                 <div className="flex items-baseline gap-1 mb-6">
                                                     <span className="font-heading text-[36px] font-extrabold text-ink">
                                                         {plan.price}
                                                     </span>
-                                                    <span className="text-[14px] text-ink-3 font-medium">
+                                                    <span className="text-[16px] text-ink-3 font-medium">
                                                         /мес
                                                     </span>
                                                 </div>
@@ -832,7 +832,7 @@ export function Landing() {
                                                                     size={16}
                                                                     className="text-accent shrink-0 mt-0.5"
                                                                 />
-                                                                <span className="text-[14px] text-ink-2 font-medium leading-relaxed">
+                                                                <span className="text-[16px] text-ink-2 font-medium leading-relaxed">
                                                                     {f}
                                                                 </span>
                                                             </li>
@@ -841,7 +841,7 @@ export function Landing() {
                                                 </ul>
                                                 <button
                                                     onClick={goCompany}
-                                                    className={`h-[48px] rounded-xl font-heading font-bold text-[14px] transition-colors flex items-center justify-center gap-2 ${
+                                                    className={`h-[48px] rounded-xl font-heading font-bold text-[16px] transition-colors flex items-center justify-center gap-2 ${
                                                         plan.featured
                                                             ? "bg-accent text-white hover:bg-accent-2"
                                                             : "bg-surface-2 border border-line text-ink hover:bg-surface-3"
@@ -861,7 +861,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="text-center mb-14 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Два способа найма
                                         </div>
                                         <AccentTitle>
@@ -901,7 +901,7 @@ export function Landing() {
                                                         </div>
                                                         <div>
                                                             <div
-                                                                className={`text-[11px] font-bold uppercase tracking-wider font-heading ${
+                                                                className={`text-[16px] font-bold uppercase tracking-wider font-heading ${
                                                                     method.featured
                                                                         ? "text-accent"
                                                                         : "text-ink-3"
@@ -914,7 +914,7 @@ export function Landing() {
                                                             </h3>
                                                         </div>
                                                     </div>
-                                                    <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-5 relative">
+                                                    <p className="text-[15.5px] text-ink-2 font-medium leading-relaxed mb-5 relative">
                                                         {method.desc}
                                                     </p>
                                                     <ol className="space-y-3 relative">
@@ -925,7 +925,7 @@ export function Landing() {
                                                                     className="flex items-start gap-3"
                                                                 >
                                                                     <span
-                                                                        className={`w-6 h-6 rounded-full text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+                                                                        className={`w-6 h-6 rounded-full text-[16px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
                                                                             method.featured
                                                                                 ? "bg-accent text-white"
                                                                                 : "bg-surface-2 border border-line text-ink-2"
@@ -933,7 +933,7 @@ export function Landing() {
                                                                     >
                                                                         {i + 1}
                                                                     </span>
-                                                                    <span className="text-[14px] text-ink-2 font-medium leading-relaxed">
+                                                                    <span className="text-[16px] text-ink-2 font-medium leading-relaxed">
                                                                         {text}
                                                                     </span>
                                                                 </li>
@@ -954,7 +954,7 @@ export function Landing() {
                                                 Стоимость открытия контактов
                                             </h3>
                                         </div>
-                                        <p className="text-[14.5px] text-ink-2 font-medium leading-relaxed mb-6">
+                                        <p className="text-[15.5px] text-ink-2 font-medium leading-relaxed mb-6">
                                             Токены списываются только когда вы
                                             открываете контакты кандидата.
                                             Тестирование своих кандидатов
@@ -967,7 +967,7 @@ export function Landing() {
                                                     key={i}
                                                     className="bg-surface-2 border border-line rounded-xl p-5 text-center"
                                                 >
-                                                    <div className="text-[12px] font-bold uppercase tracking-wider text-accent mb-2 font-heading">
+                                                    <div className="text-[16px] font-bold uppercase tracking-wider text-accent mb-2 font-heading">
                                                         {item.grade}
                                                     </div>
                                                     <div className="font-heading text-[24px] font-extrabold text-ink">
@@ -976,7 +976,7 @@ export function Landing() {
                                                 </div>
                                             ))}
                                         </div>
-                                        <p className="text-[13px] text-ink-3 font-medium leading-relaxed mt-5 pt-4 border-t border-line">
+                                        <p className="text-[16px] text-ink-3 font-medium leading-relaxed mt-5 pt-4 border-t border-line">
                                             Токены входят в подписку. На тарифе
                                             Pro (20 000 токенов) хватит на 57
                                             открытий Senior-контактов или 200
@@ -993,7 +993,7 @@ export function Landing() {
                                 <div className="hidden md:block absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-2/5 rounded-full blur-[100px] pointer-events-none" />
                                 <div className="max-w-[1400px] mx-auto px-6 relative">
                                     <div className="mb-12 max-w-2xl">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Почему мы
                                         </div>
                                         <AccentTitle>
@@ -1015,7 +1015,7 @@ export function Landing() {
                                                     <h3 className="font-heading text-[17px] font-bold text-ink mb-2">
                                                         {f.title}
                                                     </h3>
-                                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">
+                                                    <p className="text-[16px] text-ink-3 leading-relaxed font-medium">
                                                         {f.desc}
                                                     </p>
                                                 </div>
@@ -1032,7 +1032,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="mb-12 max-w-2xl">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Внутри теста
                                         </div>
                                         <AccentTitle>
@@ -1051,21 +1051,21 @@ export function Landing() {
                                                 const Icon = (s as any).icon;
                                                 return (
                                                     <div key={i} className="relative bg-surface border border-line rounded-2xl p-6 hover:border-accent/40 transition-all flex flex-col">
-                                                        <div className="relative z-10 w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[14px] font-bold mb-5 shadow-lg shadow-accent/20">
+                                                        <div className="relative z-10 w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[16px] font-bold mb-5 shadow-lg shadow-accent/20">
                                                             {s.num}
                                                         </div>
                                                         <div className="flex items-center gap-2 mb-3">
                                                             {Icon && <Icon size={16} className="text-accent" />}
-                                                            <span className="text-[11px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">{s.time}</span>
+                                                            <span className="text-[16px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">{s.time}</span>
                                                         </div>
-                                                        <h3 className="font-heading text-[15px] font-bold text-ink mb-2 leading-tight">{s.title}</h3>
-                                                        <p className="text-[12.5px] text-ink-3 leading-relaxed mt-auto">{s.desc}</p>
+                                                        <h3 className="font-heading text-[16px] font-bold text-ink mb-2 leading-tight">{s.title}</h3>
+                                                        <p className="text-[15.5px] text-ink-3 leading-relaxed mt-auto">{s.desc}</p>
                                                     </div>
                                                 );
                                             })}
                                         </div>
                                     </div>
-                                    <div className="bg-surface border border-line rounded-2xl p-6 md:p-7 flex flex-col md:flex-row items-start md:items-center gap-5">
+                                    <div className="mt-6 md:mt-8 bg-surface border border-line rounded-2xl p-6 md:p-7 flex flex-col md:flex-row items-start md:items-center gap-5">
                                         <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
                                             <ShieldCheck size={24} />
                                         </div>
@@ -1073,7 +1073,7 @@ export function Landing() {
                                             <h3 className="font-heading text-[17px] font-bold text-ink mb-1">
                                                 Античит работает всё время
                                             </h3>
-                                            <p className="text-[14px] text-ink-3 font-medium leading-relaxed">
+                                            <p className="text-[16px] text-ink-3 font-medium leading-relaxed">
                                                 Камера и микрофон записываются,
                                                 детектируется переключение
                                                 вкладок, блокируются DevTools,
@@ -1091,7 +1091,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="text-center mb-12 max-w-2xl mx-auto">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Результат
                                         </div>
                                         <AccentTitle>
@@ -1117,7 +1117,7 @@ export function Landing() {
                                                     <h3 className="font-heading text-[17px] font-bold text-ink mb-2">
                                                         {f.title}
                                                     </h3>
-                                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">
+                                                    <p className="text-[16px] text-ink-3 leading-relaxed font-medium">
                                                         {f.desc}
                                                     </p>
                                                 </div>
@@ -1132,7 +1132,7 @@ export function Landing() {
                             <section className="py-16 md:py-20 bg-bg">
                                 <div className="max-w-[1400px] mx-auto px-6">
                                     <div className="mb-12 max-w-2xl">
-                                        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                        <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                             Что оценивается
                                         </div>
                                         <AccentTitle>
@@ -1153,8 +1153,8 @@ export function Landing() {
                                                     <div className="relative w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:scale-110 group-hover:bg-accent group-hover:text-white transition-all">
                                                         <Icon size={26} />
                                                     </div>
-                                                    <h3 className="relative font-heading text-[15px] font-bold text-ink mb-2">{c.title}</h3>
-                                                    <p className="relative text-[13px] text-ink-3 leading-relaxed">{c.desc}</p>
+                                                    <h3 className="relative font-heading text-[16px] font-bold text-ink mb-2">{c.title}</h3>
+                                                    <p className="relative text-[16px] text-ink-3 leading-relaxed">{c.desc}</p>
                                                 </div>
                                             );
                                         })}
@@ -1170,7 +1170,7 @@ export function Landing() {
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-bl-full pointer-events-none" />
                                         <div className="grid lg:grid-cols-2 gap-10 items-center relative z-10">
                                             <div>
-                                                <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
+                                                <div className="text-[16px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
                                                     Разработчикам
                                                 </div>
                                                 <h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">
@@ -1185,7 +1185,7 @@ export function Landing() {
                                                 </p>
                                                 <button
                                                     onClick={goDev}
-                                                    className="group h-[52px] px-7 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
+                                                    className="group h-[52px] px-7 rounded-xl bg-accent text-white font-heading font-bold text-[16px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
                                                 >
                                                     Пройти тест{" "}
                                                     <ArrowRight
@@ -1212,7 +1212,7 @@ export function Landing() {
                                                                 className="text-accent"
                                                             />
                                                         </div>
-                                                        <span className="text-[14.5px] text-ink-2 font-semibold leading-relaxed">
+                                                        <span className="text-[15.5px] text-ink-2 font-semibold leading-relaxed">
                                                             {item}
                                                         </span>
                                                     </div>
@@ -1246,7 +1246,7 @@ export function Landing() {
                             <>
                                 <button
                                     onClick={goCompany}
-                                    className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2"
+                                    className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[16px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2"
                                 >
                                     Подключить компанию{" "}
                                     <ArrowRight
@@ -1256,7 +1256,7 @@ export function Landing() {
                                 </button>
                                 <button
                                     onClick={() => setAudience("developer")}
-                                    className="group h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-heading font-bold text-[15px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2"
+                                    className="group h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-heading font-bold text-[16px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2"
                                 >
                                     Я разработчик <ChevronRight size={18} />
                                 </button>
@@ -1265,7 +1265,7 @@ export function Landing() {
                             <>
                                 <button
                                     onClick={goDev}
-                                    className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2"
+                                    className="group h-[56px] px-8 rounded-xl bg-accent text-white font-heading font-bold text-[16px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2"
                                 >
                                     Пройти тест{" "}
                                     <ArrowRight
@@ -1275,7 +1275,7 @@ export function Landing() {
                                 </button>
                                 <button
                                     onClick={() => setAudience("company")}
-                                    className="group h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-heading font-bold text-[15px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2"
+                                    className="group h-[56px] px-8 rounded-xl bg-surface border border-line text-ink font-heading font-bold text-[16px] hover:bg-surface-2 transition-colors flex items-center justify-center gap-2"
                                 >
                                     Я компания <ChevronRight size={18} />
                                 </button>
