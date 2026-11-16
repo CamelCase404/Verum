@@ -129,7 +129,7 @@ export default function RegisterPage() {
 
                         <AnimatePresence mode="wait">
                             {error && (
-                                <motion.div key="error" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="text-warn text-xs bg-warn-soft border border-warn/20 p-3 rounded-lg overflow-hidden text-center">
+                                <motion.div key="error" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="text-white text-[13px] font-medium bg-red-500 border-none shadow-md p-3 rounded-lg overflow-hidden text-center">
                                     {error}
                                 </motion.div>
                             )}
