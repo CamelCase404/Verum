@@ -7,6 +7,7 @@ import { toast } from "@/components/layout/ToastContainer";
 export function EditCompanyModal({
  onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
 
+  const [fullName, setFullName] = useState(backendUser?.full_name || "");
   const [bio, setBio] = useState(backendUser?.bio || "");
   const [website, setWebsite] = useState(backendUser?.website || "");
   const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");
@@ -30,7 +31,7 @@ export function EditCompanyModal({
         const uploadRes = await authApi.uploadAvatar(selectedFile);
         finalAvatarUrl = uploadRes.url;
       }
-      await authApi.updateProfile({ bio, website, avatar_url: finalAvatarUrl });
+      await authApi.updateProfile({ full_name: fullName, bio, website, avatar_url: finalAvatarUrl });
       toast("Профиль обновлен", "success");
       onRefresh();
       onClose();
@@ -56,6 +57,10 @@ export function EditCompanyModal({
               <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-surface-2 border border-line rounded-lg text-sm font-medium hover:bg-surface-3 transition-colors">Загрузить лого</button>
               <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
             </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Название компании</label>
+            <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="ООО Ромашка" />
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">Сайт компании</label>
