@@ -334,28 +334,18 @@ export default function Interview({
                 // Ждем полной остановки и загрузки видео перед переходом
                 if (mediaRecorder && mediaRecorder.state !== "inactive") {
                     mediaRecorder.stop();
-                    
-                    await new Promise<void>((resolve) => {
-                        const onStop = async () => {
-                            mediaRecorder.removeEventListener("stop", onStop);
+                    mediaRecorder.addEventListener("stop", () => {
+                        if (!isRejectedRef.current && chunksRef.current.length > 0) {
+                            const blob = new Blob(chunksRef.current, { type: "video/webm" });
+                            const formData = new FormData();
+                            formData.append("file", blob, "interview.webm");
+                            const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
+                            const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
+                            const __token = localStorage.getItem("verum_token");
                             
-                            if (!isRejectedRef.current && chunksRef.current.length > 0) {
-                                const blob = new Blob(chunksRef.current, { type: "video/webm" });
-                                const formData = new FormData();
-                                formData.append("file", blob, "interview.webm");
-                                const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
-                                const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
-                                
-                                try {
-                                    const __token = localStorage.getItem("verum_token");
-                        await fetch(uploadUrl, { method: "POST", body: formData, headers: __token ? { Authorization: `Bearer ${__token}` } : {} });
-                                } catch (e) {
-                                    console.error("[video] upload error", e);
-                                }
-                            }
-                            resolve();
-                        };
-                        mediaRecorder.addEventListener("stop", onStop);
+                            fetch(uploadUrl, { method: "POST", body: formData, headers: __token ? { Authorization: `Bearer ${__token}` } : {} })
+                                .catch(e => console.error("[video] upload error", e));
+                        }
                     });
                 }
                 

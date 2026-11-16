@@ -128,7 +128,7 @@ export function PublicProfile() {
           <div className="w-24 h-24 rounded-full bg-accent text-white flex items-center justify-center text-3xl font-bold overflow-hidden mx-auto mb-4 shadow-lg">
             {user.avatar_url ? <img src={user.avatar_url} className="w-full h-full object-cover" /> : initials}
           </div>
-          <h1 className="text-xl font-bold text-center mb-1">{user.full_name}</h1>
+          <h1 className="text-xl font-bold text-center mb-1 break-words">{user.full_name}</h1>
           <p className="text-sm text-center text-ink-3 mb-4">{user.role === "company" ? "Компания" : "Разработчик"}</p>
 
           {user.bio && (

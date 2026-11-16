@@ -171,6 +171,7 @@ class UsageResponse(BaseModel):
     subscription_until: datetime | None
 
 class UpdateProfileReq(BaseModel):
+    full_name: str | None = None
     bio: str | None = None
     avatar_url: str | None = None
     projects: list[dict] | None = None

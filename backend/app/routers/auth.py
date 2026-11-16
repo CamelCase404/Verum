@@ -462,6 +462,24 @@ async def save_skills(
                     _company_id = _c.id
                     break
 
+            # Создаем VacancyApplication со статусом pending
+            from ..auth import VacancyApplication
+            _ex_app = await db.execute(
+                select(VacancyApplication).where(
+                    VacancyApplication.job_id == _job_id,
+                    VacancyApplication.developer_id == user.id
+                )
+            )
+            if not _ex_app.scalars().first():
+                db.add(VacancyApplication(
+                    job_id=_job_id,
+                    company_id=_company_id,
+                    developer_id=user.id,
+                    interview_id=report.interview_id,
+                    status="pending"
+                ))
+                print(f"  ✅ Создан VacancyApplication (pending) для job_id={_job_id}")
+
         _existing = await db.execute(
             select(VerificationRequest).where(
                 VerificationRequest.developer_id == user.id,
@@ -520,6 +538,8 @@ async def update_profile(
     user: UserDB = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if data.full_name is not None:
+        user.full_name = data.full_name
     if data.bio is not None:
         user.bio = data.bio
     if data.avatar_url is not None:

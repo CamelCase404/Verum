@@ -193,7 +193,7 @@ async def get_vacancy_top(
         .where(
             VacancyApplication.job_id == job_id,
             VacancyApplication.company_id == user.id,
-            VacancyApplication.status == "approved",
+            VacancyApplication.status.in_(["pending", "approved"]),
         )
     )
     apps = res.scalars().all()
@@ -215,6 +215,7 @@ async def get_vacancy_top(
                 "total_score": d.skills_data.get("total_score_100", 0),
                 "summary": d.skills_data.get("summary", ""),
                 "avatar_url": d.avatar_url,
+                "status": next((a.status for a in apps if a.developer_id == d.id), "pending"),
             })
     
     items.sort(key=lambda x: x["total_score"], reverse=True)

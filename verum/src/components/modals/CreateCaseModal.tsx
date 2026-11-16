@@ -6,6 +6,15 @@ import { toast } from "@/components/layout/ToastContainer";
 
 const STACKS = ["Mobile (iOS)", "Mobile (Android)", "Frontend", "Backend", "GameDev", "DevOps / SRE", "Data / ML"];
 const LEVELS = ["Junior", "Middle", "Senior"];
+const STACK_LANGS: Record<string, string[]> = {
+    "Mobile (iOS)": ["Swift", "Objective-C", "SwiftUI", "UIKit", "Combine"],
+    "Mobile (Android)": ["Kotlin", "Java", "Jetpack Compose", "Coroutines"],
+    "Frontend": ["HTML", "CSS", "JavaScript", "TypeScript", "React", "Vue", "Svelte"],
+    "Backend": ["Python", "FastAPI", "Django", "Go", "Node.js", "Java", "C#", "Next.js"],
+    "GameDev": ["Unity (C#)", "Unreal (C++)", "Godot (GDScript)"],
+    "DevOps / SRE": ["Docker", "Kubernetes", "Terraform", "Ansible", "Bash"],
+    "Data / ML": ["Python", "Pandas", "PyTorch", "TensorFlow", "SQL"]
+};
 
 export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
   const [title, setTitle] = useState("");
@@ -13,6 +22,7 @@ export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: 
   const [stack, setStack] = useState("Frontend");
   const [level, setLevel] = useState("Middle");
   const [budget, setBudget] = useState("");
+  const [languages, setLanguages] = useState<string[]>([]);
   
   const [loading, setLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -45,6 +55,8 @@ export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: 
 
   const handleSave = async () => {
     if (!title.trim()) return toast("Введите название кейса");
+    if (!stack) return toast("Выберите стек");
+    if (languages.length === 0) return toast("Выберите хотя бы один язык");
     setLoading(true);
     try {
       const currentJobs = backendUser?.job_postings || [];
@@ -56,6 +68,7 @@ export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: 
           level, 
           salary: budget ? `Бюджет: ${budget} ₽` : "По договоренности", 
           format: "Удалённо (кейс)",
+          languages: languages.join(", "),
           type: "case",
           created_at: new Date().toISOString(),
       };
@@ -129,6 +142,31 @@ export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: 
               </AnimatePresence>
             </div>
           </div>
+
+
+          {stack && STACK_LANGS[stack] && (
+              <div>
+                  <label className="text-sm font-medium mb-1 block">Языки (до 4)</label>
+                  <div className="flex flex-wrap gap-2">
+                      {STACK_LANGS[stack].map(lang => {
+                          const active = languages.includes(lang);
+                          return (
+                              <button
+                                  key={lang}
+                                  type="button"
+                                  onClick={() => {
+                                      if (active) setLanguages(l => l.filter(x => x !== lang));
+                                      else if (languages.length < 4) setLanguages(l => [...l, lang]);
+                                  }}
+                                  className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${active ? "bg-accent text-white border-accent" : "bg-bg-2 border-line text-ink-2 hover:border-line-2"}`}
+                              >
+                                  {lang}
+                              </button>
+                          );
+                      })}
+                  </div>
+              </div>
+          )}
 
           <div>
             <label className="text-sm font-medium mb-1 block">Бюджет (₽)</label>

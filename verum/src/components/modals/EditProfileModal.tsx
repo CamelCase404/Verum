@@ -7,6 +7,7 @@ import { toast } from "@/components/layout/ToastContainer";
 export function EditProfileModal({
  onClose, backendUser, onRefresh }: { onClose: () => void, backendUser: any, onRefresh: () => void }) {
 
+  const [fullName, setFullName] = useState(backendUser?.full_name || "");
   const [bio, setBio] = useState(backendUser?.bio || "");
   const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -79,6 +80,7 @@ export function EditProfileModal({
       }
 
       await authApi.updateProfile({ 
+        full_name: fullName,
         bio, 
         avatar_url: finalAvatarUrl,
         expected_salary: valSalary,
@@ -120,6 +122,10 @@ export function EditProfileModal({
             </div>
           </div>
 
+          <div>
+            <label className="text-sm font-medium mb-1 block">Имя / Никнейм</label>
+            <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" placeholder="Ваше имя" />
+          </div>
           <div>
             <label className="text-sm font-medium mb-1 block">О себе</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-ink-4" placeholder="Расскажите о своем опыте..." />

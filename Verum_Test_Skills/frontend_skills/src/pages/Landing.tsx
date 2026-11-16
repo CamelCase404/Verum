@@ -43,6 +43,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
     const [languageIds, setLanguageIds] = useState<string[]>([]);
 
     const [loading, setLoading] = useState(false);
+    const [isJobLocked, setIsJobLocked] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
     // Состояние темы
@@ -56,6 +57,31 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
     };
 
     useEffect(() => {
+        // 1. Сначала проверяем, есть ли job_id (пришли по ссылке от компании)
+        const jobId = localStorage.getItem("verum_test_job_id");
+        if (jobId) {
+            const API = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
+            fetch(`${API}/api/jobs/id/${jobId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.stack) setStackId(data.stack);
+                    if (data.level) setLevelId(data.level.toLowerCase() as LevelId);
+                    if (data.languages) {
+                        // Разбиваем строку "React, TypeScript" в массив id ["react", "ts"]
+                        const langArr = data.languages.split(",").map((l: string) => l.trim().toLowerCase());
+                        // Оставляем только те, которые есть в каталоге
+                        const validLangs = langArr.filter((l: string) => 
+                            ["swift", "objc", "kotlin", "java", "html", "css", "js", "ts", "react", "vue", "python", "fastapi", "go", "node", "unity", "docker", "k8s", "pandas", "pytorch", "sql"].includes(l)
+                        );
+                        setLanguageIds(validLangs);
+                    }
+                    setIsJobLocked(true); // Блокируем изменение
+                })
+                .catch(err => console.error("Ошибка загрузки вакансии:", err));
+            return; // Прерываем, если это тест по вакансии
+        }
+
+        // 2. Если это обычный тест, грузим последние настройки
         const saved = localStorage.getItem("verum.lastSettings");
         if (saved) {
             try {
@@ -169,7 +195,9 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
 
                 <div className="bg-card border border-divider rounded-[22px] shadow-card p-6 sm:p-10 transition-colors duration-300">
                     <h1 className="text-[28px] font-bold text-ink text-center transition-colors duration-300">Проверка знаний</h1>
-                    <p className="text-muted mt-2 text-[15px] text-center transition-colors duration-300">Выберите уровень, стек и до 4 языков.</p>
+                    <p className="text-muted mt-2 text-[15px] text-center transition-colors duration-300">
+                    {isJobLocked ? "Выбор стека и языков зафиксирован под требования вакансии." : "Выберите уровень, стек и до 4 языков."}
+                </p>
 
                     {catalogError && (
                         <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[13px] text-red-500 flex items-center justify-between">
@@ -187,7 +215,8 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                 return (
                                     <button
                                         key={l.id}
-                                        onClick={() => setLevelId(l.id as LevelId)}
+                                        onClick={() => !isJobLocked && setLevelId(l.id as LevelId)}
+                                        disabled={isJobLocked}
                                         className={`text-left rounded-[22px] border p-4 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
                                     >
                                         <div className="flex items-center gap-2 justify-center">
@@ -213,9 +242,11 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                     <button
                                         key={s.id}
                                         onClick={() => {
+                                            if (isJobLocked) return;
                                             setStackId(s.id);
                                             setLanguageIds([]);
                                         }}
+                                        disabled={isJobLocked}
                                         className={`flex items-center gap-3 rounded-[22px] border px-5 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-lg shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
                                     >
                                         <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors ${active ? "bg-white/20 text-white shadow-sm" : "bg-card text-ink"}`}>
@@ -246,8 +277,8 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                     return (
                                         <button
                                             key={lang.id}
-                                            onClick={() => toggleLanguage(lang.id)}
-                                            disabled={!active && languageIds.length >= 4}
+                                            onClick={() => !isJobLocked && toggleLanguage(lang.id)}
+                                            disabled={isJobLocked || (!active && languageIds.length >= 4)}
                                             className={`flex items-center gap-2 rounded-[22px] border px-4 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-md shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"} ${!active && languageIds.length >= 4 ? "opacity-40 cursor-not-allowed" : ""}`}
                                         >
                                             <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${active ? "bg-white/20 text-white" : "bg-card text-ink"}`}>

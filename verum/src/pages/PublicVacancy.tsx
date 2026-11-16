@@ -12,6 +12,7 @@ export function PublicVacancy() {
     const [job, setJob] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     useEffect(() => {
         vacancyApi.getPublic(slug as string)
@@ -26,17 +27,12 @@ export function PublicVacancy() {
             navigate(`/register?role=developer&job=${slug}`);
             return;
         }
-        const confirmRetake = window.confirm(
-            "Вы уже зарегистрированы на Verum.\n\n" +
-            "Для отклика на эту вакансию вам нужно будет пройти собеседование заново, " +
-            "даже если вы проходили его недавно.\n\n" +
-            "Предыдущие результаты сохранятся в профиле, но в топ этой вакансии попадут новые.\n\n" +
-            "Продолжить?"
-        );
-        if (confirmRetake) {
-            localStorage.setItem("verum.pending_job", JSON.stringify(job));
-            navigate(`/dashboard?action=interview&job=${slug}`);
-        }
+        setShowConfirm(true);
+    };
+
+    const confirmApply = () => {
+        localStorage.setItem("verum.pending_job", JSON.stringify(job));
+        navigate(`/dashboard?action=interview&job=${slug}`);
     };
 
     if (loading) return <div className="min-h-screen bg-bg flex items-center justify-center"><Loader2 className="animate-spin text-accent" size={32} /></div>;
@@ -87,6 +83,22 @@ export function PublicVacancy() {
                     </div>
                 </div>
             </div>
+
+            {showConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-surface border border-line rounded-[22px] p-6 sm:p-8 w-full max-w-md shadow-2xl relative">
+                        <h3 className="text-xl font-bold mb-4">Начать собеседование?</h3>
+                        <p className="text-ink-2 text-[14px] leading-relaxed mb-6">
+                            Вы уже зарегистрированы на Verum. Для отклика на эту вакансию вам нужно будет пройти собеседование заново, даже если вы проходили его недавно.<br/><br/>
+                            Предыдущие результаты сохранятся в профиле, но в топ этой вакансии попадут новые.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button onClick={() => setShowConfirm(false)} className="px-5 py-2.5 rounded-xl font-medium hover:bg-surface-2 transition-colors">Отмена</button>
+                            <button onClick={confirmApply} className="px-6 py-2.5 bg-accent text-white rounded-xl font-medium hover:bg-accent-2 transition-colors">Продолжить</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

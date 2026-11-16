@@ -111,6 +111,8 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
 
   const handleNext = () => {
     if (!title.trim()) return toast("Введите название вакансии");
+    if (!stack) return toast("Выберите стек");
+    if (languages.length === 0) return toast("Выберите хотя бы один язык");
     if (!generatedSlug) {
         setGeneratedSlug(generateSlug(title, level));
     }

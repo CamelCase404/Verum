@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, AlertTriangle, XCircle, FileText } from "lucide-react";
+import { Loader2, AlertTriangle, XCircle, FileText, CheckCircle2 } from "lucide-react";
 import { api, ApiError } from "../api";
 import type { LevelId, ReportResponse } from "../types";
 
@@ -90,15 +90,36 @@ export default function Processing({
             <div className="bg-card rounded-[22px] shadow-card p-8 text-center">
                 {phase === "pending" && (
                     <>
-                        <div className="mx-auto w-14 h-14 rounded-full bg-accentSoft text-accent flex items-center justify-center">
-                            <Loader2 size={26} className="animate-spin" />
+                        <div className="relative w-20 h-20 mx-auto mb-6">
+                            <div className="absolute inset-0 rounded-full border-4 border-surface-2"></div>
+                            <div className="absolute inset-0 rounded-full border-4 border-accent border-t-transparent animate-spin"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Loader2 size={28} className="text-accent animate-pulse" />
+                            </div>
                         </div>
-                        <h1 className="mt-4 text-[20px] font-bold">Формируем отчёт…</h1>
-                        <p className="mt-1 text-[13px] text-muted">
-                            GigaChat оценивает ответы по рубрике. Это может занять до минуты.
+                        
+                        <h1 className="text-[22px] font-bold mb-2">Анализируем ваши ответы</h1>
+                        <p className="text-[13px] text-muted mb-8 max-w-[280px] mx-auto leading-relaxed">
+                            ИИ оценивает архитектурное мышление и работу с кодом. Обычно это занимает до 40 секунд.
                         </p>
-                        <p className="mt-1 text-[12px] text-muted">
-                            {elapsed} с · interview {interviewId.slice(0, 8)} · {level}
+                        
+                        <div className="space-y-3 text-left max-w-[240px] mx-auto mb-8">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 size={18} className="text-accent" />
+                                <span className="text-[13px] text-ink font-medium">Видео загружено</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Loader2 size={18} className="text-accent animate-spin" />
+                                <span className="text-[13px] text-ink font-medium">ИИ формирует вердикт...</span>
+                            </div>
+                            <div className="flex items-center gap-3 opacity-40">
+                                <div className="w-4 h-4 rounded-full border-2 border-muted flex items-center justify-center"></div>
+                                <span className="text-[13px] text-muted">Готовый отчёт</span>
+                            </div>
+                        </div>
+
+                        <p className="text-[11px] text-muted font-mono bg-page px-3 py-1.5 rounded-lg inline-block">
+                            {elapsed} с · ID: {interviewId.slice(0, 8)}
                         </p>
                     </>
                 )}

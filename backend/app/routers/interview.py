@@ -394,10 +394,12 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
         raw = await ask_chat(SYSTEM_REPORT, history, ai_user)
         parsed = _Report.model_validate(_parse_report_json(raw))
     except Exception as e:
-        # если GigaChat упал — отдаём программный отчёт
+        # если GigaChat упал или вернул пустой JSON — отдаём программный отчёт
         parsed = _Report(
-            summary="Отчёт сформирован на основе ответов кандидата.",
-            stages=[], strengths=[], gaps=[],
+            summary="Отчёт сформирован на основе ваших ответов. ИИ не смог сгенерировать подробный вердикт, но баллы рассчитаны верно.",
+            stages=[],
+            strengths=["Ответы на вопросы зафиксированы и оценены."],
+            gaps=["Детальный анализ недоступен из-за технического сбоя ИИ."],
             recommendation="insufficient_evidence",
         )
 

@@ -100,6 +100,9 @@ export function VacancyApplicants() {
                                 <div className="text-left sm:text-right">
                                     <div className="text-[11px] text-ink-3 mb-0.5 uppercase tracking-wider font-semibold">Балл</div>
                                     <div className="text-[18px] font-bold text-accent leading-none">{c.total_score}<span className="text-[12px] text-ink-3 font-normal">/100</span></div>
+                                {c.status === "pending" && (
+                                    <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mt-1">На проверке</div>
+                                )}
                                 </div>
                                 <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-colors">
                                     <ChevronRight size={18} />

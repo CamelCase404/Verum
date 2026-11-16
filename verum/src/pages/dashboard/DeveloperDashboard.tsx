@@ -462,7 +462,7 @@ export function DeveloperDashboard({
                             <Pencil size={12} className="md:w-3.5 md:h-3.5" />
                         </button>
                         <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-5">
-                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-xl text-white shadow-md overflow-hidden bg-accent">
+                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-xl text-white shadow-md overflow-hidden bg-accent shrink-0">
                                 {backendUser?.avatar_url ? (
                                     <img
                                         src={backendUser.avatar_url}
