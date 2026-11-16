@@ -196,23 +196,23 @@ export function Landing() {
                     <div className="text-center mb-10 max-w-2xl mx-auto">
                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">Кто вы?</div>
                         <h2 className="font-heading text-[clamp(28px,3.5vw,40px)] font-extrabold leading-tight text-ink mb-3">Выберите свою роль</h2>
-                        <p className="text-[15px] md:text-[16px] text-ink-3 font-medium leading-relaxed">Мы покажем только то, что важно именно для вас.</p>
+                        <p className="text-[16.0px] md:text-[16px] text-ink-3 font-medium leading-relaxed">Мы покажем только то, что важно именно для вас.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                         <motion.div initial="hidden" whileInView="visible" viewport={viewportSafe} variants={slideInLeft}>
                             <button onClick={() => setAudience("company")} className={`w-full h-full group relative text-left p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${audience === "company" ? "border-accent bg-surface shadow-xl shadow-accent/10" : "border-line bg-surface hover:border-accent/40"}`}>
                                 <div className={`relative w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-colors ${audience === "company" ? "bg-accent text-white" : "bg-accent/10 text-accent"}`}><Building2 size={26} /></div>
                                 <h3 className="relative font-heading text-[22px] font-bold text-ink mb-2">Ищу разработчика</h3>
-                                <p className="relative text-[14px] text-ink-3 font-medium leading-relaxed mb-4">Хочу быстро находить проверенных инженеров и экономить время на скрининге.</p>
-                                <div className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading ${audience === "company" ? "text-accent" : "text-ink-3"}`}>{audience === "company" ? "Выбрано" : "Выбрать"}<ArrowRight size={14} /></div>
+                                <p className="relative text-[15.0px] text-ink-3 font-medium leading-relaxed mb-4">Хочу быстро находить проверенных инженеров и экономить время на скрининге.</p>
+                                <div className={`relative inline-flex items-center gap-2 text-[14.0px] font-bold font-heading ${audience === "company" ? "text-accent" : "text-ink-3"}`}>{audience === "company" ? "Выбрано" : "Выбрать"}<ArrowRight size={14} /></div>
                             </button>
                         </motion.div>
                         <motion.div initial="hidden" whileInView="visible" viewport={viewportSafe} variants={slideInRight}>
                             <button onClick={() => setAudience("developer")} className={`w-full h-full group relative text-left p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${audience === "developer" ? "border-accent bg-surface shadow-xl shadow-accent/10" : "border-line bg-surface hover:border-accent/40"}`}>
                                 <div className={`relative w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-colors ${audience === "developer" ? "bg-accent text-white" : "bg-accent/10 text-accent"}`}><User size={26} /></div>
                                 <h3 className="relative font-heading text-[22px] font-bold text-ink mb-2">Ищу работу</h3>
-                                <p className="relative text-[14px] text-ink-3 font-medium leading-relaxed mb-4">Хочу попасть в базу проверенных инженеров и получать предложения напрямую.</p>
-                                <div className={`relative inline-flex items-center gap-2 text-[13px] font-bold font-heading ${audience === "developer" ? "text-accent" : "text-ink-3"}`}>{audience === "developer" ? "Выбрано" : "Выбрать"}<ArrowRight size={14} /></div>
+                                <p className="relative text-[15.0px] text-ink-3 font-medium leading-relaxed mb-4">Хочу попасть в базу проверенных инженеров и получать предложения напрямую.</p>
+                                <div className={`relative inline-flex items-center gap-2 text-[14.0px] font-bold font-heading ${audience === "developer" ? "text-accent" : "text-ink-3"}`}>{audience === "developer" ? "Выбрано" : "Выбрать"}<ArrowRight size={14} /></div>
                             </button>
                         </motion.div>
                     </div>
@@ -232,7 +232,7 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className="text-center">
                                                 <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mx-auto mb-4"><m.icon size={26} /></div>
                                                 <div className="font-heading text-[36px] md:text-[44px] font-extrabold text-ink leading-none mb-2">{m.value}</div>
-                                                <div className="text-[13px] md:text-[14px] font-semibold text-ink-3">{m.label}</div>
+                                                <div className="text-[14.0px] md:text-[15.0px] font-semibold text-ink-3">{m.label}</div>
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -246,7 +246,7 @@ export function Landing() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                         <motion.div initial="hidden" whileInView="visible" viewport={viewportSafe} variants={slideInLeft} className="bg-surface border border-line rounded-2xl p-6 md:p-8">
                                             <h3 className="font-heading text-[18px] font-bold text-ink-3 mb-6 pb-4 border-b border-line">Обычный найм</h3>
-                                            <ul className="space-y-4">{COMPARISON.map((row, i) => (<li key={i} className="flex items-start gap-3"><div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5"><XCircle size={14} className="text-ink-4" /></div><span className="text-[15px] text-ink-3 font-medium leading-relaxed">{row[0]}</span></li>))}</ul>
+                                            <ul className="space-y-4">{COMPARISON.map((row, i) => (<li key={i} className="flex items-start gap-3"><div className="w-6 h-6 rounded-full bg-ink-4/10 flex items-center justify-center shrink-0 mt-0.5"><XCircle size={14} className="text-ink-4" /></div><span className="text-[16.0px] text-ink-3 font-medium leading-relaxed">{row[0]}</span></li>))}</ul>
                                         </motion.div>
                                         <motion.div initial="hidden" whileInView="visible" viewport={viewportSafe} variants={slideInRight} className="bg-surface border-2 border-accent rounded-2xl p-6 md:p-8 relative overflow-hidden">
                                             <h3 className="font-heading text-[18px] font-bold text-accent mb-6 pb-4 border-b border-line flex items-center gap-2"><ShieldCheck size={20} /> С Верум</h3>
@@ -268,7 +268,15 @@ export function Landing() {
                                                     <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[12px] font-bold z-20">{step.num}</div>
                                                 </motion.div>
                                                 <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{step.title}</h3>
-                                                <p className="text-[13.5px] text-ink-3 leading-relaxed font-medium">{step.desc}</p>
+                                                <p className="text-[14.5px] text-ink-3 leading-relaxed font-medium">{step.desc}</p>
+                                                
+                                                {/* Стрелочка между шагами */}
+                                                {i < STEPS.length - 1 && (
+                                                    <div className="hidden md:flex absolute top-[38px] -right-[24px] w-12 items-center z-0">
+                                                        <div className="flex-1 h-[2px] bg-accent/30" />
+                                                        <ChevronRight size={16} className="text-accent/50 -ml-1" />
+                                                    </div>
+                                                )}
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -284,7 +292,7 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className="bg-surface border border-line rounded-2xl p-5 hover:border-accent/40">
                                                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4"><c.icon size={22} /></div>
                                                 <h3 className="font-heading text-[15px] font-bold text-ink mb-2">{c.title}</h3>
-                                                <p className="text-[13px] text-ink-3 leading-relaxed">{c.desc}</p>
+                                                <p className="text-[14.0px] text-ink-3 leading-relaxed">{c.desc}</p>
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -300,7 +308,7 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className="bg-surface border border-line rounded-xl p-5 hover:border-accent/40">
                                                 <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3"><m.icon size={20} /></div>
                                                 <h3 className="font-heading text-[15px] font-bold text-ink mb-2">{m.title}</h3>
-                                                <p className="text-[13px] text-ink-3 leading-relaxed">{m.desc}</p>
+                                                <p className="text-[14.0px] text-ink-3 leading-relaxed">{m.desc}</p>
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -316,9 +324,9 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className={`rounded-2xl p-8 flex flex-col relative ${plan.featured ? "bg-surface border-2 border-accent shadow-xl" : "bg-surface border border-line"}`}>
                                                 {plan.featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider z-10">Популярный</div>}
                                                 <h3 className="font-heading text-[20px] font-bold text-ink mb-2">{plan.name}</h3>
-                                                <p className="text-[13px] text-ink-3 font-medium mb-6">{plan.desc}</p>
-                                                <div className="font-heading text-[36px] font-extrabold text-ink mb-6">{plan.price}<span className="text-[14px] text-ink-3 font-medium">/мес</span></div>
-                                                <ul className="space-y-3 mb-8 flex-1">{plan.features.map((f, j) => (<li key={j} className="flex items-start gap-2.5"><Check size={16} className="text-accent shrink-0 mt-0.5" /><span className="text-[14px] text-ink-2 font-medium">{f}</span></li>))}</ul>
+                                                <p className="text-[14.0px] text-ink-3 font-medium mb-6">{plan.desc}</p>
+                                                <div className="font-heading text-[36px] font-extrabold text-ink mb-6">{plan.price}<span className="text-[15.0px] text-ink-3 font-medium">/мес</span></div>
+                                                <ul className="space-y-3 mb-8 flex-1">{plan.features.map((f, j) => (<li key={j} className="flex items-start gap-2.5"><Check size={16} className="text-accent shrink-0 mt-0.5" /><span className="text-[15.0px] text-ink-2 font-medium">{f}</span></li>))}</ul>
                                                 <button onClick={goCompany} className={`h-[48px] rounded-xl font-heading font-bold text-[14px] transition-colors flex items-center justify-center gap-2 ${plan.featured ? "bg-accent text-white hover:bg-accent-2" : "bg-surface-2 border border-line text-ink hover:bg-surface-3"}`}>Подключить <ArrowRight size={16} /></button>
                                             </motion.div>
                                         ))}
@@ -333,9 +341,9 @@ export function Landing() {
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                         {NAV_METHODS.map((method, idx) => (
                                             <motion.div initial="hidden" whileInView="visible" viewport={viewportSafe} variants={idx === 0 ? slideInLeft : slideInRight} key={idx} className={`rounded-2xl p-8 relative overflow-hidden ${method.featured ? "bg-surface border-2 border-accent" : "bg-surface border border-line"}`}>
-                                                <div className="flex items-center gap-3 mb-5"><div className={`w-12 h-12 rounded-xl flex items-center justify-center ${method.featured ? "bg-accent text-white" : "bg-accent/10 text-accent"}`}><method.icon size={22} /></div><div><div className={`text-[11px] font-bold uppercase ${method.featured ? "text-accent" : "text-ink-3"}`}>{method.badge}</div><h3 className="font-heading text-[20px] font-bold text-ink">{method.title}</h3></div></div>
-                                                <p className="text-[14.5px] text-ink-2 mb-5">{method.desc}</p>
-                                                <ol className="space-y-3">{method.steps.map((text, i) => (<li key={i} className="flex items-start gap-3"><span className={`w-6 h-6 rounded-full text-[12px] font-bold flex items-center justify-center shrink-0 ${method.featured ? "bg-accent text-white" : "bg-surface-2 text-ink-2"}`}>{i + 1}</span><span className="text-[14px] text-ink-2 font-medium">{text}</span></li>))}</ol>
+                                                <div className="flex items-center gap-3 mb-5"><div className={`w-12 h-12 rounded-xl flex items-center justify-center ${method.featured ? "bg-accent text-white" : "bg-accent/10 text-accent"}`}><method.icon size={22} /></div><div><div className={`text-[12.0px] font-bold uppercase ${method.featured ? "text-accent" : "text-ink-3"}`}>{method.badge}</div><h3 className="font-heading text-[20px] font-bold text-ink">{method.title}</h3></div></div>
+                                                <p className="text-[15.5px] text-ink-2 mb-5">{method.desc}</p>
+                                                <ol className="space-y-3">{method.steps.map((text, i) => (<li key={i} className="flex items-start gap-3"><span className={`w-6 h-6 rounded-full text-[13.0px] font-bold flex items-center justify-center shrink-0 ${method.featured ? "bg-accent text-white" : "bg-surface-2 text-ink-2"}`}>{i + 1}</span><span className="text-[15.0px] text-ink-2 font-medium">{text}</span></li>))}</ol>
                                             </motion.div>
                                         ))}
                                     </div>
@@ -357,7 +365,7 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className="bg-surface border border-line rounded-xl p-6">
                                                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4"><f.icon size={22} /></div>
                                                 <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{f.title}</h3>
-                                                <p className="text-[14px] text-ink-3 leading-relaxed font-medium">{f.desc}</p>
+                                                <p className="text-[15.0px] text-ink-3 leading-relaxed font-medium">{f.desc}</p>
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -376,13 +384,13 @@ export function Landing() {
                                                 <motion.div variants={scaleIn} className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[14px] font-bold mb-5 shadow-lg shadow-accent/20">{s.num}</motion.div>
                                                 <div className="flex items-center gap-2 mb-3"><s.icon size={16} className="text-accent" /><span className="text-[12px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">{s.time}</span></div>
                                                 <h3 className="font-heading text-[15px] font-bold text-ink mb-2">{s.title}</h3>
-                                                <p className="text-[13px] text-ink-3 mt-auto">{s.desc}</p>
+                                                <p className="text-[14.0px] text-ink-3 mt-auto">{s.desc}</p>
                                             </motion.div>
                                         ))}
                                     </motion.div>
                                     <motion.div initial="hidden" whileInView="visible" viewport={viewportConfig} variants={fadeUp} className="mt-8 bg-surface border border-line rounded-2xl p-6 md:p-7 flex flex-col md:flex-row items-start md:items-center gap-5">
                                         <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0"><ShieldCheck size={24} /></div>
-                                        <div><h3 className="font-heading text-[17px] font-bold text-ink mb-1">Античит работает всё время</h3><p className="text-[14px] text-ink-3">Камера и микрофон записываются, детектируется переключение вкладок, блокируются DevTools и копирование.</p></div>
+                                        <div><h3 className="font-heading text-[17px] font-bold text-ink mb-1">Античит работает всё время</h3><p className="text-[15.0px] text-ink-3">Камера и микрофон записываются, детектируется переключение вкладок, блокируются DevTools и копирование.</p></div>
                                     </motion.div>
                                 </div>
                             </section>
@@ -396,7 +404,7 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className="bg-surface border border-line rounded-xl p-6">
                                                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4"><f.icon size={22} /></div>
                                                 <h3 className="font-heading text-[17px] font-bold text-ink mb-2">{f.title}</h3>
-                                                <p className="text-[14px] text-ink-3 leading-relaxed">{f.desc}</p>
+                                                <p className="text-[15.0px] text-ink-3 leading-relaxed">{f.desc}</p>
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -412,7 +420,7 @@ export function Landing() {
                                             <motion.div variants={fadeUp} key={i} className="bg-surface border border-line rounded-2xl p-5 hover:border-accent/40">
                                                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4"><c.icon size={22} /></div>
                                                 <h3 className="font-heading text-[15px] font-bold text-ink mb-2">{c.title}</h3>
-                                                <p className="text-[13px] text-ink-3 leading-relaxed">{c.desc}</p>
+                                                <p className="text-[14.0px] text-ink-3 leading-relaxed">{c.desc}</p>
                                             </motion.div>
                                         ))}
                                     </motion.div>
@@ -425,7 +433,7 @@ export function Landing() {
                                     <motion.div initial="hidden" whileInView="visible" viewport={viewportConfig} variants={fadeUp} className="bg-surface border-2 border-accent rounded-3xl p-8 md:p-12 relative overflow-hidden">
                                         <div className="grid lg:grid-cols-2 gap-10 items-center relative z-10">
                                             <div><h2 className="font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-tight text-ink mb-4">Хотите в базу проверенных инженеров?</h2><button onClick={goDev} className="h-[52px] px-7 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">Пройти тест <ArrowRight size={18} /></button></div>
-                                            <div className="space-y-3">{["Бесплатное прохождение теста", "Верифицированный профиль в базе", "Прямые контакты с компаниями", "Никаких резюме и самопрезентаций", "Тест всего за 45–60 минут"].map((item, i) => (<div key={i} className="flex items-start gap-3 bg-surface-2 border border-line rounded-xl p-4"><Check size={14} className="text-accent shrink-0 mt-0.5" /><span className="text-[14.5px] text-ink-2 font-semibold">{item}</span></div>))}</div>
+                                            <div className="space-y-3">{["Бесплатное прохождение теста", "Верифицированный профиль в базе", "Прямые контакты с компаниями", "Никаких резюме и самопрезентаций", "Тест всего за 45–60 минут"].map((item, i) => (<div key={i} className="flex items-start gap-3 bg-surface-2 border border-line rounded-xl p-4"><Check size={14} className="text-accent shrink-0 mt-0.5" /><span className="text-[15.5px] text-ink-2 font-semibold">{item}</span></div>))}</div>
                                         </div>
                                     </motion.div>
                                 </div>
