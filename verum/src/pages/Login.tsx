@@ -64,17 +64,17 @@ export default function LoginPage() {
 
                     <motion.form variants={staggerContainer} initial="hidden" animate="visible" onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/50 ring-offset-0 transition-shadow duration-200 placeholder:text-ink-4" />
                             <Mail size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-ink-4" />
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/50 ring-offset-0 transition-shadow duration-200 placeholder:text-ink-4" />
                             <Lock size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
 
                         <AnimatePresence mode="wait">
                             {error && (
-                                <motion.div key="error" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="text-white text-[13px] font-medium bg-red-500 border-none shadow-md p-3 rounded-lg overflow-hidden text-center">
+                                <motion.div key="error" initial={{ opacity: 0, y: -10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2, ease: "easeOut" }} className="mx-auto w-fit max-w-full px-6 py-2.5 text-white text-[13px] font-medium bg-red-500 shadow-lg shadow-red-500/20 rounded-xl text-center break-words">
                                     {error}
                                 </motion.div>
                             )}
