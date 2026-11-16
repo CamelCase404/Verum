@@ -93,6 +93,15 @@ export function PublicProfile() {
   };
   const estimatedSalary = calculateSalary();
 
+  const calculateCasePrice = () => {
+    if (!skills || skills.final_grade === "Reject") return 0;
+    const score = skills.total_score_100 || 50;
+    return Math.round(score * 500 + 10000);
+  };
+  const estimatedCasePrice = calculateCasePrice();
+  const displayCasePrice = user.project_rate || estimatedCasePrice;
+  const displaySalary = user.expected_salary || estimatedSalary;
+
   const SkillBar = ({ label, score }: { label: string, score: number }) => (
     <div>
       <div className="flex justify-between text-[13px] mb-1.5">
@@ -153,18 +162,26 @@ export function PublicProfile() {
 
           {isTested && (
             <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
-              <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
-                <div className="p-3 flex flex-col justify-center">
-                  <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                    <ShieldCheck size={12} className="text-accent" /> Уровень
-                  </div>
-                  <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
+              <div className="border-b border-line">
+                <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
+                    <div className="p-3 flex flex-col justify-center">
+                      <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                        <ShieldCheck size={12} className="text-accent" /> Уровень
+                      </div>
+                      <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
+                    </div>
+                    <div className="p-3 flex flex-col justify-center">
+                      <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                        <Banknote size={12} className="text-accent" /> Зарплата
+                      </div>
+                      <div className="text-[15px] font-bold text-ink">~ {displaySalary.toLocaleString('ru-RU')} <span className="text-[11px] text-ink-3 font-normal">₽</span></div>
+                    </div>
                 </div>
-                <div className="p-3 flex flex-col justify-center">
-                  <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                    <Banknote size={12} className="text-accent" /> Доход
-                  </div>
-                  <div className="text-lg font-bold text-ink">~ {estimatedSalary.toLocaleString('ru-RU')} <span className="text-[11px] text-ink-3 font-normal">₽</span></div>
+                <div className="p-3 flex flex-col justify-center bg-surface-2/30">
+                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
+                      <Briefcase size={12} className="text-accent" /> Стоимость кейса
+                    </div>
+                    <div className="text-[15px] font-bold text-ink">~ {displayCasePrice.toLocaleString('ru-RU')} <span className="text-[11px] text-ink-3 font-normal">₽</span></div>
                 </div>
               </div>
               <div className="p-3 space-y-3">
