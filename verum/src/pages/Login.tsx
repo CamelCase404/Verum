@@ -74,7 +74,7 @@ export default function LoginPage() {
 
                         <AnimatePresence mode="wait">
                             {error && (
-                                <motion.div key="error" initial={{ opacity: 0, y: -10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2, ease: "easeOut" }} className="mx-auto w-fit max-w-full px-6 py-2.5 text-white text-[13px] font-medium bg-red-500 shadow-lg shadow-red-500/20 rounded-xl text-center break-words">
+                                <motion.div key="error" initial={{ opacity: 0, y: -10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2, ease: "easeOut" }} className="mx-auto w-fit max-w-full px-6 py-2.5 text-white text-[13px] font-medium bg-red-500 rounded-xl text-center break-words">
                                     {error}
                                 </motion.div>
                             )}
