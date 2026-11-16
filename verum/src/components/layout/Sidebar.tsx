@@ -12,7 +12,10 @@ import { useAppStore } from "@/store/useAppStore";
 import { authApi } from "@/api";
 import { toast } from "@/components/layout/ToastContainer";
 
+import { useState } from "react";
+
 export function Drawer() {
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { drawerOpen, toggleDrawer, user, setUser } = useAppStore();
     const location = useLocation();
 
@@ -24,13 +27,7 @@ export function Drawer() {
     };
 
     const handleDeleteAccount = async () => {
-        const confirmDelete = window.confirm(
-            "Вы уверены, что хотите удалить аккаунт?\n\n" +
-                "Это действие необратимо. Будут удалены: профиль, история собеседований, " +
-                "чаты, отклики на вакансии и все связанные данные.",
-        );
-        if (!confirmDelete) return;
-
+        setShowDeleteModal(false); // Закрываем модалку
         try {
             await authApi.deleteAccount();
             toast("Аккаунт удален", "success");
@@ -145,7 +142,7 @@ export function Drawer() {
                         {user && (
                             <div className="p-4 border-t border-line flex flex-col gap-2">
                                 <button
-                                    onClick={handleDeleteAccount}
+                                    onClick={() => setShowDeleteModal(true)}
                                     className="w-full h-[42px] rounded-lg border border-transparent text-warn hover:bg-warn-soft transition-colors text-[13px] flex items-center justify-center gap-2"
                                 >
                                     <Trash2 size={15} /> Удалить аккаунт
@@ -161,6 +158,47 @@ export function Drawer() {
                     </motion.aside>
                 </>
             )}
+
+            {/* Модалка удаления аккаунта */}
+            <AnimatePresence>
+                {showDeleteModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-surface border border-line rounded-[22px] p-6 sm:p-8 w-full max-w-md shadow-2xl relative"
+                        >
+                            <div className="w-14 h-14 rounded-full bg-warn-soft text-warn flex items-center justify-center mx-auto mb-5">
+                                <Trash2 size={28} />
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2">Удалить аккаунт?</h3>
+                            <p className="text-ink-2 text-sm text-center leading-relaxed mb-6">
+                                Это действие <b className="text-warn">необратимо</b>. Будут удалены: профиль, история собеседований, чаты, отклики на вакансии и все связанные данные.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    className="flex-1 py-2.5 rounded-xl border border-line font-medium hover:bg-surface-2 transition-colors"
+                                >
+                                    Отмена
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="flex-1 py-2.5 rounded-xl bg-warn text-white font-medium hover:bg-red-600 transition-colors shadow-sm"
+                                >
+                                    Да, удалить
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AnimatePresence>
     );
 }

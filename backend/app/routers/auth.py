@@ -514,6 +514,23 @@ async def delete_account(
     from ..interview_store import DBInterview, DBTurn
     from ..interview_store import SessionLocal as InterviewSession
 
+    from sqlalchemy import or_
+    from ..auth import Conversation, Message, VacancyApplication, VerificationRequest, UsageLog
+
+    # 0. Удаляем сообщения, чаты, отклики и логи (чтобы не было ForeignKeyViolation)
+    user_conv_ids_res = await db.execute(
+        select(Conversation.id).where(or_(Conversation.company_id == user.id, Conversation.developer_id == user.id))
+    )
+    conv_ids = [r[0] for r in user_conv_ids_res.fetchall()]
+    
+    if conv_ids:
+        await db.execute(delete(Message).where(Message.conversation_id.in_(conv_ids)))
+    await db.execute(delete(Message).where(Message.sender_id == user.id))
+    await db.execute(delete(Conversation).where(or_(Conversation.company_id == user.id, Conversation.developer_id == user.id)))
+    await db.execute(delete(VacancyApplication).where(or_(VacancyApplication.company_id == user.id, VacancyApplication.developer_id == user.id)))
+    await db.execute(delete(VerificationRequest).where(or_(VerificationRequest.company_id == user.id, VerificationRequest.developer_id == user.id)))
+    await db.execute(delete(UsageLog).where(UsageLog.company_id == user.id))
+
     # 1. Удаляем интервью и ответы (они в другой БД-сессии)
     async with InterviewSession() as idb:
         res = await idb.execute(
