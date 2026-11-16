@@ -509,40 +509,38 @@ async def delete_account(
     user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     """Полное удаление аккаунта и всех связанных данных."""
-    from sqlalchemy import delete
-
+    from sqlalchemy import delete, or_
+    from ..auth import Conversation, Message, VacancyApplication, VerificationRequest, UsageLog
     from ..interview_store import DBInterview, DBTurn
     from ..interview_store import SessionLocal as InterviewSession
 
-    from sqlalchemy import or_
-    from ..auth import Conversation, Message, VacancyApplication, VerificationRequest, UsageLog
-
-    # 0. Удаляем сообщения, чаты, отклики и логи (чтобы не было ForeignKeyViolation)
-    user_conv_ids_res = await db.execute(
+    # 1. Сначала удаляем сообщения (чтобы не нарушать внешние ключи)
+    await db.execute(delete(Message).where(Message.sender_id == user.id))
+    
+    # Находим все чаты пользователя и удаляем их
+    user_conv_res = await db.execute(
         select(Conversation.id).where(or_(Conversation.company_id == user.id, Conversation.developer_id == user.id))
     )
-    conv_ids = [r[0] for r in user_conv_ids_res.fetchall()]
-    
+    conv_ids = [r[0] for r in user_conv_res.fetchall()]
     if conv_ids:
         await db.execute(delete(Message).where(Message.conversation_id.in_(conv_ids)))
-    await db.execute(delete(Message).where(Message.sender_id == user.id))
-    await db.execute(delete(Conversation).where(or_(Conversation.company_id == user.id, Conversation.developer_id == user.id)))
+        await db.execute(delete(Conversation).where(Conversation.id.in_(conv_ids)))
+
+    # 2. Удаляем отклики на вакансии, запросы на проверку и логи
     await db.execute(delete(VacancyApplication).where(or_(VacancyApplication.company_id == user.id, VacancyApplication.developer_id == user.id)))
     await db.execute(delete(VerificationRequest).where(or_(VerificationRequest.company_id == user.id, VerificationRequest.developer_id == user.id)))
     await db.execute(delete(UsageLog).where(UsageLog.company_id == user.id))
 
-    # 1. Удаляем интервью и ответы (они в другой БД-сессии)
+    # 3. Удаляем интервью и ответы (они в другой БД-сессии)
     async with InterviewSession() as idb:
-        res = await idb.execute(
-            select(DBInterview.id).where(DBInterview.user_id == user.id)
-        )
+        res = await idb.execute(select(DBInterview.id).where(DBInterview.user_id == user.id))
         it_ids = [r[0] for r in res.fetchall()]
         if it_ids:
             await idb.execute(delete(DBTurn).where(DBTurn.interview_id.in_(it_ids)))
             await idb.execute(delete(DBInterview).where(DBInterview.id.in_(it_ids)))
         await idb.commit()
 
-    # 2. Удаляем пользователя (каскадно удалит чаты, отклики, счета и т.д. благодаря ondelete="CASCADE")
+    # 4. Удаляем самого пользователя
     await db.delete(user)
     await db.commit()
 
