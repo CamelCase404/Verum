@@ -65,7 +65,13 @@ const itemVariants = {
 function SectionDivider({ icon: Icon }: { icon: any }) {
     return (
         <div className="relative py-12 md:py-16 flex items-center justify-center">
-            <div className="max-w-[1400px] mx-auto px-6 w-full flex items-center gap-6">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.5, ease: EASE }}
+                className="max-w-[1400px] mx-auto px-6 w-full flex items-center gap-6"
+            >
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-line-2/70 to-line-2" />
                 <div className="relative flex items-center justify-center shrink-0">
                     <div className="absolute inset-0 w-12 h-12 rounded-full bg-accent/10 blur-[10px]" />
@@ -74,7 +80,7 @@ function SectionDivider({ icon: Icon }: { icon: any }) {
                     </div>
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-l from-transparent via-line-2/70 to-line-2" />
-            </div>
+            </motion.div>
         </div>
     );
 }
@@ -395,16 +401,12 @@ export function Landing() {
         else if (user.role === "developer") navigate("/dashboard");
         else toast("Для теста нужен аккаунт разработчика");
     };
-    const goStart = () => {
-        if (!user) navigate("/register");
-        else navigate("/dashboard");
-    };
 
     return (
         <div className="w-full bg-bg overflow-hidden text-ink font-sans">
             {/* ===== HERO ===== */}
             <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-                <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none -z-10" />
+                <div className="absolute inset-0 bg-grid-pattern opacity-20 md:opacity-50 pointer-events-none -z-10" />
                 <div className="absolute inset-0 pointer-events-none -z-10">
                     <motion.div
                         animate={{
