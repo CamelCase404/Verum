@@ -114,9 +114,6 @@ export default function Interview({
         };
     }, []);
 
-
-
-
     // Эффект для привязки видеопотока к тегу <video>
     useEffect(() => {
         if (videoRef.current && mediaStream) {
@@ -298,7 +295,11 @@ export default function Interview({
         const prevStage = currentStage;
 
         try {
-            const res = await api.answer(payload.interviewId, text, isSkip ? 0 : spent);
+            const res = await api.answer(
+                payload.interviewId,
+                text,
+                isSkip ? 0 : spent,
+            );
             setCurrentStage(res.stage);
             setCurrentStageName(res.stage_name);
 
@@ -328,27 +329,44 @@ export default function Interview({
                 setFinished(true);
                 setMsgs((m) => [
                     ...m,
-                    { role: "ai", text: "Интервью завершено. Загружаем видео..." },
+                    {
+                        role: "ai",
+                        text: "Интервью завершено. Загружаем видео...",
+                    },
                 ]);
-                
+
                 // Ждем полной остановки и загрузки видео перед переходом
                 if (mediaRecorder && mediaRecorder.state !== "inactive") {
                     mediaRecorder.stop();
                     mediaRecorder.addEventListener("stop", () => {
-                        if (!isRejectedRef.current && chunksRef.current.length > 0) {
-                            const blob = new Blob(chunksRef.current, { type: "video/webm" });
+                        if (
+                            !isRejectedRef.current &&
+                            chunksRef.current.length > 0
+                        ) {
+                            const blob = new Blob(chunksRef.current, {
+                                type: "video/webm",
+                            });
                             const formData = new FormData();
                             formData.append("file", blob, "interview.webm");
-                            const apiBase = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
+                            const apiBase =
+                                import.meta.env.VITE_API_URL ||
+                                "https://api.verumskills.ru";
                             const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
                             const __token = localStorage.getItem("verum_token");
-                            
-                            fetch(uploadUrl, { method: "POST", body: formData, headers: __token ? { Authorization: `Bearer ${__token}` } : {} })
-                                .catch(e => console.error("[video] upload error", e));
+
+                            fetch(uploadUrl, {
+                                method: "POST",
+                                body: formData,
+                                headers: __token
+                                    ? { Authorization: `Bearer ${__token}` }
+                                    : {},
+                            }).catch((e) =>
+                                console.error("[video] upload error", e),
+                            );
                         }
                     });
                 }
-                
+
                 onFinished(payload.interviewId, payload.level);
                 return;
             }
@@ -360,27 +378,30 @@ export default function Interview({
                     stageName: res.stage_name,
                 };
                 if (res.code_snippet) {
-
-                    newMsg.text = res.question + "\n\n__CODE__" + res.code_snippet;
-
-                } else if (typeof res.question === "string" && /\n\s*Код:\s*\n/.test(res.question)) {
-
+                    newMsg.text =
+                        res.question + "\n\n__CODE__" + res.code_snippet;
+                } else if (
+                    typeof res.question === "string" &&
+                    /\n\s*Код:\s*\n/.test(res.question)
+                ) {
                     const p = res.question.split(/\n\s*Код:\s*\n/);
 
-                    if (p.length >= 2 && p[1].trim()) newMsg.text = p[0] + "\n\n__CODE__" + p[1];
-
-                } else if (typeof res.question === "string" && /```/.test(res.question)) {
-
-                    const m = res.question.match(/```[a-zA-Z0-9+#.-]*\n([\s\S]*?)```/);
+                    if (p.length >= 2 && p[1].trim())
+                        newMsg.text = p[0] + "\n\n__CODE__" + p[1];
+                } else if (
+                    typeof res.question === "string" &&
+                    /```/.test(res.question)
+                ) {
+                    const m = res.question.match(
+                        /```[a-zA-Z0-9+#.-]*\n([\s\S]*?)```/,
+                    );
 
                     if (m && m[1].trim()) {
-
                         const b = res.question.slice(0, m.index).trim();
 
-                        newMsg.text = (b ? b + "\n\n" : "") + "__CODE__" + m[1].trim();
-
+                        newMsg.text =
+                            (b ? b + "\n\n" : "") + "__CODE__" + m[1].trim();
                     }
-
                 }
 
                 if (res.stage !== prevStage) {
@@ -506,10 +527,6 @@ export default function Interview({
                             <h2 className="text-[14px] font-bold flex items-center gap-2">
                                 <Camera size={16} /> Камера
                             </h2>
-                            <span className="text-[11px] font-bold text-red-600 flex items-center gap-1">
-                                <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />{" "}
-                                REC
-                            </span>
                         </div>
                         <div className="bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center relative">
                             <video
