@@ -54,11 +54,11 @@ const EASE = [0.16, 0.84, 0.44, 1] as const;
 
 const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
 };
 const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+    hidden: { opacity: 0, y: 32, scale: 0.96 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.65, ease: EASE } },
 };
 
 /* ===== Красивый разделитель с иконкой ===== */
@@ -410,41 +410,38 @@ export function Landing() {
                 <div className="absolute inset-0 pointer-events-none -z-10">
                     <motion.div
                         animate={{
-                            scale: [1, 1.05, 1],
                             opacity: [0.05, 0.1, 0.05],
-                        }}
-                        transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                        }}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-accent rounded-full blur-[140px]"
-                    />
-                    <motion.div
-                        animate={{
-                            scale: [1, 1.2, 1],
-                            opacity: [0.03, 0.06, 0.03],
-                        }}
-                        transition={{
-                            duration: 10,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                            delay: 2,
-                        }}
-                        className="absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-accent-2 rounded-full blur-[100px]"
-                    />
-                    <motion.div
-                        animate={{
-                            scale: [1.1, 1, 1.1],
-                            opacity: [0.02, 0.05, 0.02],
                         }}
                         transition={{
                             duration: 12,
                             repeat: Infinity,
                             ease: "easeInOut",
+                        }}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[900px] md:h-[900px] bg-accent rounded-full blur-[80px] md:blur-[140px]"
+                    />
+                    <motion.div
+                        animate={{
+                            opacity: [0.03, 0.06, 0.03],
+                        }}
+                        transition={{
+                            duration: 15,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            delay: 2,
+                        }}
+                        className="hidden md:block absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-accent-2 rounded-full blur-[100px]"
+                    />
+                    <motion.div
+                        animate={{
+                            opacity: [0.02, 0.05, 0.02],
+                        }}
+                        transition={{
+                            duration: 18,
+                            repeat: Infinity,
+                            ease: "easeInOut",
                             delay: 1,
                         }}
-                        className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-accent-3 rounded-full blur-[120px]"
+                        className="hidden md:block absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-accent-3 rounded-full blur-[120px]"
                     />
                 </div>
 
@@ -475,10 +472,10 @@ export function Landing() {
 
                         <motion.div variants={itemVariants}>
                             <button
-                                onClick={goStart}
+                                onClick={goCompany}
                                 className="group h-[56px] px-10 rounded-xl bg-accent text-white font-heading font-bold text-[15px] hover:bg-accent-2 transition-colors inline-flex items-center justify-center gap-2"
                             >
-                                Начать бесплатно{" "}
+                                Нанять{" "}
                                 <ArrowRight
                                     size={18}
                                     className="transition-transform group-hover:translate-x-1"
@@ -608,7 +605,7 @@ export function Landing() {
                             {/* КОМПАНИЯМ: Метрики */}
                             <SectionDivider icon={TrendingUp} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                                <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
                                 <div className="max-w-[1400px] mx-auto px-6 relative">
                                     <div className="text-center mb-14 max-w-2xl mx-auto">
                                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
@@ -649,7 +646,7 @@ export function Landing() {
                             {/* КОМПАНИЯМ: Сравнение */}
                             <SectionDivider icon={Scale} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                                <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
                                 <div className="max-w-[1200px] mx-auto px-6 relative">
                                     <div className="text-center mb-12 max-w-2xl mx-auto">
                                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
@@ -715,7 +712,7 @@ export function Landing() {
                             {/* КОМПАНИЯМ: Шаги */}
                             <SectionDivider icon={Route} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+                                <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
                                 <div className="max-w-[1400px] mx-auto px-6 relative">
                                     <div className="text-center mb-16 max-w-2xl mx-auto">
                                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
@@ -1070,8 +1067,8 @@ export function Landing() {
                             {/* КОМПАНИЯМ: Почему мы */}
                             <SectionDivider icon={ShieldCheck} />
                             <section className="py-16 md:py-20 bg-bg relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
-                                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-2/5 rounded-full blur-[100px] pointer-events-none" />
+                                <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+                                <div className="hidden md:block absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-2/5 rounded-full blur-[100px] pointer-events-none" />
                                 <div className="max-w-[1400px] mx-auto px-6 relative">
                                     <div className="mb-12 max-w-2xl">
                                         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-3 font-heading">
