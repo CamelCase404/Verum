@@ -139,7 +139,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       
       if (isEditing) {
         const updatedJobs = currentJobs.map((j: any) => 
-          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "), is_external: isExternal, slug: isExternal ? finalSlug : null } : j
+          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "), is_external: isExternal, slug: isExternal ? finalSlug : null, created_at: j.created_at || new Date().toISOString() } : j
         );
         await authApi.updateJobs(updatedJobs);
         toast("Вакансия обновлена", "success");
@@ -148,7 +148,8 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
             id: Date.now().toString(), 
             title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "),
             is_external: isExternal,
-            slug: isExternal ? finalSlug : null
+            slug: isExternal ? finalSlug : null,
+            created_at: new Date().toISOString(),
         };
         await authApi.updateJobs([...currentJobs, newJob]);
         toast("Вакансия опубликована", "success");

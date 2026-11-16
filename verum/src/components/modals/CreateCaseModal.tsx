@@ -56,7 +56,8 @@ export function CreateCaseModal({ onClose, backendUser, onRefresh }: { onClose: 
           level, 
           salary: budget ? `Бюджет: ${budget} ₽` : "По договоренности", 
           format: "Удалённо (кейс)",
-          type: "case" // Отличаем кейс от вакансии
+          type: "case",
+          created_at: new Date().toISOString(),
       };
       await authApi.updateJobs([...currentJobs, newCase]);
       toast("Кейс опубликован", "success");

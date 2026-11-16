@@ -650,7 +650,31 @@ async def search_jobs(
                         "company_avatar": comp.avatar_url,
                     }
                 )
-    return matched_jobs
+
+    # ─── Фильтр: только вакансии, созданные за последние 24 часа ───
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    _cutoff = _dt.now(_tz.utc) - _td(hours=24)
+
+    def _is_fresh(j: dict) -> bool:
+        ca = j.get("created_at")
+        if not ca:
+            return False
+        try:
+            s = ca.replace("Z", "+00:00") if isinstance(ca, str) and ca.endswith("Z") else ca
+            dt = _dt.fromisoformat(s)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=_tz.utc)
+            return dt >= _cutoff
+        except Exception:
+            return False
+
+    matched_jobs = [j for j in matched_jobs if _is_fresh(j)]
+
+    # Сортировка: свежие сверху
+    matched_jobs.sort(key=lambda j: j.get("created_at") or "", reverse=True)
+
+    # Не больше 50 штук за раз
+    return matched_jobs[:50]
 
 
 # Дедуп просмотров: считаем не больше 1 просмотра в день на пару (viewer_id, target_id)

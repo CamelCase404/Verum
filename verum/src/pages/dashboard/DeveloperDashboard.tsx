@@ -99,28 +99,48 @@ export function DeveloperDashboard({
         if (!backendUser?.id || !skills?.stack_id) return;
 
         const cacheKey = `verum_recs_${backendUser.id}`;
-        const today = new Date().toISOString().split('T')[0];
 
-        let cachedData: { date: string; items: any[] } | null = null;
-        try {
-            const c = localStorage.getItem(cacheKey);
-            if (c) cachedData = JSON.parse(c);
-        } catch (e) {}
+        // Локальная дата YYYY-MM-DD (не UTC)
+        const getToday = () => {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        };
 
-        if (cachedData && cachedData.date === today) {
-            // Если данные за сегодня уже есть — берем их из кэша
-            setRecommendedJobs(cachedData.items);
-        } else {
-            // Если данных нет или они за прошлый день — делаем запрос
+        const checkAndRefresh = (force = false) => {
+            const today = getToday();
+            let cachedData: { date: string; items: any[] } | null = null;
+            try {
+                const c = localStorage.getItem(cacheKey);
+                if (c) cachedData = JSON.parse(c);
+            } catch (e) {}
+
+            if (!force && cachedData && cachedData.date === today) {
+                setRecommendedJobs(cachedData.items);
+                return;
+            }
+
             authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
                 .then((res) => {
                     const newItems = res.data || [];
                     setRecommendedJobs(newItems);
-                    // Перезаписываем кэш новыми данными
                     localStorage.setItem(cacheKey, JSON.stringify({ date: today, items: newItems }));
                 })
                 .catch(console.error);
-        }
+        };
+
+        checkAndRefresh();
+
+        const onVisible = () => {
+            if (document.visibilityState === "visible") checkAndRefresh();
+        };
+        document.addEventListener("visibilitychange", onVisible);
+
+        const interval = setInterval(() => checkAndRefresh(), 5 * 60 * 1000);
+
+        return () => {
+            document.removeEventListener("visibilitychange", onVisible);
+            clearInterval(interval);
+        };
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
 
     
@@ -372,7 +392,7 @@ export function DeveloperDashboard({
                         <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 flex items-center gap-2">
                             <Briefcase size={14} /> Вакансии и кейсы компаний под ваш стек
                         </h4>
-                        <span className="text-[11px] text-ink-3 font-medium">Список обновляется каждые 24 часа</span>
+                        <span className="text-[11px] text-ink-3 font-medium">Только вакансии за последние 24 часа</span>
                     </div>
                     {recommendedJobs.length > 0 ? (
                         <>
