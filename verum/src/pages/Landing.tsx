@@ -348,25 +348,10 @@ const TEST_RESULTS = [
 const NAV_METHODS = [
     {
         badge: "Способ 1",
-        title: "Найм из базы Верум",
-        desc: "Алгоритм сам подбирает кандидатов по вашим требованиям. Вы открываете контакты только тех, кто подошёл.",
-        icon: UserPlus,
-        featured: true,
-        steps: [
-            "Заполняете профиль компании в Веруме",
-            "В поиске указываете стек, грейд, вилку",
-            "Алгоритм подбирает по 7 осям матчинга",
-            "Смотрите профили: балл, видео, компетенции",
-            "Открываете контакты за токены",
-            "Связываетесь с кандидатом напрямую",
-        ],
-    },
-    {
-        badge: "Способ 2",
         title: "Интеграция для своих кандидатов",
         desc: "Уже нашли человека сами (на hh.ru, по рекомендациям)? Отправьте ему ссылку на тест — он пройдёт его заново под вашу вакансию.",
         icon: ExternalLink,
-        featured: false,
+        featured: true,
         steps: [
             "Создаёте вакансию в ЛК Верума",
             "Получаете короткую ссылку /v/abc123",
@@ -374,6 +359,21 @@ const NAV_METHODS = [
             "Кандидат проходит тест за 45–60 минут",
             "Составляется топ откликов на вакансию",
             "Открываете контакты только прошедших",
+        ],
+    },
+    {
+        badge: "Способ 2",
+        title: "Найм из базы Верум",
+        desc: "Алгоритм сам подбирает кандидатов по вашим требованиям. Вы открываете контакты только тех, кто подошёл.",
+        icon: UserPlus,
+        featured: false,
+        steps: [
+            "Заполняете профиль компании в Веруме",
+            "В поиске указываете стек, грейд, вилку",
+            "Алгоритм подбирает по 7 осям матчинга",
+            "Смотрите профили: балл, видео, компетенции",
+            "Открываете контакты за токены",
+            "Связываетесь с кандидатом напрямую",
         ],
     },
 ];
@@ -871,19 +871,23 @@ export function Landing() {
                                         {PRICING.map((plan, i) => (
                                             <div
                                                 key={i}
-                                                className={`rounded-2xl p-8 flex flex-col relative overflow-hidden ${
+                                                className={`rounded-2xl p-8 flex flex-col relative ${
                                                     plan.featured
                                                         ? "bg-surface border-2 border-accent shadow-xl shadow-accent/10"
                                                         : "bg-surface border border-line"
                                                 }`}
                                             >
+                                                {/* Фоновый орб внутри overflow-hidden, чтобы не вылезал за рамки */}
+                                                <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                                                    {plan.featured && (
+                                                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-accent/10 rounded-full blur-3xl" />
+                                                    )}
+                                                </div>
+
                                                 {plan.featured && (
-                                                    <>
-                                                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-                                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider font-heading whitespace-nowrap">
-                                                            Популярный
-                                                        </div>
-                                                    </>
+                                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-white text-[11px] font-bold uppercase tracking-wider font-heading whitespace-nowrap shadow-md z-10">
+                                                        Популярный
+                                                    </div>
                                                 )}
                                                 <h3 className="font-heading text-[20px] font-bold text-ink mb-2">
                                                     {plan.name}
