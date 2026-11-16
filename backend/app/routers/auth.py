@@ -28,6 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import (
     UserDB,
+    VerificationRequest,
     create_access_token,
     get_current_user,
     get_current_user_optional,
@@ -447,6 +448,32 @@ async def save_skills(
             except Exception as _e:
                 print(f"  ⚠️ save_skills: job_id read failed: {_e}")
         user.test_status = "pending"
+
+        # ← СОЗДАЁМ ЗАПИСЬ НА МОДЕРАЦИЮ
+        _job_id = (user.pending_skills_data or {}).get("job_id")
+        _company_id = user.id  # для обычного теста
+        if _job_id:
+            _comp_res = await db.execute(
+                select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None))
+            )
+            for _c in _comp_res.scalars().all():
+                if any(str(_j.get("id")) == str(_job_id) for _j in (_c.job_postings or [])):
+                    _company_id = _c.id
+                    break
+
+        _existing = await db.execute(
+            select(VerificationRequest).where(
+                VerificationRequest.developer_id == user.id,
+                VerificationRequest.status == "pending",
+            )
+        )
+        if not _existing.scalars().first():
+            db.add(VerificationRequest(
+                company_id=_company_id,
+                developer_id=user.id,
+                status="pending",
+            ))
+            print(f"  ✅ Создан VerificationRequest для user_id={user.id} (company_id={_company_id})")
 
     # Ищем видео по ID собеседования
     if report.interview_id:

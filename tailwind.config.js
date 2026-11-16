@@ -1,0 +1,50 @@
+/** @type {import("tailwindcss").Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        bg: "var(--bg)",
+        "bg-2": "var(--bg-2)",
+        surface: "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        "surface-3": "var(--surface-3)",
+        ink: "var(--ink)",
+        "ink-2": "var(--ink-2)",
+        "ink-3": "var(--ink-3)",
+        "ink-4": "var(--ink-4)",
+        line: "var(--line)",
+        "line-2": "var(--line-2)",
+        accent: "var(--accent)",
+        "accent-2": "var(--accent-2)",
+        "accent-3": "var(--accent-3)",
+        "accent-soft": "var(--accent-soft)",
+        "accent-line": "var(--accent-line)",
+        warn: "var(--warn)",
+        "warn-soft": "var(--warn-soft)",
+        amber: "var(--amber)",
+        "amber-soft": "var(--amber-soft)",
+        blue: "var(--blue)",
+        "blue-soft": "var(--blue-soft)",
+        violet: "var(--violet)",
+        "violet-soft": "var(--violet-soft)",
+      },
+      borderRadius: { sm: "6px", DEFAULT: "10px", lg: "16px", xl: "24px", "2xl": "32px", "3xl": "40px" },
+      fontFamily: {
+        sans: ["Manrope", "sans-serif"], // Основной текст (читаемый)
+        display: ["Sora", "sans-serif"], // Заголовки (футуристичный)
+        heading: ["Montserrat", "sans-serif"], // Подзаголовки
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+      },
+      animation: {
+        float: "float 6s ease-in-out infinite",
+        "pulse-slow": "pulse-slow 8s ease-in-out infinite",
+      },
+      keyframes: {
+        float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-10px)" } },
+        "pulse-slow": { "0%, 100%": { opacity: "0.2", transform: "scale(1)" }, "50%": { opacity: "0.4", transform: "scale(1.05)" } },
+      },
+    },
+  },
+  plugins: [],
+};
