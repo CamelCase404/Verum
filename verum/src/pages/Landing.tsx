@@ -48,6 +48,8 @@ import {
     GitMerge,
     CircleDollarSign,
     Scale,
+    Award,
+    AlertCircle,
 } from "lucide-react";
 
 const EASE = [0.16, 0.84, 0.44, 1] as const;
@@ -134,69 +136,21 @@ const STEPS = [
 ];
 
 const COMPETENCIES = [
-    {
-        icon: Layers,
-        title: "Архитектурное мышление",
-        desc: "Умение проектировать системы, выбирать паттерны и обосновывать trade-offs.",
-    },
-    {
-        icon: Code,
-        title: "Понимание кода",
-        desc: "Чтение и рефакторинг чужого кода, поиск багов и узких мест.",
-    },
-    {
-        icon: Sparkles,
-        title: "Работа с ИИ",
-        desc: "Умение формулировать промпты и использовать ИИ-ассистентов в работе.",
-    },
-    {
-        icon: Target,
-        title: "Adaptability",
-        desc: "Скорость адаптации к новым задачам и продакшен-инцидентам.",
-    },
-    {
-        icon: MessageSquare,
-        title: "Soft skills",
-        desc: "Ясность изложения, умение объяснять сложное простыми словами.",
-    },
+    { icon: Layers, title: "Архитектурное мышление", desc: "Умение проектировать системы, выбирать паттерны и обосновывать trade-offs." },
+    { icon: Code, title: "Понимание кода", desc: "Чтение и рефакторинг чужого кода, поиск багов и узких мест." },
+    { icon: Sparkles, title: "Работа с ИИ", desc: "Умение формулировать промпты и использовать ИИ-ассистентов в работе." },
+    { icon: Zap, title: "Adaptability", desc: "Скорость адаптации к новым задачам и продакшен-инцидентам." },
+    { icon: MessageSquare, title: "Soft skills", desc: "Ясность изложения, умение объяснять сложное простыми словами." },
 ];
 
 const MATCHING = [
-    {
-        icon: Code2,
-        title: "Стек",
-        desc: "Полное совпадение или пересечение по ключевым технологиям.",
-    },
-    {
-        icon: Gauge,
-        title: "Грейд",
-        desc: "Точное попадание или разница в одну ступень.",
-    },
-    {
-        icon: Terminal,
-        title: "Языки",
-        desc: "Пересечение языков кандидата и требований вакансии.",
-    },
-    {
-        icon: Wallet,
-        title: "Зарплата",
-        desc: "Ожидания кандидата вписываются в вилку вакансии.",
-    },
-    {
-        icon: Star,
-        title: "GitHub",
-        desc: "Активность, звёзды репозиториев и реальный код на GitHub.",
-    },
-    {
-        icon: TrendingUp,
-        title: "Балл теста",
-        desc: "Итоговый балл 0–100 по результатам ИИ-интервью.",
-    },
-    {
-        icon: Users,
-        title: "Soft skills",
-        desc: "Оценка коммуникабельности и умения работать в команде.",
-    },
+    { icon: Layers, title: "Стек", desc: "Полное совпадение или пересечение по ключевым технологиям.", pills: ["FE", "BE", "ML", "DevOps"] },
+    { icon: Award, title: "Грейд", desc: "Точное попадание или разница в одну ступень.", badge: "J / M / S" },
+    { icon: Code2, title: "Языки", desc: "Пересечение языков кандидата и требований вакансии.", pills: ["JS", "TS", "PY", "GO", "RS"] },
+    { icon: Banknote, title: "Зарплата", desc: "Ожидания кандидата вписываются в вилку вакансии.", badge: "₽" },
+    { icon: Github, title: "GitHub", desc: "Активность, звёзды репозиториев и реальный код.", badge: "★" },
+    { icon: Gauge, title: "Балл теста", desc: "Итоговый балл 0–100 по результатам ИИ-интервью.", badge: "0–100" },
+    { icon: Users, title: "Soft skills", desc: "Оценка коммуникабельности и умения работать в команде." },
 ];
 
 const PRICING = [
@@ -280,36 +234,11 @@ const COMPARISON = [
 ];
 
 const TEST_STAGES = [
-    {
-        num: "01",
-        title: "Общие знания",
-        desc: "8 вопросов по стеку и грейду",
-        time: "15 мин",
-    },
-    {
-        num: "02",
-        title: "Code Review",
-        desc: "Поиск багов в реальном коде",
-        time: "10 мин",
-    },
-    {
-        num: "03",
-        title: "Продакшен-инцидент",
-        desc: "Как починить сломанный код",
-        time: "10 мин",
-    },
-    {
-        num: "04",
-        title: "Code Review 2",
-        desc: "Другие баги и уязвимости",
-        time: "10 мин",
-    },
-    {
-        num: "05",
-        title: "Вторая проблема",
-        desc: "Новая ситуация из продакшена",
-        time: "10 мин",
-    },
+    { num: "01", title: "Общие знания", desc: "8 вопросов по стеку и грейду", time: "15 мин", icon: Brain },
+    { num: "02", title: "Code Review", desc: "Поиск багов в реальном коде", time: "10 мин", icon: Code },
+    { num: "03", title: "Продакшен-инцидент", desc: "Как починить сломанный код", time: "10 мин", icon: AlertCircle },
+    { num: "04", title: "Code Review 2", desc: "Другие баги и уязвимости", time: "10 мин", icon: Code },
+    { num: "05", title: "Вторая проблема", desc: "Новая ситуация из продакшена", time: "10 мин", icon: AlertCircle },
 ];
 
 const TEST_RESULTS = [
@@ -785,23 +714,19 @@ export function Landing() {
                                             итоговый балл.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                                         {COMPETENCIES.map((c, i) => {
                                             const Icon = c.icon;
                                             return (
-                                                <div
-                                                    key={i}
-                                                    className="bg-surface border border-line rounded-xl p-6"
-                                                >
-                                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
-                                                        <Icon size={22} />
+                                                <div key={i} className="group relative bg-surface border border-line rounded-2xl p-5 hover:border-accent/40 transition-all overflow-hidden">
+                                                    <div className="absolute top-3 right-3 text-[11px] font-bold font-mono text-ink-4 opacity-50">
+                                                        0{i + 1}
                                                     </div>
-                                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2">
-                                                        {c.title}
-                                                    </h3>
-                                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">
-                                                        {c.desc}
-                                                    </p>
+                                                    <div className="relative w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:scale-110 group-hover:bg-accent group-hover:text-white transition-all">
+                                                        <Icon size={26} />
+                                                    </div>
+                                                    <h3 className="relative font-heading text-[15px] font-bold text-ink mb-2">{c.title}</h3>
+                                                    <p className="relative text-[13px] text-ink-3 leading-relaxed">{c.desc}</p>
                                                 </div>
                                             );
                                         })}
@@ -826,23 +751,31 @@ export function Landing() {
                                             не только по стеку.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                                         {MATCHING.map((m, i) => {
                                             const Icon = m.icon;
                                             return (
-                                                <div
-                                                    key={i}
-                                                    className="bg-surface border border-line rounded-xl p-5"
-                                                >
-                                                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3">
-                                                        <Icon size={20} />
+                                                <div key={i} className="relative bg-surface border border-line rounded-2xl p-5 hover:border-accent/40 transition-all group overflow-hidden">
+                                                    <div className="absolute -top-8 -right-8 w-24 h-24 bg-accent/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                                    <div className="relative flex items-start justify-between mb-4">
+                                                        <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all">
+                                                            <Icon size={22} />
+                                                        </div>
+                                                        {m.badge && (
+                                                            <span className="text-[10px] px-2 py-1 rounded-md bg-surface-2 border border-line font-bold text-ink-3">
+                                                                {m.badge}
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                    <h3 className="font-heading text-[15px] font-bold text-ink mb-2">
-                                                        {m.title}
-                                                    </h3>
-                                                    <p className="text-[13px] text-ink-3 leading-relaxed font-medium">
-                                                        {m.desc}
-                                                    </p>
+                                                    <h3 className="relative font-heading text-[15px] font-bold text-ink mb-1.5">{m.title}</h3>
+                                                    <p className="relative text-[12.5px] text-ink-3 leading-relaxed">{m.desc}</p>
+                                                    {m.pills && (
+                                                        <div className="relative flex flex-wrap gap-1 mt-3">
+                                                            {m.pills.map((p: string) => (
+                                                                <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-surface-2 border border-line font-mono text-ink-2">{p}</span>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             );
                                         })}
@@ -1126,26 +1059,26 @@ export function Landing() {
                                             без повторов.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                                        {TEST_STAGES.map((s, i) => (
-                                            <div
-                                                key={i}
-                                                className="bg-surface border border-line rounded-xl p-5"
-                                            >
-                                                <div className="text-[11px] font-bold text-accent mb-2 font-mono">
-                                                    {s.num}
-                                                </div>
-                                                <h3 className="font-heading text-[15px] font-bold text-ink mb-1.5 leading-tight">
-                                                    {s.title}
-                                                </h3>
-                                                <p className="text-[12.5px] text-ink-3 font-medium leading-relaxed mb-3">
-                                                    {s.desc}
-                                                </p>
-                                                <div className="text-[11px] font-bold text-ink-4 uppercase tracking-wider">
-                                                    {s.time}
-                                                </div>
-                                            </div>
-                                        ))}
+                                    <div className="relative">
+                                        <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 relative">
+                                            {TEST_STAGES.map((s, i) => {
+                                                const Icon = (s as any).icon;
+                                                return (
+                                                    <div key={i} className="relative bg-surface border border-line rounded-2xl p-5 hover:border-accent/40 transition-all">
+                                                        <div className="relative z-10 w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-mono text-[14px] font-bold mb-4 shadow-lg shadow-accent/20">
+                                                            {s.num}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mb-3">
+                                                            {Icon && <Icon size={16} className="text-accent" />}
+                                                            <span className="text-[11px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">{s.time}</span>
+                                                        </div>
+                                                        <h3 className="font-heading text-[14px] font-bold text-ink mb-1.5 leading-tight">{s.title}</h3>
+                                                        <p className="text-[12px] text-ink-3 leading-relaxed">{s.desc}</p>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                     <div className="bg-surface border border-line rounded-2xl p-6 md:p-7 flex flex-col md:flex-row items-start md:items-center gap-5">
                                         <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
@@ -1226,23 +1159,19 @@ export function Landing() {
                                             итоговый балл.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                                         {COMPETENCIES.map((c, i) => {
                                             const Icon = c.icon;
                                             return (
-                                                <div
-                                                    key={i}
-                                                    className="bg-surface border border-line rounded-xl p-6"
-                                                >
-                                                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
-                                                        <Icon size={22} />
+                                                <div key={i} className="group relative bg-surface border border-line rounded-2xl p-5 hover:border-accent/40 transition-all overflow-hidden">
+                                                    <div className="absolute top-3 right-3 text-[11px] font-bold font-mono text-ink-4 opacity-50">
+                                                        0{i + 1}
                                                     </div>
-                                                    <h3 className="font-heading text-[17px] font-bold text-ink mb-2">
-                                                        {c.title}
-                                                    </h3>
-                                                    <p className="text-[14px] text-ink-3 leading-relaxed font-medium">
-                                                        {c.desc}
-                                                    </p>
+                                                    <div className="relative w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:scale-110 group-hover:bg-accent group-hover:text-white transition-all">
+                                                        <Icon size={26} />
+                                                    </div>
+                                                    <h3 className="relative font-heading text-[15px] font-bold text-ink mb-2">{c.title}</h3>
+                                                    <p className="relative text-[13px] text-ink-3 leading-relaxed">{c.desc}</p>
                                                 </div>
                                             );
                                         })}
