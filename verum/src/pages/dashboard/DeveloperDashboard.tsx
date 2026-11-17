@@ -71,8 +71,6 @@ export function DeveloperDashboard({
     const [showAllRepos, setShowAllRepos] = useState(false);
     const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
 
-
-
     const initials =
         backendUser?.full_name?.substring(0, 2).toUpperCase() || "??";
     const skills = backendUser?.skills;
@@ -92,7 +90,8 @@ export function DeveloperDashboard({
             setIsInterviewOpen(true);
         };
         window.addEventListener("verum-open-interview", handleOpen);
-        return () => window.removeEventListener("verum-open-interview", handleOpen);
+        return () =>
+            window.removeEventListener("verum-open-interview", handleOpen);
     }, []);
 
     useEffect(() => {
@@ -119,11 +118,18 @@ export function DeveloperDashboard({
                 return;
             }
 
-            authApi.searchJobs({ stack: skills.stack_id, level: skills.final_grade })
+            authApi
+                .searchJobs({
+                    stack: skills.stack_id,
+                    level: skills.final_grade,
+                })
                 .then((res) => {
                     const newItems = res.data || [];
                     setRecommendedJobs(newItems);
-                    localStorage.setItem(cacheKey, JSON.stringify({ date: today, items: newItems }));
+                    localStorage.setItem(
+                        cacheKey,
+                        JSON.stringify({ date: today, items: newItems }),
+                    );
                 })
                 .catch(console.error);
         };
@@ -142,9 +148,6 @@ export function DeveloperDashboard({
             clearInterval(interval);
         };
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
-
-
-
 
     // Заполненность профиля (геймификация)
     let profileScore = 0;
@@ -268,7 +271,6 @@ export function DeveloperDashboard({
 
     return (
         <div className="max-w-[1280px] w-full overflow-hidden mx-auto px-3 md:px-8 py-4 md:py-10 relative">
-
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">
@@ -390,22 +392,83 @@ export function DeveloperDashboard({
                 <div className="mt-6 relative z-10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-1">
                         <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 flex items-center gap-2">
-                            <Briefcase size={14} /> Вакансии и кейсы компаний под ваш стек
+                            <Briefcase size={14} /> Вакансии и кейсы компаний
+                            под ваш стек
                         </h4>
-                        <span className="text-[11px] text-ink-3 font-medium">Только вакансии за последние 24 часа</span>
+                        <span className="text-[11px] text-ink-3 font-medium">
+                            Только вакансии за последние 24 часа
+                        </span>
                     </div>
                     {recommendedJobs.length > 0 ? (
                         <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {recommendedJobs.map((job, i) => (
-
-                            ))}
-                        </div>
-                        {recommendedJobs.length > 4 && (
-                            <button onClick={() => setShowAllRecs(!showAllRecs)} className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors">
-                                {showAllRecs ? "Скрыть" : `Показать все (${recommendedJobs.length})`}
-                            </button>
-                        )}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {recommendedJobs.map((job) => (
+                                    <div
+                                        key={job.id}
+                                        className="p-4 bg-surface border border-line rounded-xl flex flex-col justify-between"
+                                    >
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-10 h-10 rounded-lg bg-surface-2 border border-line flex items-center justify-center overflow-hidden shrink-0">
+                                                    {job.company_avatar ? (
+                                                        <img
+                                                            src={
+                                                                job.company_avatar
+                                                            }
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Briefcase
+                                                            size={16}
+                                                            className="text-ink-3"
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-0.5 truncate">
+                                                        {job.company_name}
+                                                    </div>
+                                                    <div className="font-semibold text-[14px] text-ink truncate">
+                                                        {job.title}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span
+                                                className={`text-[10px] px-2 py-1 rounded-md font-bold shrink-0 ${job.type === "case" ? "bg-violet-soft text-violet" : "bg-accent-soft text-accent"}`}
+                                            >
+                                                {job.type === "case"
+                                                    ? "Кейс"
+                                                    : "Вакансия"}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-end justify-between mt-auto pt-3 border-t border-line">
+                                            <div className="flex flex-wrap gap-2 text-[11px] text-ink-2">
+                                                <span className="px-2 py-0.5 bg-surface-2 rounded border border-line">
+                                                    {job.stack}
+                                                </span>
+                                                {job.format && (
+                                                    <span className="px-2 py-0.5 bg-surface-2 rounded border border-line">
+                                                        {job.format}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="font-bold text-[13px] text-accent whitespace-nowrap">
+                                                {job.salary}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            {recommendedJobs.length > 4 && (
+                                <button
+                                    onClick={() => setShowAllRecs(!showAllRecs)}
+                                    className="mt-3 w-full py-2 bg-surface-2 border border-line rounded-xl text-[13px] font-medium text-ink-2 hover:bg-surface-3 transition-colors"
+                                >
+                                    {showAllRecs
+                                        ? "Скрыть"
+                                        : `Показать все (${recommendedJobs.length})`}
+                                </button>
+                            )}
                         </>
                     ) : (
                         <div className="text-[12px] text-ink-3 p-3 bg-surface-2 rounded-xl text-center border border-dashed border-line-2">
@@ -418,8 +481,8 @@ export function DeveloperDashboard({
             </div>
             <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
                 {/* ЛЕВАЯ КОЛОНКА */}
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="space-y-4 md:space-y-6 min-w-0">
-                    <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group hover:border-line-2 transition-colors">
+                <div className="space-y-4 md:space-y-6 min-w-0">
+                    <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group">
                         <button
                             onClick={() => setIsEditOpen(true)}
                             className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-2 border border-line flex items-center justify-center text-ink-3 hover:text-accent transition-all z-10"
@@ -464,26 +527,46 @@ export function DeveloperDashboard({
                         {isTested && (
                             <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
                                 <div className="p-4 space-y-4">
-
                                     {/* Уровень */}
                                     <div className="flex justify-between items-center pb-3 border-b border-line">
                                         <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
-                                            <ShieldCheck size={14} className="text-accent" /> Уровень
+                                            <ShieldCheck
+                                                size={14}
+                                                className="text-accent"
+                                            />{" "}
+                                            Уровень
                                         </div>
-                                        <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
+                                        <div className="text-xl font-bold text-accent">
+                                            {skills.final_grade}
+                                        </div>
                                     </div>
 
                                     {/* Зарплата (для найма) */}
                                     <div className="flex justify-between items-center pb-3 border-b border-line">
                                         <div>
                                             <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5 mb-1">
-                                                <Banknote size={14} className="text-accent" /> Зарплата (найм)
+                                                <Banknote
+                                                    size={14}
+                                                    className="text-accent"
+                                                />{" "}
+                                                Зарплата (найм)
                                             </div>
-                                            <div className="text-[11px] text-ink-3">Системная: ~ {estimatedSalary.toLocaleString("ru-RU")} ₽</div>
+                                            <div className="text-[11px] text-ink-3">
+                                                Системная: ~{" "}
+                                                {estimatedSalary.toLocaleString(
+                                                    "ru-RU",
+                                                )}{" "}
+                                                ₽
+                                            </div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-[15px] font-bold text-ink">
-                                                ~ {(backendUser?.expected_salary || estimatedSalary).toLocaleString("ru-RU")} ₽
+                                                ~{" "}
+                                                {(
+                                                    backendUser?.expected_salary ||
+                                                    estimatedSalary
+                                                ).toLocaleString("ru-RU")}{" "}
+                                                ₽
                                             </div>
                                         </div>
                                     </div>
@@ -492,13 +575,36 @@ export function DeveloperDashboard({
                                     <div className="flex justify-between items-center pb-3 border-b border-line">
                                         <div>
                                             <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5 mb-1">
-                                                <Briefcase size={14} className="text-accent" /> Стоимость кейса
+                                                <Briefcase
+                                                    size={14}
+                                                    className="text-accent"
+                                                />{" "}
+                                                Стоимость кейса
                                             </div>
-                                            <div className="text-[11px] text-ink-3">Системная: ~ {Math.round((skills.total_score_100 || 50) * 500 + 10000).toLocaleString("ru-RU")} ₽</div>
+                                            <div className="text-[11px] text-ink-3">
+                                                Системная: ~{" "}
+                                                {Math.round(
+                                                    (skills.total_score_100 ||
+                                                        50) *
+                                                        500 +
+                                                        10000,
+                                                ).toLocaleString("ru-RU")}{" "}
+                                                ₽
+                                            </div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-[15px] font-bold text-ink">
-                                                ~ {(backendUser?.project_rate || Math.round((skills.total_score_100 || 50) * 500 + 10000)).toLocaleString("ru-RU")} ₽
+                                                ~{" "}
+                                                {(
+                                                    backendUser?.project_rate ||
+                                                    Math.round(
+                                                        (skills.total_score_100 ||
+                                                            50) *
+                                                            500 +
+                                                            10000,
+                                                    )
+                                                ).toLocaleString("ru-RU")}{" "}
+                                                ₽
                                             </div>
                                         </div>
                                     </div>
@@ -511,8 +617,16 @@ export function DeveloperDashboard({
                                             </div>
                                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface border border-line rounded-md text-[13px] font-medium text-ink capitalize">
                                                 {(() => {
-                                                    const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers;
-                                                    return <Icon size={14} className="text-accent" />;
+                                                    const Icon =
+                                                        STACK_ICONS[
+                                                            skills.stack_id.toLowerCase()
+                                                        ] || Layers;
+                                                    return (
+                                                        <Icon
+                                                            size={14}
+                                                            className="text-accent"
+                                                        />
+                                                    );
                                                 })()}
                                                 {skills.stack_id}
                                             </div>
@@ -526,15 +640,32 @@ export function DeveloperDashboard({
                                                 <Code2 size={14} /> Языки
                                             </div>
                                             <div className="flex flex-wrap gap-1.5">
-                                                {skills.language_id.split(",").map((lang: string) => (
-                                                    <span key={lang} className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface border border-line rounded text-[11px] font-medium text-ink-2 uppercase">
-                                                        {(() => {
-                                                            const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2;
-                                                            return <LIcon size={12} className="text-ink-3" />;
-                                                        })()}
-                                                        {lang.trim()}
-                                                    </span>
-                                                ))}
+                                                {skills.language_id
+                                                    .split(",")
+                                                    .map((lang: string) => (
+                                                        <span
+                                                            key={lang}
+                                                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface border border-line rounded text-[11px] font-medium text-ink-2 uppercase"
+                                                        >
+                                                            {(() => {
+                                                                const LIcon =
+                                                                    LANG_ICONS[
+                                                                        lang
+                                                                            .trim()
+                                                                            .toLowerCase()
+                                                                    ] || Code2;
+                                                                return (
+                                                                    <LIcon
+                                                                        size={
+                                                                            12
+                                                                        }
+                                                                        className="text-ink-3"
+                                                                    />
+                                                                );
+                                                            })()}
+                                                            {lang.trim()}
+                                                        </span>
+                                                    ))}
                                             </div>
                                         </div>
                                     )}
@@ -569,10 +700,10 @@ export function DeveloperDashboard({
                             </div>
                         )}
                     </div>
-                </motion.div>
+                </div>
 
                 {/* ПРАВАЯ КОЛОНКА */}
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="space-y-4 md:space-y-6 min-w-0">
+                <div className="space-y-4 md:space-y-6 min-w-0">
                     {/* НАВЫКИ И АНАЛИЗ ИИ */}
                     <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4 md:mb-6">
@@ -1103,7 +1234,7 @@ export function DeveloperDashboard({
                             </div>
                         )}
                     </div>
-                </motion.div>
+                </div>
             </div>
             <AnimatePresence>
                 {isEditOpen && (
@@ -1126,7 +1257,10 @@ export function DeveloperDashboard({
                 {isInterviewOpen && (
                     <InterviewModal
                         key="interview-modal"
-                        onClose={() => { setIsInterviewOpen(false); setPendingJobId(null); }}
+                        onClose={() => {
+                            setIsInterviewOpen(false);
+                            setPendingJobId(null);
+                        }}
                         jobId={pendingJobId}
                     />
                 )}
