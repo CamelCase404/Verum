@@ -397,7 +397,8 @@ export function DeveloperDashboard({
                     {recommendedJobs.length > 0 ? (
                         <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {recommendedJobs.map((job) => (
+                            {recommendedJobs.map((job, i) => (
+                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} key={job.id}
                                 <div
                                     key={job.id}
                                     className="p-4 bg-surface border border-line rounded-xl flex flex-col justify-between"
@@ -433,7 +434,7 @@ export function DeveloperDashboard({
                                             {job.salary}
                                         </div>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                         {recommendedJobs.length > 4 && (
@@ -453,8 +454,8 @@ export function DeveloperDashboard({
             </div>
             <div className="grid lg:grid-cols-[1fr_2fr] gap-4 md:gap-6">
                 {/* ЛЕВАЯ КОЛОНКА */}
-                <div className="space-y-4 md:space-y-6 min-w-0">
-                    <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="space-y-4 md:space-y-6 min-w-0">
+                    <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm relative group hover:border-line-2 transition-colors">
                         <button
                             onClick={() => setIsEditOpen(true)}
                             className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-2 border border-line flex items-center justify-center text-ink-3 hover:text-accent transition-all z-10"
@@ -604,10 +605,10 @@ export function DeveloperDashboard({
                             </div>
                         )}
                     </div>
-                </div>
+                </motion.div>
 
                 {/* ПРАВАЯ КОЛОНКА */}
-                <div className="space-y-4 md:space-y-6 min-w-0">
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="space-y-4 md:space-y-6 min-w-0">
                     {/* НАВЫКИ И АНАЛИЗ ИИ */}
                     <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4 md:mb-6">
@@ -1138,7 +1139,7 @@ export function DeveloperDashboard({
                             </div>
                         )}
                     </div>
-                </div>
+                </motion.div>
             </div>
             <AnimatePresence>
                 {isEditOpen && (
