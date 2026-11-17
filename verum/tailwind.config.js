@@ -31,7 +31,7 @@ export default {
       },
       borderRadius: { sm: "6px", DEFAULT: "10px", lg: "16px", xl: "22px", "2xl": "24px", "3xl": "28px" },
       fontFamily: {
-        sans: ["Manrope", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans: ["Montserrat", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
         display: ["Sora", "sans-serif"],
         heading: ["Montserrat", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],

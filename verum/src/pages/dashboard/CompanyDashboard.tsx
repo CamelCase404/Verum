@@ -360,7 +360,7 @@ export function CompanyDashboard({
                 } else {
                     handleJobClick(job);
                 }
-            }} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between hover:border-line-2 cursor-pointer transition-all group">
+            }} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between hover:border-line-2 cursor-pointer transition-all group w-full min-w-0">
                                             <div className="absolute top-3 right-3 flex gap-1 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setEditingJob(job); if (job.type === "case") setIsCaseOpen(true); else setIsJobOpen(true); }}
@@ -380,20 +380,20 @@ export function CompanyDashboard({
                                             
                                             <div>
                                                 <div className="flex justify-between items-start mb-1 gap-2 pr-16">
-                                                    <h4 className="font-semibold text-[15px] text-ink">{job.title}</h4>
+                                                    <h4 className="font-semibold text-[15px] text-ink break-words">{job.title}</h4>
                                                     {job.type === "case" && <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full ml-2">Кейс</span>}
                                                 </div>
                                                 <p className="text-[12px] text-ink-3 line-clamp-2 mb-3 break-words">{job.description}</p>
                                             </div>
                                             
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-[11px] text-ink-3 flex-wrap">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-3">
+                                                <div className="flex items-center gap-2 text-[11px] text-ink-3 flex-wrap min-w-0">
                                                     <span className="px-2 py-1 bg-surface border border-line rounded">{job.stack}</span>
                                                     {job.languages && <span className="px-2 py-1 bg-surface border border-line rounded max-w-[200px] truncate" title={job.languages}>{job.languages}</span>}
                                                     <span className="px-2 py-1 bg-surface border border-line rounded">{job.level}</span>
                                                     {job.format && <span className="px-2 py-1 bg-surface border border-line rounded">{job.format}</span>}
                                                 </div>
-                                                {job.salary && <div className="text-[13px] font-bold text-accent whitespace-nowrap">{formatSalary(job.salary)}</div>}
+                                                {job.salary && <div className="text-[13px] font-bold text-accent sm:whitespace-nowrap shrink-0">{formatSalary(job.salary)}</div>}
                                             </div>
                                             
                                             
