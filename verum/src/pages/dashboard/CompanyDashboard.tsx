@@ -361,7 +361,7 @@ export function CompanyDashboard({
                     handleJobClick(job);
                 }
             }} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between hover:border-line-2 cursor-pointer transition-all group">
-                                            <div className="absolute top-3 right-3 flex gap-1 z-10 opacity-0 group-hover:opacity-100">
+                                            <div className="absolute top-3 right-3 flex gap-1 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setEditingJob(job); if (job.type === "case") setIsCaseOpen(true); else setIsJobOpen(true); }}
                                                     className="p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors"
@@ -383,7 +383,7 @@ export function CompanyDashboard({
                                                     <h4 className="font-semibold text-[15px] text-ink">{job.title}</h4>
                                                     {job.type === "case" && <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full ml-2">Кейс</span>}
                                                 </div>
-                                                <p className="text-[12px] text-ink-3 line-clamp-2 mb-3">{job.description}</p>
+                                                <p className="text-[12px] text-ink-3 line-clamp-2 mb-3 break-words">{job.description}</p>
                                             </div>
                                             
                                             <div className="flex items-center justify-between">
