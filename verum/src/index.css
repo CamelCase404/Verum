@@ -90,3 +90,11 @@
   background-color: var(--accent);
   color: #ffffff;
 }
+
+
+/* Плавная анимация смены темы (волна) */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}

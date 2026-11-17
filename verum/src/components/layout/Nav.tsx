@@ -29,16 +29,53 @@ export function Nav() {
   }, [user]);
   const location = useLocation();
 
-  const toggleTheme = () => {
+  const toggleTheme = (e?: React.MouseEvent) => {
     const newTheme = theme === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
     
-    // Если в сторе есть метод setTheme, обновляем и там
-    const setTheme = useAppStore.getState().setTheme;
-    if (setTheme) setTheme(newTheme);
-    else window.location.reload(); // Принудительная перезагрузка для применения темы, если стор не обновляется
-  };
+    // Применяем тему
+    const applyTheme = () => {
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        const setTheme = useAppStore.getState().setTheme;
+        if (setTheme) setTheme(newTheme);
+    };
+
+    // Если View Transitions API не поддерживается или нет координат клика — меняем мгновенно
+    if (!document.startViewTransition || !e) {
+        applyTheme();
+        return;
+    }
+
+    // Получаем координаты клика (работает и для тача)
+    const x = e.clientX || (e as any).touches?.[0]?.clientX || window.innerWidth / 2;
+    const y = e.clientY || (e as any).touches?.[0]?.clientY || window.innerHeight / 2;
+    
+    // Радиус до furthest угла экрана
+    const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = document.startViewTransition(() => {
+        applyTheme();
+    });
+
+    transition.ready.then(() => {
+        const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`
+        ];
+        
+        document.documentElement.animate(
+            { clipPath },
+            {
+                duration: 600,
+                easing: "ease-in-out",
+                pseudoElement: "::view-transition-new(root)"
+            }
+        );
+    });
+};
 
   return (
     // Убрали max-w-[1280px], чтобы шапка растянулась на всю ширину, и добавили px-6

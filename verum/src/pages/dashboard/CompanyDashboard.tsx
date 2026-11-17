@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
     Building2,
@@ -19,6 +20,7 @@ import {
     Database,
     X,
     Trash2,
+    AlertTriangle,
 } from "lucide-react";
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
@@ -59,6 +61,7 @@ export function CompanyDashboard({
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     const [hireCandidate, setHireCandidate] = useState<any>(null);
     const [isHiring, setIsHiring] = useState(false);
+    const [jobToDelete, setJobToDelete] = useState<string | null>(null);
 
     const [activeTab, setActiveTab] = useState<"jobs" | "candidates">("jobs");
 
@@ -167,16 +170,22 @@ export function CompanyDashboard({
         }
     };
 
-    const handleDeleteJob = async (e: React.MouseEvent, jobId: string) => {
+    const handleDeleteJob = (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
-        if (!confirm("Вы уверены, что хотите удалить вакансию?")) return;
+        setJobToDelete(jobId);
+    };
+
+    const confirmDeleteJob = async () => {
+        if (!jobToDelete) return;
         try {
-            const updatedJobs = allJobs.filter((j: any) => j.id !== jobId);
+            const updatedJobs = allJobs.filter((j: any) => j.id !== jobToDelete);
             await authApi.updateJobs(updatedJobs);
             toast("Вакансия удалена", "success");
             onRefresh();
         } catch (err) {
             toast("Ошибка при удалении", "error");
+        } finally {
+            setJobToDelete(null);
         }
     };
 
@@ -567,6 +576,47 @@ export function CompanyDashboard({
             {isJobOpen && <CreateJobModal onClose={() => setIsJobOpen(false)} backendUser={backendUser} onRefresh={handleJobCreated} jobToEdit={editingJob} />}
             {isCompareOpen && <CompareCandidatesModal candidates={candidatesToCompare} onClose={() => setIsCompareOpen(false)} />}
             {hireCandidate && <HireConfirmModal candidate={hireCandidate} onClose={() => setHireCandidate(null)} onConfirm={confirmHire} loading={isHiring} />}
+
+            {/* Модалка удаления вакансии */}
+            <AnimatePresence>
+                {jobToDelete && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-surface border border-line rounded-[22px] p-6 sm:p-8 w-full max-w-md shadow-2xl relative"
+                        >
+                            <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-5">
+                                <AlertTriangle size={28} />
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2">Удалить вакансию?</h3>
+                            <p className="text-ink-2 text-sm text-center leading-relaxed mb-6">
+                                Это действие <b className="text-red-500">необратимо</b>. Все отклики и данные, связанные с этой вакансией, будут удалены.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setJobToDelete(null)}
+                                    className="flex-1 py-2.5 rounded-xl border border-line font-medium hover:bg-surface-2 transition-colors"
+                                >
+                                    Отмена
+                                </button>
+                                <button
+                                    onClick={confirmDeleteJob}
+                                    className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition-colors shadow-sm"
+                                >
+                                    Да, удалить
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

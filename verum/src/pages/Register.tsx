@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { authApi, setToken } from "@/api";
-import { User, Building2, ArrowLeft, ShieldCheck, Loader2, Mail, Lock, Github } from "lucide-react";
+import { User, Building2, ArrowLeft, ShieldCheck, Loader2, Mail, Lock, Github, Eye, EyeOff } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 type Role = "developer" | "company";
@@ -26,6 +26,7 @@ export default function RegisterPage() {
     const [fullName, setFullName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [githubLoading, setGithubLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const navigate = useNavigate();
@@ -123,8 +124,20 @@ export default function RegisterPage() {
                             <Mail size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
                         </motion.div>
                         <motion.div variants={fadeUp} className="relative">
-                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/50 ring-offset-0 transition-shadow duration-200 placeholder:text-ink-4" />
-                            <Lock size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4" />
+                            <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Пароль" className="w-full bg-bg-2 border-none rounded-lg px-3 sm:px-4 py-2 sm:py-3.5 text-sm outline-none focus:ring-2 focus:ring-accent/50 ring-offset-0 transition-shadow duration-200 placeholder:text-ink-4" />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4 hover:text-ink transition-colors focus:outline-none">
+                            <AnimatePresence mode="wait" initial={false}>
+                                <motion.div
+                                    key={showPassword ? "visible" : "hidden"}
+                                    initial={{ opacity: 0, scale: 0.8, rotate: -20 }}
+                                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                    exit={{ opacity: 0, scale: 0.8, rotate: 20 }}
+                                    transition={{ duration: 0.15 }}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </motion.div>
+                            </AnimatePresence>
+                        </button>
                         </motion.div>
 
                         <AnimatePresence mode="wait">
