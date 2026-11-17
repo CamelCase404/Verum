@@ -21,6 +21,7 @@ import { Contacts } from "@/pages/Contacts";
 import { Terms } from "@/pages/Terms";
 import { Privacy } from "@/pages/Privacy";
 import { Cases } from "@/pages/Cases";
+import { Pricing } from "@/pages/Pricing";
 import { Partners } from "@/pages/Partners";
 import { Press } from "@/pages/Press";
 import { Careers } from "@/pages/Careers";
