@@ -115,7 +115,7 @@ export default function App() {
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/cases" element={<Cases />} />
-                    <Route path="/pricing" element={<Pricing/>}
+                    <Route path="/pricing" element={<Pricing />} />
                     <Route path="/partners" element={<Partners />} />
                     <Route path="/press" element={<Press />} />
                     <Route path="/careers" element={<Careers />} />
