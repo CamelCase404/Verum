@@ -31,7 +31,8 @@ export function PublicVacancy() {
     };
 
     const confirmApply = () => {
-        localStorage.setItem("verum.pending_job", JSON.stringify(job));
+        const jobWithId = { ...job, id: job.job_id || job.id };
+        localStorage.setItem("verum.pending_job", JSON.stringify(jobWithId));
         navigate(`/dashboard?action=interview&job=${slug}`);
     };
 

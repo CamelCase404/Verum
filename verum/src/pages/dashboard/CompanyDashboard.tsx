@@ -18,6 +18,7 @@ import {
     Layers,
     Database,
     X,
+    Trash2,
 } from "lucide-react";
 import { EditCompanyModal } from "@/components/modals/EditCompanyModal";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
@@ -163,6 +164,19 @@ export function CompanyDashboard({
         } finally {
             setIsHiring(false);
             setHireCandidate(null);
+        }
+    };
+
+    const handleDeleteJob = async (e: React.MouseEvent, jobId: string) => {
+        e.stopPropagation();
+        if (!confirm("Вы уверены, что хотите удалить вакансию?")) return;
+        try {
+            const updatedJobs = allJobs.filter((j: any) => j.id !== jobId);
+            await authApi.updateJobs(updatedJobs);
+            toast("Вакансия удалена", "success");
+            onRefresh();
+        } catch (err) {
+            toast("Ошибка при удалении", "error");
         }
     };
 
@@ -325,7 +339,7 @@ export function CompanyDashboard({
                     {activeTab === "jobs" && (
                         <div className="bg-surface border border-line rounded-2xl p-4 md:p-6 shadow-sm min-h-[300px]">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                                <div className="flex bg-surface-2 border border-line rounded-xl p-1 w-full sm:w-auto">
+                                <div className="flex bg-surface-2 border border-line rounded-xl p-1 w-full sm:w-auto overflow-x-auto custom-scrollbar">
                                     <button onClick={() => setActiveWorkType("vacancies")} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeWorkType === "vacancies" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Вакансии</button>
                                     <button onClick={() => setActiveWorkType("cases")} className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${activeWorkType === "cases" ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink"}`}>Кейсы</button>
                                 </div>
@@ -340,17 +354,32 @@ export function CompanyDashboard({
                             {currentList.length > 0 ? (
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     {currentList.map((job: any) => (
-                                        <div key={job.id} onClick={() => handleJobClick(job)} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between hover:border-line-2 cursor-pointer transition-all group">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); setEditingJob(job); if (job.type === "case") setIsCaseOpen(true); else setIsJobOpen(true); }}
-                                                className="absolute top-3 right-3 p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors z-10 opacity-0 group-hover:opacity-100"
-                                                title="Редактировать"
-                                            >
-                                                <Pencil size={14} />
-                                            </button>
+                                        <div key={job.id} onClick={() => {
+                if (job.is_external) {
+                    navigate(`/dashboard/vacancy/${job.id}`, { state: { title: job.title } });
+                } else {
+                    handleJobClick(job);
+                }
+            }} className="relative p-4 border border-line rounded-xl bg-surface-2 flex flex-col justify-between hover:border-line-2 cursor-pointer transition-all group">
+                                            <div className="absolute top-3 right-3 flex gap-1 z-10 opacity-0 group-hover:opacity-100">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setEditingJob(job); if (job.type === "case") setIsCaseOpen(true); else setIsJobOpen(true); }}
+                                                    className="p-1.5 text-ink-3 hover:text-accent hover:bg-accent/10 rounded transition-colors"
+                                                    title="Редактировать"
+                                                >
+                                                    <Pencil size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeleteJob(e, job.id)}
+                                                    className="p-1.5 text-ink-3 hover:text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                                                    title="Удалить"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                             
                                             <div>
-                                                <div className="flex justify-between items-start mb-1 gap-2 pr-8">
+                                                <div className="flex justify-between items-start mb-1 gap-2 pr-16">
                                                     <h4 className="font-semibold text-[15px] text-ink">{job.title}</h4>
                                                     {job.type === "case" && <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full ml-2">Кейс</span>}
                                                 </div>
@@ -367,16 +396,7 @@ export function CompanyDashboard({
                                                 {job.salary && <div className="text-[13px] font-bold text-accent whitespace-nowrap">{formatSalary(job.salary)}</div>}
                                             </div>
                                             
-                                            {job.is_external && (
-                                                <div className="mt-3 pt-3 border-t border-line w-full">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/vacancy/${job.id}`, { state: { title: job.title } }); }}
-                                                        className="w-full py-1.5 bg-surface border border-line rounded text-[12px] font-medium text-ink-2 hover:text-accent hover:border-accent transition-colors"
-                                                    >
-                                                        Посмотреть отклики
-                                                    </button>
-                                                </div>
-                                            )}
+                                            
                                         </div>
                                     ))}
                                 </div>

@@ -88,7 +88,7 @@ export function DeveloperDashboard({
     // Слушаем кастомное событие из Dashboard.tsx
     useEffect(() => {
         const handleOpen = (e: any) => {
-            setPendingJobId(e.detail?.id || null);
+            setPendingJobId(e.detail?.id || e.detail?.job_id || null);
             setIsInterviewOpen(true);
         };
         window.addEventListener("verum-open-interview", handleOpen);

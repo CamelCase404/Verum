@@ -60,29 +60,38 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
         // 1. Сначала проверяем, есть ли job_id (пришли по ссылке от компании)
         const jobId = localStorage.getItem("verum_test_job_id");
         if (jobId) {
+            setIsJobLocked(true); // Блокируем СРАЗУ, чтобы не мигало
             const API = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
             fetch(`${API}/api/jobs/id/${jobId}`)
                 .then(res => res.json())
                 .then(data => {
                     const STACK_MAP: Record<string, string> = {
-                            "mobile (ios)": "mobile-ios", "mobile (android)": "mobile-android",
-                            "frontend": "frontend", "backend": "backend", "gamedev": "gamedev",
-                            "devops / sre": "devops", "data / ml": "data", "fullstack": "backend"
-                        };
-                        if (data.stack) setStackId(STACK_MAP[data.stack.toLowerCase()] || "backend");
+                        "mobile (ios)": "mobile-ios", "mobile (android)": "mobile-android",
+                        "frontend": "frontend", "backend": "backend", "gamedev": "gamedev",
+                        "devops / sre": "devops", "data / ml": "data", "fullstack": "backend"
+                    };
+                    if (data.stack) setStackId(STACK_MAP[data.stack.toLowerCase()] || "backend");
                     if (data.level) setLevelId(data.level.toLowerCase() as LevelId);
+                    
                     if (data.languages) {
-                        // Разбиваем строку "React, TypeScript" в массив id ["react", "ts"]
+                        const LANG_MAP: Record<string, string> = {
+                            "react": "react", "vue": "vue", "svelte": "svelte", "typescript": "ts", "javascript": "js", "html": "html", "css": "css",
+                            "python": "python", "fastapi": "fastapi", "django": "django", "go": "go", "node.js": "node", "node": "node", "java": "java", "c#": "csharp", "next.js": "next", "next": "next",
+                            "swift": "swift", "objective-c": "objc", "objc": "objc", "swiftui": "swiftui", "uikit": "uikit", "combine": "combine",
+                            "kotlin": "kotlin", "jetpack compose": "compose", "compose": "compose", "coroutines": "coroutines",
+                            "unity (c#)": "unity", "unity": "unity", "unreal (c++)": "unreal", "unreal": "unreal", "godot (gdscript)": "godot", "godot": "godot",
+                            "docker": "docker", "kubernetes": "k8s", "terraform": "terraform", "ansible": "ansible", "bash": "bash",
+                            "pandas": "pandas", "pytorch": "pytorch", "tensorflow": "tensorflow", "sql": "sql"
+                        };
                         const langArr = data.languages.split(",").map((l: string) => l.trim().toLowerCase());
-                        // Оставляем только те, которые есть в каталоге
-                        const validLangs = langArr.filter((l: string) => 
-                            ["swift", "objc", "kotlin", "java", "html", "css", "js", "ts", "react", "vue", "python", "fastapi", "go", "node", "unity", "docker", "k8s", "pandas", "pytorch", "sql"].includes(l)
-                        );
+                        const validLangs = langArr.map((l: string) => LANG_MAP[l]).filter(Boolean);
                         setLanguageIds(validLangs);
                     }
-                    setIsJobLocked(true); // Блокируем изменение
                 })
-                .catch(err => console.error("Ошибка загрузки вакансии:", err));
+                .catch(err => {
+                    console.error("Ошибка загрузки вакансии:", err);
+                    setIsJobLocked(false); // Разблокируем, если вакансия не найдена
+                });
             return; // Прерываем, если это тест по вакансии
         }
 

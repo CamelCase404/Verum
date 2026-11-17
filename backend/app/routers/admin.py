@@ -125,7 +125,10 @@ async def approve(
                     VacancyApplication.developer_id == dev.id
                 )
             )
-            if not ex_app.scalars().first():
+            existing_app = ex_app.scalars().first()
+            if existing_app:
+                existing_app.status = "approved"
+            else:
                 db.add(VacancyApplication(
                     job_id=job_id,
                     company_id=comp.id,
