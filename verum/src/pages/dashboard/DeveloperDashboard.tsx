@@ -70,8 +70,8 @@ export function DeveloperDashboard({
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [showAllRepos, setShowAllRepos] = useState(false);
     const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
-    
-    
+
+
 
     const initials =
         backendUser?.full_name?.substring(0, 2).toUpperCase() || "??";
@@ -143,9 +143,9 @@ export function DeveloperDashboard({
         };
     }, [backendUser?.id, skills?.stack_id, skills?.final_grade]);
 
-    
 
-    
+
+
     // Заполненность профиля (геймификация)
     let profileScore = 0;
     if (backendUser?.bio) profileScore += 25;
@@ -268,7 +268,7 @@ export function DeveloperDashboard({
 
     return (
         <div className="max-w-[1280px] w-full overflow-hidden mx-auto px-3 md:px-8 py-4 md:py-10 relative">
-            
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-10">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-1 md:mb-2">
@@ -398,43 +398,7 @@ export function DeveloperDashboard({
                         <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {recommendedJobs.map((job, i) => (
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} key={job.id}
-                                <div
-                                    key={job.id}
-                                    className="p-4 bg-surface border border-line rounded-xl flex flex-col justify-between"
-                                >
-                                    <div className="flex items-start justify-between gap-3 mb-3">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-10 h-10 rounded-lg bg-surface-2 border border-line flex items-center justify-center overflow-hidden shrink-0">
-                                                {job.company_avatar ? (
-                                                    <img src={job.company_avatar} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Briefcase size={16} className="text-ink-3" />
-                                                )}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-0.5 truncate">
-                                                    {job.company_name}
-                                                </div>
-                                                <div className="font-semibold text-[14px] text-ink truncate">
-                                                    {job.title}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span className={`text-[10px] px-2 py-1 rounded-md font-bold shrink-0 ${job.type === "case" ? "bg-violet-soft text-violet" : "bg-accent-soft text-accent"}`}>
-                                            {job.type === "case" ? "Кейс" : "Вакансия"}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-end justify-between mt-auto pt-3 border-t border-line">
-                                        <div className="flex flex-wrap gap-2 text-[11px] text-ink-2">
-                                            <span className="px-2 py-0.5 bg-surface-2 rounded border border-line">{job.stack}</span>
-                                            {job.format && <span className="px-2 py-0.5 bg-surface-2 rounded border border-line">{job.format}</span>}
-                                        </div>
-                                        <div className="font-bold text-[13px] text-accent whitespace-nowrap">
-                                            {job.salary}
-                                        </div>
-                                    </div>
-                                </motion.div>
+
                             ))}
                         </div>
                         {recommendedJobs.length > 4 && (
@@ -500,7 +464,7 @@ export function DeveloperDashboard({
                         {isTested && (
                             <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
                                 <div className="p-4 space-y-4">
-                                    
+
                                     {/* Уровень */}
                                     <div className="flex justify-between items-center pb-3 border-b border-line">
                                         <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
