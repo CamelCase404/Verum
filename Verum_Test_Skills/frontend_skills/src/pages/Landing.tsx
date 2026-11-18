@@ -343,6 +343,38 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                     </div>
                                 </motion.section>
                             )}
+                            
+                            {stack && languageIds.length > 0 && (
+                                <motion.section 
+                                    initial={{ opacity: 0, y: 10 }} 
+                                    animate={{ opacity: 1, y: 0 }} 
+                                    transition={{ duration: 0.3 }}
+                                    className="mt-10"
+                                >
+                                    <h2 className="text-[13px] font-semibold tracking-wide uppercase text-muted text-center mb-4">Библиотека / Фреймворк</h2>
+                                    <div className="flex flex-wrap justify-center gap-3">
+                                        {stack.languages
+                                            .filter(l => languageIds.includes(l.id))
+                                            .flatMap(l => l.libraries || [])
+                                            // Убираем дубликаты (например, если выбраны JS и TS, а библиотека React общая)
+                                            .filter((lib, index, self) => self.findIndex(l => l.id === lib.id) === index)
+                                            .map(lib => {
+                                                const active = libraryId === lib.id;
+                                                return (
+                                                    <button
+                                                        key={lib.id}
+                                                        onClick={() => setLibraryId(lib.id)}
+                                                        className={`flex items-center gap-2 rounded-[22px] border px-5 py-3 transition-all duration-200 active:scale-95 ${active ? "border-accent bg-accent text-white shadow-md shadow-accent/20" : "border-line bg-surface-3 hover:border-line-2 hover:bg-surface-2"}`}
+                                                    >
+                                                        <span className="font-medium text-[14px]">{lib.name}</span>
+                                                        {active && <Check size={14} className="ml-1 text-white" />}
+                                                    </button>
+                                                );
+                                            })}
+                                    </div>
+                                </motion.section>
+                            )}
+
                         </>
                     )}
 
