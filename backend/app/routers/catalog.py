@@ -1,12 +1,16 @@
 from fastapi import APIRouter
 
-from ..schemas import CatalogOption, CatalogResponse, StackOption, LanguageOption
+from ..schemas import CatalogOption, CatalogResponse, LanguageOption, StackOption
 
 router = APIRouter(prefix="/api", tags=["catalog"])
 
 
 def _opt(id: str, name: str, icon: str, description: str) -> CatalogOption:
     return CatalogOption(id=id, name=name, icon=icon, description=description)
+
+
+def _lang(id: str, name: str, icon: str, description: str) -> LanguageOption:
+    return LanguageOption(id=id, name=name, icon=icon, description=description)
 
 
 LEVELS = [
@@ -37,11 +41,11 @@ STACKS = [
         icon="Smartphone",
         description="Нативная разработка под iOS",
         languages=[
-            _opt("swift", "Swift", "Swift", "Основной язык iOS"),
-            _opt("objc", "Objective-C", "Braces", "Legacy-код iOS"),
-            _opt("swiftui", "SwiftUI", "Layers", "Декларативный UI"),
-            _opt("uikit", "UIKit", "LayoutGrid", "Классический UI"),
-            _opt("combine", "Combine", "Waves", "Реактивные потоки"),
+            _lang("swift", "Swift", "Swift", "Основной язык iOS"),
+            _lang("objc", "Objective-C", "Braces", "Legacy-код iOS"),
+            _lang("swiftui", "SwiftUI", "Layers", "Декларативный UI"),
+            _lang("uikit", "UIKit", "LayoutGrid", "Классический UI"),
+            _lang("combine", "Combine", "Waves", "Реактивные потоки"),
         ],
     ),
     StackOption(
@@ -50,10 +54,10 @@ STACKS = [
         icon="Smartphone",
         description="Нативная разработка под Android",
         languages=[
-            _opt("kotlin", "Kotlin", "Code2", "Основной язык Android"),
-            _opt("java", "Java", "Coffee", "Классический Android"),
-            _opt("compose", "Jetpack Compose", "Layers", "Декларативный UI"),
-            _opt("coroutines", "Kotlin Coroutines", "Waves", "Асинхронность"),
+            _lang("kotlin", "Kotlin", "Code2", "Основной язык Android"),
+            _lang("java", "Java", "Coffee", "Классический Android"),
+            _lang("compose", "Jetpack Compose", "Layers", "Декларативный UI"),
+            _lang("coroutines", "Kotlin Coroutines", "Waves", "Асинхронность"),
         ],
     ),
     StackOption(
@@ -62,13 +66,13 @@ STACKS = [
         icon="Monitor",
         description="Клиентская веб-разработка",
         languages=[
-            _opt("html", "HTML5", "FileCode2", "Разметка"),
-            _opt("css", "CSS3", "Layers", "Стили"),
-            _opt("js", "JavaScript", "Braces", "Базовый язык веба"),
-            _opt("ts", "TypeScript", "FileCode2", "Типизированный JS"),
-            _opt("react", "React", "Atom", "Библиотека UI"),
-            _opt("vue", "Vue", "Hexagon", "Прогрессивный фреймворк"),
-            _opt("svelte", "Svelte", "Flame", "Компилируемый UI"),
+            _lang("html", "HTML5", "FileCode2", "Разметка"),
+            _lang("css", "CSS3", "Layers", "Стили"),
+            _lang("js", "JavaScript", "Braces", "Базовый язык веба"),
+            _lang("ts", "TypeScript", "FileCode2", "Типизированный JS"),
+            _lang("react", "React", "Atom", "Библиотека UI"),
+            _lang("vue", "Vue", "Hexagon", "Прогрессивный фреймворк"),
+            _lang("svelte", "Svelte", "Flame", "Компилируемый UI"),
         ],
     ),
     StackOption(
@@ -77,14 +81,14 @@ STACKS = [
         icon="Server",
         description="Серверная разработка",
         languages=[
-            _opt("next", "Next.js", "Layers", "SSR/SSG React"),
-            _opt("python", "Python", "FileCode2", "Универсальный язык"),
-            _opt("fastapi", "FastAPI", "Zap", "Асинхронный Python-фреймворк"),
-            _opt("django", "Django", "Boxes", "Batteries-included"),
-            _opt("go", "Go", "Rabbit", "Компилируемый, быстрый"),
-            _opt("node", "Node.js", "Hexagon", "JS на сервере"),
-            _opt("java", "Java", "Coffee", "JVM-стек"),
-            _opt("csharp", "C#", "Hash", ".NET-стек"),
+            _lang("next", "Next.js", "Layers", "SSR/SSG React"),
+            _lang("python", "Python", "FileCode2", "Универсальный язык"),
+            _lang("fastapi", "FastAPI", "Zap", "Асинхронный Python-фреймворк"),
+            _lang("django", "Django", "Boxes", "Batteries-included"),
+            _lang("go", "Go", "Rabbit", "Компилируемый, быстрый"),
+            _lang("node", "Node.js", "Hexagon", "JS на сервере"),
+            _lang("java", "Java", "Coffee", "JVM-стек"),
+            _lang("csharp", "C#", "Hash", ".NET-стек"),
         ],
     ),
     StackOption(
@@ -93,9 +97,9 @@ STACKS = [
         icon="Gamepad2",
         description="Разработка игр",
         languages=[
-            _opt("unity", "Unity (C#)", "Gamepad2", "Кроссплатформенный движок"),
-            _opt("unreal", "Unreal (C++)", "Boxes", "AAA-движок"),
-            _opt("godot", "Godot (GDScript)", "Hexagon", "Открытый движок"),
+            _lang("unity", "Unity (C#)", "Gamepad2", "Кроссплатформенный движок"),
+            _lang("unreal", "Unreal (C++)", "Boxes", "AAA-движок"),
+            _lang("godot", "Godot (GDScript)", "Hexagon", "Открытый движок"),
         ],
     ),
     StackOption(
@@ -104,11 +108,11 @@ STACKS = [
         icon="Cloud",
         description="Инфраструктура и эксплуатация",
         languages=[
-            _opt("docker", "Docker", "Box", "Контейнеризация"),
-            _opt("k8s", "Kubernetes", "Ship", "Оркестрация"),
-            _opt("terraform", "Terraform", "Layers", "IaC"),
-            _opt("ansible", "Ansible", "Wrench", "Автоматизация"),
-            _opt("bash", "Bash", "Terminal", "Скрипты"),
+            _lang("docker", "Docker", "Box", "Контейнеризация"),
+            _lang("k8s", "Kubernetes", "Ship", "Оркестрация"),
+            _lang("terraform", "Terraform", "Layers", "IaC"),
+            _lang("ansible", "Ansible", "Wrench", "Автоматизация"),
+            _lang("bash", "Bash", "Terminal", "Скрипты"),
         ],
     ),
     StackOption(
@@ -117,11 +121,11 @@ STACKS = [
         icon="Brain",
         description="Анализ данных и машинное обучение",
         languages=[
-            _opt("python", "Python", "FileCode2", "Основной язык"),
-            _opt("pandas", "Pandas", "Table", "Табличные данные"),
-            _opt("pytorch", "PyTorch", "Flame", "DL-фреймворк"),
-            _opt("tensorflow", "TensorFlow", "Brain", "DL-фреймворк"),
-            _opt("sql", "SQL", "Database", "Работа с данными"),
+            _lang("python", "Python", "FileCode2", "Основной язык"),
+            _lang("pandas", "Pandas", "Table", "Табличные данные"),
+            _lang("pytorch", "PyTorch", "Flame", "DL-фреймворк"),
+            _lang("tensorflow", "TensorFlow", "Brain", "DL-фреймворк"),
+            _lang("sql", "SQL", "Database", "Работа с данными"),
         ],
     ),
 ]
