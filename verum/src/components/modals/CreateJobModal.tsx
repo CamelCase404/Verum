@@ -8,14 +8,37 @@ const STACKS = ["Mobile (iOS)", "Mobile (Android)", "Frontend", "Backend", "Game
 const LEVELS = ["Junior", "Middle", "Senior"];
 const FORMATS = ["Удалённо", "Гибрид", "Офис"];
 
-const STACK_LANGS: Record<string, string[]> = {
-    "Mobile (iOS)": ["Swift", "Objective-C", "SwiftUI", "UIKit", "Combine"],
-    "Mobile (Android)": ["Kotlin", "Java", "Jetpack Compose", "Coroutines"],
-    "Frontend": ["HTML", "CSS", "JavaScript", "TypeScript", "React", "Vue", "Svelte"],
-    "Backend": ["Python", "FastAPI", "Django", "Go", "Node.js", "Java", "C#", "Next.js"],
-    "GameDev": ["Unity (C#)", "Unreal (C++)", "Godot (GDScript)"],
-    "DevOps / SRE": ["Docker", "Kubernetes", "Terraform", "Ansible", "Bash"],
-    "Data / ML": ["Python", "Pandas", "PyTorch", "TensorFlow", "SQL"]
+const STACK_LANGS: Record<string, {id: string, name: string, libraries: {id: string, name: string}[]}[]> = {
+    "Frontend": [
+        { id: "js", name: "JavaScript", libraries: [{id: "react", name: "React"}, {id: "vue", name: "Vue.js"}, {id: "angular", name: "Angular"}, {id: "next", name: "Next.js"}] },
+        { id: "ts", name: "TypeScript", libraries: [{id: "react", name: "React"}, {id: "vue", name: "Vue.js"}, {id: "angular", name: "Angular"}, {id: "next", name: "Next.js"}] }
+    ],
+    "Backend": [
+        { id: "python", name: "Python", libraries: [{id: "django", name: "Django"}, {id: "fastapi", name: "FastAPI"}, {id: "flask", name: "Flask"}] },
+        { id: "node", name: "Node.js", libraries: [{id: "express", name: "Express"}, {id: "nestjs", name: "NestJS"}] },
+        { id: "go", name: "Go", libraries: [{id: "gin", name: "Gin"}, {id: "fiber", name: "Fiber"}] },
+        { id: "java", name: "Java", libraries: [{id: "spring", name: "Spring Boot"}] },
+        { id: "csharp", name: "C#", libraries: [{id: "aspnet", name: "ASP.NET Core"}] },
+        { id: "php", name: "PHP", libraries: [{id: "laravel", name: "Laravel"}, {id: "symfony", name: "Symfony"}] }
+    ],
+    "Mobile (iOS)": [
+        { id: "swift", name: "Swift", libraries: [{id: "swiftui", name: "SwiftUI"}, {id: "uikit", name: "UIKit"}] }
+    ],
+    "Mobile (Android)": [
+        { id: "kotlin", name: "Kotlin", libraries: [{id: "compose", name: "Jetpack Compose"}] }
+    ],
+    "GameDev": [
+        { id: "csharp", name: "C#", libraries: [{id: "unity", name: "Unity"}] },
+        { id: "cpp", name: "C++", libraries: [{id: "unreal", name: "Unreal Engine"}] }
+    ],
+    "DevOps / SRE": [
+        { id: "docker", name: "Docker", libraries: [] }, { id: "k8s", name: "Kubernetes", libraries: [] },
+        { id: "terraform", name: "Terraform", libraries: [] }, { id: "ansible", name: "Ansible", libraries: [] }, { id: "bash", name: "Bash", libraries: [] }
+    ],
+    "Data / ML": [
+        { id: "python", name: "Python", libraries: [{id: "pandas", name: "Pandas"}, {id: "pytorch", name: "PyTorch"}, {id: "tensorflow", name: "TensorFlow"}] },
+        { id: "sql", name: "SQL", libraries: [] }
+    ]
 };
 
 export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: { onClose: () => void, backendUser: any, onRefresh: () => void, jobToEdit?: any }) {
@@ -31,6 +54,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
   const [level, setLevel] = useState("Middle");
   const [format, setFormat] = useState("Удалённо");
   const [languages, setLanguages] = useState<string[]>([]);
+  const [library, setLibrary] = useState<string>("");
   
   // Зарплата
   const [salaryFrom, setSalaryFrom] = useState("");
@@ -60,6 +84,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       setStack(jobToEdit.stack || "Frontend");
       setLevel(jobToEdit.level || "Middle");
       setFormat(jobToEdit.format || "Удалённо");
+      if (jobToEdit.library) setLibrary(jobToEdit.library);
       if (jobToEdit.languages) {
           setLanguages(jobToEdit.languages.split(", ").filter(Boolean));
       }
@@ -141,7 +166,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
       
       if (isEditing) {
         const updatedJobs = currentJobs.map((j: any) => 
-          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "), is_external: isExternal, slug: isExternal ? finalSlug : null, created_at: j.created_at || new Date().toISOString() } : j
+          j.id === jobToEdit.id ? { ...j, title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "), libraries: library, is_external: isExternal, slug: isExternal ? finalSlug : null, created_at: j.created_at || new Date().toISOString() } : j
         );
         await authApi.updateJobs(updatedJobs);
         toast("Вакансия обновлена", "success");
@@ -149,6 +174,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
         const newJob = { 
             id: Date.now().toString(), 
             title, description, stack, level, salary: finalSalary, format, languages: languages.join(", "),
+            libraries: library,
             is_external: isExternal,
             slug: isExternal ? finalSlug : null,
             created_at: new Date().toISOString(),
@@ -207,7 +233,7 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                         {openStack && (
                           <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-50 py-1 max-h-48 overflow-y-auto custom-scrollbar">
                             {STACKS.map(s => (
-                              <button key={s} onClick={() => { setStack(s); setLanguages([]); setOpenStack(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
+                              <button key={s} onClick={() => { setStack(s); setLanguages([]); setLibrary(""); setOpenStack(false); }} className="w-full text-left px-3.5 py-2 text-[13px] hover:bg-surface-2 flex items-center justify-between transition-colors text-ink-2">
                                 {s} {stack === s && <Check size={14} className="text-accent" />}
                               </button>
                             ))}
@@ -241,18 +267,18 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                           <label className="text-sm font-medium mb-1 block">Языки (до 4)</label>
                           <div className="flex flex-wrap gap-2">
                               {STACK_LANGS[stack].map(lang => {
-                                  const active = languages.includes(lang);
+                                  const active = languages.includes(lang.id);
                                   return (
                                       <button
                                           key={lang}
                                           type="button"
                                           onClick={() => {
-                                              if (active) setLanguages(l => l.filter(x => x !== lang));
-                                              else if (languages.length < 4) setLanguages(l => [...l, lang]);
+                                              if (active) setLanguages(l => l.filter(x => x !== lang.id));
+                                              else if (languages.length < 4) setLanguages(l => [...l, lang.id]);
                                           }}
                                           className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${active ? "bg-accent text-white border-accent" : "bg-bg-2 border-line text-ink-2 hover:border-line-2"}`}
                                       >
-                                          {lang}
+                                          {lang.name}
                                       </button>
                                   );
                               })}
@@ -260,6 +286,27 @@ export function CreateJobModal({ onClose, backendUser, onRefresh, jobToEdit }: {
                       </div>
                   )}
 
+
+                  {languages.length > 0 && (
+                      <div>
+                          <label className="text-sm font-medium mb-1 block">Библиотека / Фреймворк</label>
+                          <div className="flex flex-wrap gap-2">
+                              {languages.map(langId => {
+                                  const langObj = STACK_LANGS[stack]?.find(l => l.id === langId);
+                                  if (!langObj || !langObj.libraries || langObj.libraries.length === 0) return null;
+                                  return langObj.libraries.map(lib => {
+                                      const active = library === lib.id;
+                                      return (
+                                          <button key={lib.id} type="button" onClick={() => setLibrary(lib.id)}
+                                              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${active ? "bg-accent text-white border-accent" : "bg-bg-2 border-line text-ink-2 hover:border-line-2"}`}>
+                                              {lib.name}
+                                          </button>
+                                      );
+                                  });
+                              })}
+                          </div>
+                      </div>
+                  )}
                   <div className="relative">
                     <label className="text-sm font-medium mb-1 block">Формат</label>
                     <button onClick={() => { setOpenFormat(!openFormat); setOpenStack(false); setOpenLevel(false); }} className="w-full bg-bg-2 border border-transparent hover:border-line-2 rounded-xl p-3 text-sm text-left flex justify-between items-center transition-colors">

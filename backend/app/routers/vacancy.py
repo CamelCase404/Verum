@@ -40,6 +40,7 @@ async def get_vacancy_by_id(job_id: str, db: AsyncSession = Depends(get_db)):
                     "title": job.get("title"),
                     "stack": job.get("stack"),
                     "level": job.get("level"),
-                    "languages": job.get("languages")
+                    "languages": job.get("languages"),
+                    "library_id": job.get("libraries")  # Сохраняли как libraries, отдаем как library_id
                 }
     raise HTTPException(404, "Вакансия не найдена")

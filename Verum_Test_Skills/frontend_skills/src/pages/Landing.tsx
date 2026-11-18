@@ -41,6 +41,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
     const [levelId, setLevelId] = useState<LevelId>("middle");
     const [stackId, setStackId] = useState<string>("");
     const [languageIds, setLanguageIds] = useState<string[]>([]);
+    const [libraryId, setLibraryId] = useState<string>("");
 
     const [loading, setLoading] = useState(false);
     const [isJobLocked, setIsJobLocked] = useState(false);
@@ -86,6 +87,9 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                         const langArr = data.languages.split(",").map((l: string) => l.trim().toLowerCase());
                         const validLangs = langArr.map((l: string) => LANG_MAP[l]).filter(Boolean);
                         setLanguageIds(validLangs);
+                    }
+                    if (data.library_id) {
+                        setLibraryId(data.library_id);
                     }
                 })
                 .catch(err => {
@@ -136,7 +140,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
         setLoading(true);
         setError(null);
         try {
-            const res = await api.startInterview(LEVEL_TO_API[levelId], stackId, languageIds);
+            const res = await api.startInterview(LEVEL_TO_API[levelId], stackId, languageIds, libraryId);
             onStarted({
                 interviewId: res.interview_id,
                 level: levelId,
@@ -244,6 +248,14 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                                         );
                                     })}
                                 </div>
+                                {libraryId && (
+                                    <div className="flex gap-2 items-center">
+                                        <span className="text-[13px] font-semibold text-ink-3">Библиотека:</span>
+                                        <span className="px-3 py-1 bg-accent text-white rounded-lg font-medium text-[14px]">
+                                            {libraryId}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ) : (

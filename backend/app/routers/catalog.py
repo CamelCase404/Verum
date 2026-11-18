@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from ..schemas import CatalogOption, CatalogResponse, StackOption
+from ..schemas import CatalogOption, CatalogResponse, StackOption, LanguageOption
 
 router = APIRouter(prefix="/api", tags=["catalog"])
 

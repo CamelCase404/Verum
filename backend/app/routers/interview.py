@@ -98,8 +98,8 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
     prev_q_str = "\n".join(f"- {q[:50]}..." for q in past_questions[-5:]) if past_questions else "Нет"
 
     # Передаем stack везде
-    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id, prev_code="(см. ниже)")
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
+    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id, libs=it.library_id or "стандартная библиотека", prev_code="(см. ниже)")
+    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id, libs=it.library_id or "стандартная библиотека")
 
     prompt = f"Стадия: {stage}. {stage_desc}\nУже заданные вопросы:\n{prev_q_str}\n\n"
     
@@ -122,7 +122,7 @@ async def _generate_pure_question(stage: int, it, past_questions: list[str], pre
 
 async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
     if is_skip: return 0
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
+    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id, libs=it.library_id or "стандартная библиотека")
 
     prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если кандидат просто сказал \"исправь это\", не предложил КАК именно (какой код/библиотеку использовать) и не описал внедрение — ставь максимум 20-30. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Если предложил хорошее решение и описал внедрение - 50-100. Верни ТОЛЬКО число. Не додумывай за кандидата!"
     history = _get_history(it)
@@ -142,7 +142,7 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
     return 40
 
 async def _generate_code_review_task(it) -> tuple[str, str]:
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id)
+    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id, libs=it.library_id or "стандартная библиотека")
     
     if it.level.lower() == "junior":
         difficulty = "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior в стеке {stack} на языке {langs}. Разнообразь: логика, API, память, безопасность."
@@ -154,7 +154,7 @@ async def _generate_code_review_task(it) -> tuple[str, str]:
     diff_text = difficulty.format(stack=it.stack_id, langs=it.language_id)
 
     prompt = (
-        f"Сгенерируй РОВНО ОДИН блок кода СТРОГО на одном из этих языков: {it.language_id}.\n"
+        f"Сгенерируй РОВНО ОДИН блок кода СТРОГО на одном из этих языков: {it.language_id} с использованием библиотеки {it.library_id or 'стандартная'}.\n"
         f"ОБЯЗАТЕЛЬНО используй самые современные библиотеки/фреймворки для {it.stack_id}.\n"
         f"{diff_text}\n"
         f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ НИ ОДНОГО КОММЕНТАРИЯ (убери //, #, /* */ и т.д.).\n"
@@ -240,7 +240,11 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
             job_langs_norm = [_normalize_lang(l) for l in job_langs_raw]
             for l in req.language_ids:
                 if _normalize_lang(l) not in job_langs_norm:
-                    raise HTTPException(400, f"Язык {l} не подходит под вакансию. Разрешены: {', '.join(job_langs_raw)}")
+                    raise HTTPException(400, f"Язык {l} не подходит. Разрешены: {', '.join(job_langs_raw)}")
+            
+            job_libs_str = str(target_job.get("libraries", "")).lower()
+            if req.library_id and req.library_id.lower() not in job_libs_str:
+                raise HTTPException(400, f"Библиотека {req.library_id} не подходит. Разрешены: {job_libs_str}")
     
     # Блокируем старт, пока предыдущее собеседование висит на модерации (только для обычных тестов)
     if not is_job_test and user.test_status == "pending":
@@ -268,7 +272,7 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
     await db.commit()
 
     langs_str = ", ".join(req.language_ids)
-    it = await create(req.level, req.stack_id, langs_str, user_id=user.id, job_id=req.job_id)
+    it = await create(req.level, req.stack_id, langs_str, user_id=user.id, job_id=req.job_id, library_id=req.library_id)
     try:
         q = await _generate_pure_question(0, it, [])
     except Exception as e:
@@ -511,7 +515,7 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
 
     return ReportResponse(
         interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
-        summary=parsed.summary, stages=parsed.stages, strengths=parsed.strengths, gaps=parsed.gaps,
+        library_id=it.library_id, summary=parsed.summary, stages=parsed.stages, strengths=parsed.strengths, gaps=parsed.gaps,
         recommendation=parsed.recommendation if parsed.recommendation in ("hire", "no_hire", "insufficient_evidence") else "insufficient_evidence",
         competency_architecture=comp_arch,
         competency_code_understanding=comp_code,

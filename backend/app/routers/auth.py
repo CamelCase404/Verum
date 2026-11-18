@@ -157,6 +157,7 @@ class SearchRequest(BaseModel):
     grade: Optional[str] = None
     stack: Optional[str] = None
     language: Optional[str] = None
+    library: Optional[str] = None
     job_id: Optional[str] = None
     min_salary: Optional[int] = None
 
@@ -232,6 +233,12 @@ async def search_candidates(
                 l.strip().lower() for l in data.get("language_id", "").split(",")
             ]
             if req.language.lower() not in cand_langs:
+                match = False
+                
+        # Библиотека
+        if req.library:
+            cand_lib = data.get("library_id", "").lower()
+            if req.library.lower() != cand_lib:
                 match = False
 
         if match:
@@ -320,7 +327,13 @@ async def search_candidates(
                         if overlap:
                             match_score += 15
 
-                    # 4. Зарплата (макс 10)
+                    # 4. Библиотека (макс 10)
+                    job_lib = target_job.get("libraries", "").lower()
+                    cand_lib = data.get("library_id", "").lower()
+                    if job_lib and cand_lib and job_lib == cand_lib:
+                        match_score += 10
+
+                    # 5. Зарплата (макс 5)
                     if job_salary_str and u.expected_salary:
                         salary_nums = [
                             int(n)
@@ -363,6 +376,7 @@ class SkillsReport(BaseModel):
     total_score_100: int
     stack_id: str
     language_id: str
+    library_id: Optional[str] = None
     summary: str
     stages: Optional[list[dict]] = None
     strengths: Optional[list[str]] = None
@@ -444,10 +458,13 @@ async def save_skills(
         if report.interview_id:
             try:
                 _it_for_job = await get_interview(report.interview_id)
-                if _it_for_job and getattr(_it_for_job, "job_id", None):
-                    user.pending_skills_data["job_id"] = _it_for_job.job_id
+                if _it_for_job:
+                    if getattr(_it_for_job, "job_id", None):
+                        user.pending_skills_data["job_id"] = _it_for_job.job_id
+                    if getattr(_it_for_job, "library_id", None):
+                        user.pending_skills_data["library_id"] = _it_for_job.library_id
             except Exception as _e:
-                print(f"  ⚠️ save_skills: job_id read failed: {_e}")
+                print(f"  ⚠️ save_skills: meta read failed: {_e}")
         user.test_status = "pending"
 
         # ← СОЗДАЁМ ЗАПИСЬ НА МОДЕРАЦИЮ

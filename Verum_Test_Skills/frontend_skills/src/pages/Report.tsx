@@ -60,6 +60,7 @@ export default function Report({
                     <h1 className="text-[28px] font-bold text-ink">Результат интервью</h1>
                     <p className="text-ink-3 text-[14px] mt-1">
                         Уровень: {report.level} · Стек: {report.stack_id} · Язык: {report.language_id}
+                        {report.library_id && ` · Библиотека: ${report.library_id}`}
                     </p>
                 </header>
 

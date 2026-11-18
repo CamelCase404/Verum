@@ -12,8 +12,11 @@ class CatalogOption(BaseModel):
     icon: str
     description: str
 
+class LanguageOption(CatalogOption):
+    libraries: list["CatalogOption"] = []
+
 class StackOption(CatalogOption):
-    languages: list[CatalogOption]
+    languages: list[LanguageOption]
 
 class CatalogResponse(BaseModel):
     levels: list[CatalogOption]
@@ -23,6 +26,7 @@ class StartInterviewRequest(BaseModel):
     level: Level
     stack_id: str
     language_ids: list[str]
+    library_id: str | None = None
     job_id: str | None = None
 
 class Turn(BaseModel):
@@ -61,6 +65,7 @@ class StageScore(BaseModel):
 
 class ReportResponse(BaseModel):
     interview_id: str
+    library_id: str | None = None
     level: Level
     stack_id: str
     language_id: str

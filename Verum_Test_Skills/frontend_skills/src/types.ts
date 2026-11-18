@@ -7,8 +7,11 @@ export interface Option {
     icon: string;
     description: string;
 }
+export interface LanguageOption extends Option {
+    libraries: Option[];
+}
 export interface StackOption extends Option {
-    languages: Option[];
+    languages: LanguageOption[];
 }
 export interface CatalogResponse {
     levels: Option[];

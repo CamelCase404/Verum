@@ -31,7 +31,8 @@ class DBInterview(Base):
     rejected = Column(Boolean, default=False)
     reject_reason = Column(String, nullable=True)
     timecode_markers = Column(JSON, nullable=True)
-    job_id = Column(String(50), nullable=True)  # массив [{time: "00:45", reason: "tab_switch"}]
+    job_id = Column(String(50), nullable=True)
+    library_id = Column(String(100), nullable=True)  # массив [{time: "00:45", reason: "tab_switch"}]
     turns = relationship(
         "DBTurn",
         back_populates="interview",
@@ -68,6 +69,7 @@ class Interview:
     language_id: str
     user_id: int | None = None
     job_id: str | None = None
+    library_id: str | None = None
     stage: int = 0
     finished: bool = False
     rejected: bool = False
@@ -75,10 +77,12 @@ class Interview:
     turns: list[TurnData] = field(default_factory=list)
 
 
-async def create(level: Level, stack_id: str, language_id: str, user_id: int | None = None, job_id: str | None = None) -> Interview:
+async def create(level: Level, stack_id: str, language_id: str, user_id: int | None = None, job_id: str | None = None
+    library_id: str | None = None) -> Interview:
     async with SessionLocal() as db:
         new_it = DBInterview(
-            id=str(uuid.uuid4()), user_id=user_id, level=level, stack_id=stack_id, language_id=language_id, job_id=job_id
+            id=str(uuid.uuid4()), user_id=user_id, level=level, stack_id=stack_id, language_id=language_id, job_id=job_id,
+            library_id=library_id
         )
         db.add(new_it)
         await db.commit()
@@ -107,6 +111,7 @@ async def get(interview_id: str) -> Optional[Interview]:
             id=db_it.id,
             user_id=getattr(db_it, "user_id", None),
             job_id=getattr(db_it, "job_id", None),
+            library_id=getattr(db_it, "library_id", None),
             level=db_it.level,
             stack_id=db_it.stack_id,
             language_id=db_it.language_id,
@@ -129,6 +134,7 @@ async def save(interview: Interview):
             db_it.rejected = interview.rejected
             db_it.reject_reason = interview.reject_reason
             db_it.job_id = interview.job_id
+            db_it.library_id = interview.library_id
 
             await db.execute(delete(DBTurn).where(DBTurn.interview_id == interview.id))
             for t in interview.turns:
