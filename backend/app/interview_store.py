@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import os
 import uuid
 from dataclasses import dataclass, field
 from typing import Optional
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, JSON, String, Text
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base, relationship
 
 from .schemas import Level
 
-import os
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://verum_user:verum_password_secure_change_me@db:5432/verum_db")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://verum_user:verum_password_secure_change_me@db:5432/verum_db",
+)
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -32,7 +35,9 @@ class DBInterview(Base):
     reject_reason = Column(String, nullable=True)
     timecode_markers = Column(JSON, nullable=True)
     job_id = Column(String(50), nullable=True)
-    library_id = Column(String(100), nullable=True)  # массив [{time: "00:45", reason: "tab_switch"}]
+    library_id = Column(
+        String(100), nullable=True
+    )  # массив [{time: "00:45", reason: "tab_switch"}]
     turns = relationship(
         "DBTurn",
         back_populates="interview",
@@ -50,7 +55,6 @@ class DBTurn(Base):
     seconds_spent = Column(Integer, default=0)
     score = Column(Integer, nullable=True)
     interview = relationship("DBInterview", back_populates="turns")
-
 
 
 @dataclass
@@ -77,12 +81,23 @@ class Interview:
     turns: list[TurnData] = field(default_factory=list)
 
 
-async def create(level: Level, stack_id: str, language_id: str, user_id: int | None = None, job_id: str | None = None
-    library_id: str | None = None) -> Interview:
+async def create(
+    level: Level,
+    stack_id: str,
+    language_id: str,
+    user_id: int | None = None,
+    job_id: str | None = None,
+    library_id: str | None = None,
+) -> Interview:
     async with SessionLocal() as db:
         new_it = DBInterview(
-            id=str(uuid.uuid4()), user_id=user_id, level=level, stack_id=stack_id, language_id=language_id, job_id=job_id,
-            library_id=library_id
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            level=level,
+            stack_id=stack_id,
+            language_id=language_id,
+            job_id=job_id,
+            library_id=library_id,
         )
         db.add(new_it)
         await db.commit()
@@ -93,18 +108,30 @@ async def create(level: Level, stack_id: str, language_id: str, user_id: int | N
 
 async def get(interview_id: str) -> Optional[Interview]:
     from sqlalchemy import select
+
     async with SessionLocal() as db:
-        result = await db.execute(select(DBInterview).where(DBInterview.id == interview_id))
+        result = await db.execute(
+            select(DBInterview).where(DBInterview.id == interview_id)
+        )
         db_it = result.scalars().first()
         if not db_it:
             return None
 
         # Загружаем turns
-        turns_result = await db.execute(select(DBTurn).where(DBTurn.interview_id == interview_id).order_by(DBTurn.id))
+        turns_result = await db.execute(
+            select(DBTurn)
+            .where(DBTurn.interview_id == interview_id)
+            .order_by(DBTurn.id)
+        )
         turns_db = turns_result.scalars().all()
 
         turns = [
-            TurnData(role=t.role, content=t.content, seconds_spent=t.seconds_spent, score=getattr(t, "score", None))
+            TurnData(
+                role=t.role,
+                content=t.content,
+                seconds_spent=t.seconds_spent,
+                score=getattr(t, "score", None),
+            )
             for t in turns_db
         ]
         return Interview(
@@ -124,9 +151,12 @@ async def get(interview_id: str) -> Optional[Interview]:
 
 
 async def save(interview: Interview):
-    from sqlalchemy import select, delete
+    from sqlalchemy import delete, select
+
     async with SessionLocal() as db:
-        result = await db.execute(select(DBInterview).where(DBInterview.id == interview.id))
+        result = await db.execute(
+            select(DBInterview).where(DBInterview.id == interview.id)
+        )
         db_it = result.scalars().first()
         if db_it:
             db_it.stage = interview.stage
