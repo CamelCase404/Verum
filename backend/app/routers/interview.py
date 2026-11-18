@@ -27,6 +27,45 @@ router = APIRouter(prefix="/api/interview", tags=["interview"])
 STAGE_NAMES = {0: "Общие знания", 1: "Code Review", 2: "Нагрузка", 3: "Code Review (Повторный)", 4: "Нагрузка (Повторный)"}
 STAGE0_QUESTIONS = 8
 
+def _normalize_lang(lang: str) -> str:
+    lang = lang.strip().lower()
+    mapping = {
+        # Frontend
+        "javascript": "js", "js": "js",
+        "typescript": "ts", "ts": "ts",
+        "html5": "html", "html": "html",
+        "css3": "css", "css": "css",
+        "reactjs": "react", "react": "react",
+        "vuejs": "vue", "vue": "vue",
+        
+        # Backend
+        "c#": "csharp", "cs": "csharp", "csharp": "csharp",
+        "node.js": "node", "nodejs": "node", "node": "node",
+        "next.js": "next", "nextjs": "next", "next": "next",
+        "fastapi": "fastapi", "django": "django", "go": "go", "golang": "go",
+        "python": "python", "java": "java",
+        
+        # Mobile
+        "objective-c": "objc", "objc": "objc", "objectivec": "objc",
+        "swift": "swift", "swiftui": "swiftui", "uikit": "uikit", "combine": "combine",
+        "kotlin": "kotlin", "java": "java", "jetpack compose": "compose", 
+        "compose": "compose", "kotlin coroutines": "coroutines", "coroutines": "coroutines",
+        
+        # GameDev
+        "unity (c#)": "unity", "unity": "unity",
+        "unreal (c++)": "unreal", "unreal": "unreal", "c++": "unreal",
+        "godot (gdscript)": "godot", "godot": "godot", "gdscript": "godot",
+        
+        # DevOps
+        "kubernetes": "k8s", "k8s": "k8s", "terraform": "terraform", 
+        "ansible": "ansible", "bash": "bash", "docker": "docker",
+        
+        # Data/ML
+        "pandas": "pandas", "pytorch": "pytorch", "tensorflow": "tensorflow", "sql": "sql"
+    }
+    return mapping.get(lang, lang)
+
+
 def _clean_text(raw: str) -> str:
     raw = raw.strip().replace("{{", "{").replace("}}", "}")
     if raw.startswith("```json"): raw = raw[7:]
@@ -197,10 +236,11 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
                 raise HTTPException(400, f"Выбранный стек не соответствует вакансии. Ожидается: {target_job.get('stack')}")
             
             job_langs_str = str(target_job.get("languages", ""))
-            job_langs = [l.strip().lower() for l in job_langs_str.split(",") if l.strip()]
+            job_langs_raw = [l.strip().lower() for l in job_langs_str.split(",") if l.strip()]
+            job_langs_norm = [_normalize_lang(l) for l in job_langs_raw]
             for l in req.language_ids:
-                if l.lower() not in job_langs:
-                    raise HTTPException(400, f"Язык {l} не подходит под вакансию. Разрешены: {', '.join(job_langs)}")
+                if _normalize_lang(l) not in job_langs_norm:
+                    raise HTTPException(400, f"Язык {l} не подходит под вакансию. Разрешены: {', '.join(job_langs_raw)}")
     
     # Блокируем старт, пока предыдущее собеседование висит на модерации (только для обычных тестов)
     if not is_job_test and user.test_status == "pending":
