@@ -31,11 +31,12 @@ async def get_public_vacancy(slug: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/id/{job_id}")
 async def get_vacancy_by_id(job_id: str, db: AsyncSession = Depends(get_db)):
-    """Внутренний эндпоинт: получить стек и языки вакансии по ID для авто-выбора в тесте."""
+    """Внутренний эндпоинт: получить стек и языки вакансии по ID или slug для авто-выбора в тесте."""
     res = await db.execute(select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None)))
     for comp in res.scalars().all():
         for job in comp.job_postings:
-            if str(job.get("id")) == str(job_id):
+            # Ищем и по id, и по slug на случай, если фронтенд передал слаг в параметре id
+            if str(job.get("id")) == str(job_id) or str(job.get("slug")) == str(job_id):
                 return {
                     "title": job.get("title"),
                     "stack": job.get("stack"),
