@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import json
-from ...gigachat_client import ask_chat
-from ...prompts import STAGE_DESCRIPTIONS, SYSTEM_GENERATOR, SYSTEM_EVALUATOR
+from app.gigachat_client import ask_chat
+from app.prompts import STAGE_DESCRIPTIONS, SYSTEM_GENERATOR, SYSTEM_EVALUATOR
 
 def _get_history(it) -> list[dict]:
-    # Для генератора важно видеть не только текст, но и оценку за этот текст
     history = []
     for t in it.turns:
         if t.role == "user":
-            # Подмешиваем балл за ответ прямо в историю, чтобы генератор видел успехи
             score_info = f" [Оценка ответа системой: {t.score if t.score is not None else 0}/100 баллов]"
             history.append({"role": "user", "content": t.content + score_info})
         else:
@@ -76,7 +74,6 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
         f"<candidate_answer>\n{answer}\n</candidate_answer>"
     )
     
-    # Оценщик использует чистую историю без подмешивания баллов, чтобы не путаться
     clean_history = [{"role": t.role, "content": t.content} for t in it.turns]
     raw = (await ask_chat(sys_prompt, clean_history, prompt, temperature=0.0)).strip()
     
