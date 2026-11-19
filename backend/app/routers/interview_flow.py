@@ -96,7 +96,6 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
     
-    # Конечный автомат с гарантированной передачей сгенерированного ИИ-кода (code_snippet) на фронтенд
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
         q_data = await _generate_pure_question(1, it)
@@ -136,7 +135,6 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         await save(it)
         return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], finished=True)
         
-    # Внутренний шаг текущей стадии (например, переход от 1-го ко 2-му вопросу на стадии 0)
     q_data = await _generate_pure_question(it.stage, it)
     content_str = q_data["question"]
     if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
