@@ -58,9 +58,23 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
     };
 
     useEffect(() => {
+        // 0. Очищаем URL от параметров, если они есть
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobIdFromUrl = urlParams.get("job_id");
+        if (jobIdFromUrl) {
+            localStorage.setItem("verum_test_job_id", jobIdFromUrl);
+        }
+
         // 1. Сначала проверяем, есть ли job_id (пришли по ссылке от компании)
         const jobId = localStorage.getItem("verum_test_job_id");
-        if (jobId) {
+        
+        // Если пришли БЕЗ ссылки (нет job_id в URL и в localStorage мусор), но он есть в localStorage, 
+        // значит пользователь зашел напрямую.
+        if (!jobIdFromUrl && !window.location.href.includes("token=")) {
+             localStorage.removeItem("verum_test_job_id");
+        }
+
+        if (jobId && jobId !== "null" && jobId !== "undefined") {
             setIsJobLocked(true); // Блокируем СРАЗУ, чтобы не мигало
             const API = import.meta.env.VITE_API_URL || "https://api.verumskills.ru";
             fetch(`${API}/api/jobs/id/${jobId}`)

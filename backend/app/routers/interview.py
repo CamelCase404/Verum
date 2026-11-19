@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..auth import UserDB, get_current_user, get_db, utcnow_naive
 from ..gigachat_client import ask_chat, ask_text
 from ..interview_store import create, get, save
-from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_INTERVIEWER, SYSTEM_REPORT
+from ..prompts import STAGE_DESCRIPTIONS, SYSTEM_GENERATOR, SYSTEM_EVALUATOR, SYSTEM_REPORT
 from ..schemas import (
     AnswerRequest,
     AnswerResponse,
@@ -30,179 +30,75 @@ STAGE0_QUESTIONS = 8
 def _normalize_lang(lang: str) -> str:
     lang = lang.strip().lower()
     mapping = {
-        # Frontend
-        "javascript": "js", "js": "js",
-        "typescript": "ts", "ts": "ts",
-        "html5": "html", "html": "html",
-        "css3": "css", "css": "css",
-        "reactjs": "react", "react": "react",
-        "vuejs": "vue", "vue": "vue",
-        
-        # Backend
+        "javascript": "js", "js": "js", "typescript": "ts", "ts": "ts",
+        "html5": "html", "html": "html", "css3": "css", "css": "css",
+        "reactjs": "react", "react": "react", "vuejs": "vue", "vue": "vue",
         "c#": "csharp", "cs": "csharp", "csharp": "csharp",
         "node.js": "node", "nodejs": "node", "node": "node",
         "next.js": "next", "nextjs": "next", "next": "next",
         "fastapi": "fastapi", "django": "django", "go": "go", "golang": "go",
         "python": "python", "java": "java",
-        
-        # Mobile
         "objective-c": "objc", "objc": "objc", "objectivec": "objc",
         "swift": "swift", "swiftui": "swiftui", "uikit": "uikit", "combine": "combine",
         "kotlin": "kotlin", "java": "java", "jetpack compose": "compose", 
         "compose": "compose", "kotlin coroutines": "coroutines", "coroutines": "coroutines",
-        
-        # GameDev
         "unity (c#)": "unity", "unity": "unity",
         "unreal (c++)": "unreal", "unreal": "unreal", "c++": "unreal",
         "godot (gdscript)": "godot", "godot": "godot", "gdscript": "godot",
-        
-        # DevOps
         "kubernetes": "k8s", "k8s": "k8s", "terraform": "terraform", 
         "ansible": "ansible", "bash": "bash", "docker": "docker",
-        
-        # Data/ML
         "pandas": "pandas", "pytorch": "pytorch", "tensorflow": "tensorflow", "sql": "sql"
     }
     return mapping.get(lang, lang)
 
-
-def _clean_text(raw: str) -> str:
-    raw = raw.strip().replace("{{", "{").replace("}}", "}")
-    if raw.startswith("```json"): raw = raw[7:]
-    elif raw.startswith("```"): raw = raw[3:]
-    if raw.endswith("```"): raw = raw[:-3]
-    
-    # Пытаемся вытащить вопрос из JSON, если ИИ его прислал
-    if raw.startswith("{"):
-        try:
-            data = json.loads(raw)
-            raw = str(data.get("next_question", data.get("question", raw)))
-        except: pass
-    
-    # Убираем фигурные скобки, кавычки
-    clean = re.sub(r'[{}"]', "", raw).strip()
-    
-    # Вырезаем мусор вроде "0, feedback: ...", "score: 80"
-    clean = re.sub(r'(?i)^(score|feedback|next_question|оценка|балл|0)[:\s,.-]*', '', clean).strip()
-    clean = re.sub(r'(?i)^\d+[,.]?\s*', '', clean).strip() # убираем цифры в начале
-    
-    # Убираем оставшиеся служебные слова
-    clean = re.sub(r'(?i)(feedback|next_question|score)\s*:', '', clean).strip()
-    
-    return clean
-
 def _get_history(it) -> list[dict]:
     return [{"role": t.role, "content": t.content} for t in it.turns]
 
-async def _generate_pure_question(stage: int, it, past_questions: list[str], prev_code_context: str = "", prev_answer: str = "") -> str:
-    prev_q_str = "\n".join(f"- {q[:50]}..." for q in past_questions[-5:]) if past_questions else "Нет"
+def _parse_json(content: str) -> dict:
+    content = content.strip()
+    if content.startswith("```json"): content = content[7:]
+    elif content.startswith("```"): content = content[3:]
+    if content.endswith("```"): content = content[:-3]
+    s, e = content.find("{"), content.rfind("}")
+    if s != -1 and e != -1 and e > s: content = content[s:e+1]
+    try: return json.loads(content)
+    except: pass
+    return {}
 
-    # Передаем stack везде
-    stage_desc = STAGE_DESCRIPTIONS[stage].format(langs=it.language_id, level=it.level, stack=it.stack_id, libs=it.library_id or "стандартная библиотека", prev_code="(см. ниже)")
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id, libs=it.library_id or "стандартная библиотека")
-
-    prompt = f"Стадия: {stage}. {stage_desc}\nУже заданные вопросы:\n{prev_q_str}\n\n"
-    
-    if stage in (2, 4) and prev_code_context:
-        # ЖЕСТКО напоминаем про стек, чтобы ИИ не ушел в Unity/C# на ML-задаче
-        prompt += (
-            f"Код с предыдущего этапа:\n{prev_code_context[:8000]}\n\n"
-            f"Кандидат написал промпт:\n'{prev_answer}'\n\n"
-            f"ВАЖНО: Стек кандидата: {it.stack_id} (языки: {it.language_id}). "
-            f"Придумай проблему из продакшена ИМЕННО для этого стека и этого кода. "
-            f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО придумывать проблемы для других языков (например, GameDev, если стек Frontend/Data). "
-            f"Верни ТОЛЬКО текст вопроса. Никакого JSON, никаких оценок, никаких 'feedback:'."
-        )
-    else:
-        prompt += f"Задай СЛЕДУЮЩИЙ новый вопрос строго для стека {it.stack_id}. Верни ТОЛЬКО текст вопроса. Никакого JSON."
+async def _generate_pure_question(stage: int, it) -> dict:
+    stage_desc = STAGE_DESCRIPTIONS[stage].format(
+        langs=it.language_id, level=it.level, stack=it.stack_id, 
+        libs=it.library_id or "стандартная библиотека"
+    )
+    sys_prompt = SYSTEM_GENERATOR.format(
+        level=it.level, langs=it.language_id, stack=it.stack_id, 
+        libs=it.library_id or "стандартная библиотека", stage_desc=stage_desc
+    )
 
     history = _get_history(it)
-    raw = (await ask_chat(sys_prompt, history, prompt)).strip()
-    return _clean_text(raw)
+    prompt = f"Сгенерируй задание для стадии {stage}."
+    
+    raw = (await ask_chat(sys_prompt, history, prompt, temperature=0.3)).strip()
+    parsed = _parse_json(raw)
+    
+    if not parsed or "question" not in parsed:
+        return {"question": "Опишите ваш подход к решению задач.", "code": "", "reference_answer": ""}
+    return parsed
 
 async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: bool) -> int:
     if is_skip: return 0
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id, libs=it.library_id or "стандартная библиотека")
-
-    prompt = f"Стадия: {stage}. Уровень: {it.level}.\nВопрос: {question}\nОтвет кандидата: {answer}\n\nОцени от 0-100. Если кандидат просто сказал \"исправь это\", не предложил КАК именно (какой код/библиотеку использовать) и не описал внедрение — ставь максимум 20-30. Если ответ не по теме (бред, спам), ставь 0-10. Если поверхностный - 10-30. Если предложил хорошее решение и описал внедрение - 50-100. Верни ТОЛЬКО число. Не додумывай за кандидата!"
+    sys_prompt = SYSTEM_EVALUATOR
+    # Оборачиваем ответ кандидата в теги для защиты от prompt injection
+    prompt = f"Стадия: {stage}.\nВопрос: {question}\n\n<candidate_answer>\n{answer}\n</candidate_answer>"
+    
     history = _get_history(it)
     raw = (await ask_chat(sys_prompt, history, prompt, temperature=0.0)).strip()
-
-    # Приоритетные паттерны — берём ПОСЛЕДНЕЕ найденное число
-    patterns = [
-        r"(?:оценка|балл|score)\s*[:\-]?\s*(\d{1,3})",
-        r"(\d{1,3})\s*(?:/\s*100|из\s*100|баллов?)",
-        r"\b(\d{1,3})\b",
-    ]
-    for pat in patterns:
-        matches = re.findall(pat, raw, re.IGNORECASE)
-        if matches:
-            score = int(matches[-1])
-            return max(0, min(100, score))
-    return 40
-
-async def _generate_code_review_task(it) -> tuple[str, str]:
-    sys_prompt = SYSTEM_INTERVIEWER.format(level=it.level, langs=it.language_id, stack=it.stack_id, libs=it.library_id or "стандартная библиотека")
     
-    if it.level.lower() == "junior":
-        difficulty = "Добавь ОДНУ-ДВЕ реалистичные ошибки уровня Junior в стеке {stack} на языке {langs}. Разнообразь: логика, API, память, безопасность."
-    elif it.level.lower() == "middle":
-        difficulty = "Добавь ОДНУ-ДВЕ ошибки уровня Middle в стеке {stack} на языке {langs}. Разнообразь: производительность, архитектура, БД."
-    else:
-        difficulty = "Добавь ОДНУ-ДВЕ СЛОЖНЫЕ ошибки уровня Senior в стеке {stack} на языке {langs}. Разнообразь: архитектура, гонки, масштабирование."
+    parsed = _parse_json(raw)
+    if parsed and "total_score" in parsed:
+        return max(0, min(100, int(parsed["total_score"])))
     
-    diff_text = difficulty.format(stack=it.stack_id, langs=it.language_id)
-
-    prompt = (
-        f"Сгенерируй РОВНО ОДИН блок кода СТРОГО на одном из этих языков: {it.language_id} с использованием библиотеки {it.library_id or 'стандартная'}.\n"
-        f"ОБЯЗАТЕЛЬНО используй самые современные библиотеки/фреймворки для {it.stack_id}.\n"
-        f"{diff_text}\n"
-        f"КРИТИЧЕСКОЕ ПРАВИЛО 1: В коде НЕ ДОЛЖНО БЫТЬ НИ ОДНОГО КОММЕНТАРИЯ (убери //, #, /* */ и т.д.).\n"
-        f"КРИТИЧЕСКОЕ ПРАВИЛО 2: НИКАКИХ подсказок, списков ошибок или пояснений в тексте или коде.\n"
-        f"КРИТИЧЕСКОЕ ПРАВИЛО 3: Выдай ТОЛЬКО ОДИН кусок кода. Никаких двух файлов.\n"
-        f"ФОРМАТ ОТВЕТА ДОЛЖЕН БЫТЬ СТРОГО ТАКИМ:\n"
-        f"Найдите неоптимизированные участки и баги в коде. Предложите альтернативное решение и опишите, как бы вы его внедрили.\n"
-        f"|РАЗДЕЛИТЕЛЬ|\n"
-        f"```{it.language_id}\n"
-        f"твой код без комментариев\n"
-        f"```"
-    )
-    
-    history = _get_history(it)
-    raw = (await ask_chat(sys_prompt, history, prompt)).strip()
-
-    # 1. Ищем код в markdown-блоках ```lang```
-    code = ""
-    md_matches = re.findall(r'```(?:[a-zA-Z0-9+#.-]*)\n([\s\S]*?)```', raw)
-    if md_matches:
-        code = md_matches[0].strip()
-    else:
-        # Fallback: если ИИ не сделал ```, пытаемся найти разделитель
-        if "РАЗДЕЛИТЕЛЬ" in raw:
-            parts = raw.split("РАЗДЕЛИТЕЛЬ")
-            if any(k in parts[0] for k in ["import", "const ", "def ", "function", "class "]):
-                code = parts[0].strip()
-            else:
-                code = parts[1].strip()
-        else:
-            code = raw
-
-    # 2. БРОНЕБОЙНАЯ ОЧИСТКА ОТ СПОЙЛЕРОВ
-    code = re.split(r'\n(?=\d+\.)', code)[0].strip()
-    code = re.split(r'(?i)Типовые ошибки|Ошибки:|Проблемы:|Баг:', code)[0].strip()
-    code = re.sub(r'(?i)^\s*Код:\s*', '', code, flags=re.MULTILINE)
-    code = re.sub(r'(?i)^\s*\|?РАЗДЕЛИТЕЛЬ\|?\s*$', '', code, flags=re.MULTILINE)
-
-    # 3. Убираем комментарии
-    code = re.sub(r"(?<!http:)(?<!https:)\/\/.*", "", code)
-    code = re.sub(r"(?m)^\s*#.*$", "", code)
-    code = re.sub(r"(?<=\s)#(?!\w{3,6}\b).*", "", code)
-    code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
-    code = re.sub(r"<!--.*?-->", "", code, flags=re.DOTALL)
-    code = re.sub(r"\n\s*\n", "\n", code)
-
-    task_text = "Найдите неоптимизированные участки и баги в коде. Предложите альтернативное решение и опишите, как бы вы его внедрили в проект."
-    return task_text, code.strip()
+    return 0
 
 
 @router.post("/start", response_model=StartInterviewResponse)
@@ -212,7 +108,6 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
     
     is_job_test = bool(req.job_id)
 
-    # Если тест по вакансии — строго проверяем стек и языки
     if is_job_test:
         comp_res = await db.execute(select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None)))
         target_job = None
@@ -246,43 +141,38 @@ async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_u
             if req.library_id and req.library_id.lower() not in job_libs_str:
                 raise HTTPException(400, f"Библиотека {req.library_id} не подходит. Разрешены: {job_libs_str}")
     
-    # Блокируем старт, пока предыдущее собеседование висит на модерации (только для обычных тестов)
     if not is_job_test and user.test_status == "pending":
-        raise HTTPException(
-            409,
-            "У вас уже есть собеседование на модерации. Дождитесь решения модератора."
-        )
+        raise HTTPException(409, "У вас уже есть собеседование на модерации. Дождитесь решения модератора.")
     
-    from datetime import datetime
     now = utcnow_naive()
-    # Проверяем таймер 180 дней только если это НЕ тест под вакансию
     if not is_job_test and user.blocked_until:
         blocked = user.blocked_until
         if blocked.tzinfo is not None:
             blocked = blocked.replace(tzinfo=None)
         if blocked > now:
-            raise HTTPException(
-                403,
-                f"Доступ к собеседованию заблокирован до {blocked.strftime('%d.%m.%Y')}. "
-                f"Вы исчерпали все попытки. Для прохождения теста под конкретную вакансию используйте ссылку от компании."
-            )
-    # Сбрасываем "хвосты" от прошлой попытки, чтобы админ не увидел старое видео с новым чатом
+            raise HTTPException(403, f"Доступ заблокирован до {blocked.strftime('%d.%m.%Y')}. Используйте ссылку от компании для теста.")
+            
     user.interview_video_url = None
     user.pending_skills_data = None
     await db.commit()
 
     langs_str = ", ".join(req.language_ids)
     it = await create(req.level, req.stack_id, langs_str, user_id=user.id, job_id=req.job_id, library_id=req.library_id)
+    
     try:
-        q = await _generate_pure_question(0, it, [])
+        q_data = await _generate_pure_question(0, it)
     except Exception as e:
         import traceback
         traceback.print_exc()
         raise HTTPException(500, f"Ошибка генерации вопроса: {str(e)}")
 
-    it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
+    content_str = q_data["question"]
+    if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
+    if q_data.get("reference_answer"): content_str += "\n\n___REFERENCE___\n" + q_data["reference_answer"]
+
+    it.turns.append(Turn(role="assistant", content=content_str, seconds_spent=0))
     await save(it)
-    return StartInterviewResponse(interview_id=it.id, stage=0, stage_name=STAGE_NAMES[0], question=q)
+    return StartInterviewResponse(interview_id=it.id, stage=0, stage_name=STAGE_NAMES[0], question=q_data["question"], code_snippet=q_data.get("code"))
 
 @router.post("/answer", response_model=AnswerResponse)
 async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -> AnswerResponse:
@@ -298,8 +188,7 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
     is_skip = req.answer == "___SKIP___"
-    if is_skip:
-        req.answer = "Кандидат пропустил вопрос."
+    if is_skip: req.answer = "Кандидат пропустил вопрос."
 
     past_questions = [t.content for t in it.turns if t.role == "assistant"]
     last_question = past_questions[-1] if past_questions else ""
@@ -309,7 +198,7 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
     it.turns.append(Turn(role="user", content=req.answer, seconds_spent=req.seconds_spent, score=score))
 
     if not is_skip and score <= 5:
-        it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме (бред или спам)."
+        it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме."
         await save(it)
         return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, ""), finished=True, rejected=True, reject_reason=it.reject_reason)
 
@@ -317,47 +206,46 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
 
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
-        question, code = await _generate_code_review_task(it)
-        it.turns.append(Turn(role="assistant", content=question + "\n\nКод:\n" + code, seconds_spent=0))
+        q_data = await _generate_pure_question(1, it)
+        content_str = q_data["question"] + "\n\nКод:\n" + q_data.get("code", "") + "\n\n___REFERENCE___\n" + q_data.get("reference_answer", "")
+        it.turns.append(Turn(role="assistant", content=content_str, seconds_spent=0))
         await save(it)
-        return AnswerResponse(stage=1, stage_name=STAGE_NAMES[1], question=question, code_snippet=code)
+        return AnswerResponse(stage=1, stage_name=STAGE_NAMES[1], question=q_data["question"], code_snippet=q_data.get("code"))
 
     elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:
         it.stage = 2
-        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10 and t.content != "Кандидат пропустил вопрос."), "") or "(кандидат пропустил Code Review)"
-        prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
-        q = await _generate_pure_question(2, it, past_questions, prev_code, prev_prompt)
-        it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
+        q_data = await _generate_pure_question(2, it)
+        content_str = q_data["question"] + "\n\n___REFERENCE___\n" + q_data.get("reference_answer", "")
+        it.turns.append(Turn(role="assistant", content=content_str, seconds_spent=0))
         await save(it)
-        return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], question=q)
+        return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], question=q_data["question"])
 
     elif it.stage == 2 and answers_on_stage >= STAGE0_QUESTIONS + 2:
         it.stage = 3
-        question, code = await _generate_code_review_task(it)
-        it.turns.append(Turn(role="assistant", content=question + "\n\nКод:\n" + code, seconds_spent=0))
+        q_data = await _generate_pure_question(3, it)
+        content_str = q_data["question"] + "\n\nКод:\n" + q_data.get("code", "") + "\n\n___REFERENCE___\n" + q_data.get("reference_answer", "")
+        it.turns.append(Turn(role="assistant", content=content_str, seconds_spent=0))
         await save(it)
-        return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], question=question, code_snippet=code)
+        return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], question=q_data["question"], code_snippet=q_data.get("code"))
 
     elif it.stage == 3 and answers_on_stage >= STAGE0_QUESTIONS + 3:
         it.stage = 4
-        prev_prompt = next((t.content for t in reversed(it.turns) if t.role == "user" and len(t.content) > 10 and t.content != "Кандидат пропустил вопрос."), "") or "(кандидат пропустил Code Review)"
-        prev_code = next((t.content for t in reversed(it.turns) if t.role == "assistant" and "Код:" in t.content), "")
-        q = await _generate_pure_question(4, it, past_questions, prev_code, prev_prompt)
-        it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
+        q_data = await _generate_pure_question(4, it)
+        content_str = q_data["question"] + "\n\n___REFERENCE___\n" + q_data.get("reference_answer", "")
+        it.turns.append(Turn(role="assistant", content=content_str, seconds_spent=0))
         await save(it)
-        return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], question=q)
+        return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], question=q_data["question"])
 
     elif it.stage == 4 and answers_on_stage >= STAGE0_QUESTIONS + 4:
         it.finished = True
         await save(it)
         return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], finished=True)
 
-    q = await _generate_pure_question(it.stage, it, past_questions)
-    if not q or len(q.strip()) < 10: q = "Опишите ваш подход к решению подобных задач."
-
-    it.turns.append(Turn(role="assistant", content=q, seconds_spent=0))
+    q_data = await _generate_pure_question(it.stage, it)
+    content_str = q_data["question"] + "\n\n___REFERENCE___\n" + q_data.get("reference_answer", "")
+    it.turns.append(Turn(role="assistant", content=content_str, seconds_spent=0))
     await save(it)
-    return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], question=q)
+    return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], question=q_data["question"])
 
 class _Report(BaseModel):
     summary: str = "Резюме отсутствует."
@@ -372,17 +260,6 @@ class _Report(BaseModel):
     competency_soft_skills: int | None = None
     total_score_100: int | None = None
     final_grade: str | None = None
-
-def _parse_report_json(content: str) -> dict:
-    content = content.strip()
-    if content.startswith("```json"): content = content[7:]
-    elif content.startswith("```"): content = content[3:]
-    if content.endswith("```"): content = content[:-3]
-    s, e = content.find("{"), content.rfind("}")
-    if s != -1 and e != -1 and e > s: content = content[s:e+1]
-    try: return json.loads(content)
-    except: pass
-    return {}
 
 @router.get("/{interview_id}/report", response_model=ReportResponse)
 async def report(interview_id: str, user: UserDB = Depends(get_current_user)) -> ReportResponse:
@@ -403,26 +280,19 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
             rejected=True, reject_reason=it.reject_reason
         )
 
-    # ─── ПРОГРАММНЫЙ ПОДСЧЁТ НА ОСНОВЕ РЕАЛЬНЫХ ОТВЕТОВ ───
     user_turns = [t for t in it.turns if t.role == "user"]
     total_answers = len(user_turns)
     skips = sum(1 for t in user_turns if t.content == "Кандидат пропустил вопрос.")
     
-    # Собираем score по каждому ответу (не считая пропуски)
-    # Но пропуск тоже даёт score=0 — считаем его в average, чтобы он тянул вниз
     all_scores = [getattr(t, "score", None) for t in user_turns]
     valid_scores = [sc for sc in all_scores if sc is not None]
 
-    # Считаем средний балл за ВСЕ ответы (включая пропуски как 0)
     if valid_scores:
-        # заменяем None на 0 (для старых turn'ов без score)
         scores_normalized = [sc if sc is not None else 0 for sc in all_scores]
         avg_score = sum(scores_normalized) / len(scores_normalized)
     else:
         avg_score = 0
 
-    # ─── ПРОГРАММНЫЕ КОМПЕТЕНЦИИ ПО СТАДИЯМ ───
-    # Собираем score по каждой стадии (для стадий 1,2,3,4 по одному ответу)
     def stage_avg(stages: list[int]) -> int:
         stage_scores = [
             (getattr(t, "score", None) or 0)
@@ -433,8 +303,6 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
             return 0
         return int(sum(stage_scores) / len(stage_scores))
 
-    # ─── ПРОГРАММНЫЙ REJECT ───
-    # Если пропущено >= 50% вопросов ИЛИ все — принудительный Reject
     forced_reject = False
     reject_reason = None
     if total_answers > 0:
@@ -460,15 +328,13 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
             rejected=True, reject_reason=reject_reason
         )
 
-    # ─── ГЕНЕРАЦИЯ ТЕКСТОВОГО ОТЧЁТА ЧЕРЕЗ GIGACHAT (только summary/stages/strengths/gaps) ───
     history = _get_history(it)
     ai_user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."
 
     try:
         raw = await ask_chat(SYSTEM_REPORT, history, ai_user)
-        parsed = _Report.model_validate(_parse_report_json(raw))
+        parsed = _Report.model_validate(_parse_json(raw))
     except Exception as e:
-        # если GigaChat упал или вернул пустой JSON — отдаём программный отчёт
         parsed = _Report(
             summary="Отчёт сформирован на основе ваших ответов. ИИ не смог сгенерировать подробный вердикт, но баллы рассчитаны верно.",
             stages=[],
@@ -477,10 +343,8 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
             recommendation="insufficient_evidence",
         )
 
-    # ─── ИТОГОВЫЙ БАЛЛ — ИЗ РЕАЛЬНЫХ ОТВЕТОВ ───
     total = int(round(avg_score))
 
-    # ─── ГРЕЙД — ИЗ ПРОГРАММНОГО БАЛЛА + ОГРАНИЧЕНИЕ ПО ВЫБРАННОМУ УРОВНЮ ───
     initial_level = it.level.lower()
     if total < 15:
         grade = "Reject"
@@ -496,12 +360,10 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
     elif initial_level == "middle" and grade == "Senior":
         grade = "Middle"
 
-    # ─── КОМПЕТЕНЦИИ — ПРОГРАММНЫЕ (по стадиям) ───
     comp_arch = stage_avg([0])
     comp_code = stage_avg([1, 3])
     comp_adapt = stage_avg([2, 4])
-    # prompting/soft — оставляем от GigaChat (их из score не вывести)
-    # Валидация: если GigaChat вернул вне 0-100 или None → fallback на total
+    
     def _valid_or(x, fallback):
         if x is None: return fallback
         try:
@@ -527,9 +389,7 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
         rejected=False, reject_reason=None
     )
 
-
 def _turn_stage(turns: list, user_turn_index: int) -> int:
-    """Определяет стадию turn'а по позиции: считаем assistant-вопросы ДО него."""
     stage = 0
     assistant_count = 0
     for i, t in enumerate(turns):
@@ -537,13 +397,8 @@ def _turn_stage(turns: list, user_turn_index: int) -> int:
             return stage
         if t.role == "assistant":
             assistant_count += 1
-            if assistant_count > STAGE0_QUESTIONS:
-                stage = 1
-            if assistant_count > STAGE0_QUESTIONS + 1:
-                stage = 2
-            if assistant_count > STAGE0_QUESTIONS + 2:
-                stage = 3
-            if assistant_count > STAGE0_QUESTIONS + 3:
-                stage = 4
+            if assistant_count > STAGE0_QUESTIONS: stage = 1
+            if assistant_count > STAGE0_QUESTIONS + 1: stage = 2
+            if assistant_count > STAGE0_QUESTIONS + 2: stage = 3
+            if assistant_count > STAGE0_QUESTIONS + 3: stage = 4
     return stage
-
