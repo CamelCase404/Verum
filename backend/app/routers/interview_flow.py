@@ -96,20 +96,47 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
     
-    # Корректный конечный автомат переключения 5 стадий сессии
+    # Конечный автомат с гарантированной передачей сгенерированного ИИ-кода (code_snippet) на фронтенд
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
+        q_data = await _generate_pure_question(1, it)
+        content_str = q_data["question"]
+        if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
+        it.turns.append(TurnData(role="assistant", content=content_str, seconds_spent=0, reference_data={"reference_answer": q_data.get("reference_answer", "")}))
+        await save(it)
+        return AnswerResponse(stage=1, stage_name=STAGE_NAMES[1], question=q_data["question"], code_snippet=q_data.get("code"))
+        
     elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:
         it.stage = 2
+        q_data = await _generate_pure_question(2, it)
+        content_str = q_data["question"]
+        it.turns.append(TurnData(role="assistant", content=content_str, seconds_spent=0, reference_data={"reference_answer": q_data.get("reference_answer", "")}))
+        await save(it)
+        return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], question=q_data["question"])
+        
     elif it.stage == 2 and answers_on_stage >= STAGE0_QUESTIONS + 2:
         it.stage = 3
+        q_data = await _generate_pure_question(3, it)
+        content_str = q_data["question"]
+        if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
+        it.turns.append(TurnData(role="assistant", content=content_str, seconds_spent=0, reference_data={"reference_answer": q_data.get("reference_answer", "")}))
+        await save(it)
+        return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], question=q_data["question"], code_snippet=q_data.get("code"))
+        
     elif it.stage == 3 and answers_on_stage >= STAGE0_QUESTIONS + 3:
         it.stage = 4
+        q_data = await _generate_pure_question(4, it)
+        content_str = q_data["question"]
+        it.turns.append(TurnData(role="assistant", content=content_str, seconds_spent=0, reference_data={"reference_answer": q_data.get("reference_answer", "")}))
+        await save(it)
+        return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], question=q_data["question"])
+        
     elif it.stage == 4 and answers_on_stage >= STAGE0_QUESTIONS + 4:
         it.finished = True
         await save(it)
         return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], finished=True)
-
+        
+    # Внутренний шаг текущей стадии (например, переход от 1-го ко 2-му вопросу на стадии 0)
     q_data = await _generate_pure_question(it.stage, it)
     content_str = q_data["question"]
     if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
