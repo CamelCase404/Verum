@@ -1,0 +1,119 @@
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..auth import UserDB, get_current_user, get_db, utcnow_naive
+from ..interview_store import create, get, save, TurnData
+from ..schemas import AnswerRequest, AnswerResponse, StartInterviewRequest, StartInterviewResponse
+from .interview_agents import _generate_pure_question, _evaluate_answer
+
+router_flow = APIRouter()
+
+STAGE_NAMES = {0: "Общие знания", 1: "Code Review", 2: "Нагрузка", 3: "Code Review (Повторный)", 4: "Нагрузка (Повторный)"}
+STAGE0_QUESTIONS = 8
+
+def _normalize_lang(lang: str) -> str:
+    lang = lang.strip().lower()
+    mapping = {
+        "javascript": "js", "js": "js", "typescript": "ts", "ts": "ts",
+        "html5": "html", "html": "html", "css3": "css", "css": "css",
+        "reactjs": "react", "react": "react", "vuejs": "vue", "vue": "vue",
+        "c#": "csharp", "cs": "csharp", "csharp": "csharp",
+        "node.js": "node", "nodejs": "node", "node": "node",
+        "next.js": "next", "nextjs": "next", "next": "next",
+        "fastapi": "fastapi", "django": "django", "go": "go", "golang": "go",
+        "python": "python", "java": "java", "sql": "sql"
+    }
+    return mapping.get(lang, lang)
+
+@router_flow.post("/start", response_model=StartInterviewResponse)
+async def start(req: StartInterviewRequest, user: UserDB = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> StartInterviewResponse:
+    if user.role != "developer": raise HTTPException(403, "Собеседование доступно только для разработчиков")
+    is_job_test = bool(req.job_id)
+
+    if is_job_test:
+        comp_res = await db.execute(select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None)))
+        target_job = None
+        for comp in comp_res.scalars().all():
+            for job in comp.job_postings:
+                if str(job.get("id")) == str(req.job_id): target_job = job; break
+            if target_job: break
+                
+        if target_job:
+            job_stack_str = target_job.get("stack", "").lower()
+            expected_stack = {"mobile (ios)": "mobile-ios", "mobile (android)": "mobile-android", "frontend": "frontend", "backend": "backend"}.get(job_stack_str, "backend")
+            if req.stack_id != expected_stack: raise HTTPException(400, f"Выбранный стек не соответствует вакансии.")
+            
+            job_langs_norm = [_normalize_lang(l) for l in str(target_job.get("languages", "")).split(",") if l.strip()]
+            for l in req.language_ids:
+                if _normalize_lang(l) not in job_langs_norm: raise HTTPException(400, f"Язык {l} не подходит.")
+
+    if not is_job_test and user.test_status == "pending": raise HTTPException(409, "У вас уже есть собеседование на модерации.")
+    
+    now = utcnow_naive()
+    if not is_job_test and user.blocked_until and user.blocked_until.replace(tzinfo=None) > now:
+        raise HTTPException(403, "Доступ временно заблокирован.")
+            
+    user.interview_video_url = None
+    user.pending_skills_data = None
+    await db.commit()
+
+    it = await create(req.level, req.stack_id, ", ".join(req.language_ids), user_id=user.id, job_id=req.job_id, library_id=req.library_id)
+    q_data = await _generate_pure_question(0, it)
+
+    content_str = q_data["question"]
+    if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
+
+    it.turns.append(TurnData(role="assistant", content=content_str, seconds_spent=0, reference_data={"reference_answer": q_data.get("reference_answer", "")}))
+    await save(it)
+    return StartInterviewResponse(interview_id=it.id, stage=0, stage_name=STAGE_NAMES[0], question=q_data["question"], code_snippet=q_data.get("code"))
+
+@router_flow.post("/answer", response_model=AnswerResponse)
+async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -> AnswerResponse:
+    it = await get(req.interview_id)
+    if not it: raise HTTPException(404, "interview not found")
+    if it.user_id is not None and it.user_id != user.id: raise HTTPException(403, "Запрещено.")
+
+    if req.answer == "___TAB_SWITCH_FAIL___":
+        it.finished, it.rejected, it.reject_reason = True, True, "Выход из окна."
+        await save(it)
+        return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], finished=True, rejected=True, reject_reason=it.reject_reason)
+
+    is_skip = req.answer == "___SKIP___"
+    if is_skip: req.answer = "Кандидат пропустил вопрос."
+
+    past_questions = [t.content for t in it.turns if t.role == "assistant"]
+    last_question = past_questions[-1] if past_questions else ""
+    
+    score = await _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
+    it.turns.append(TurnData(role="user", content=req.answer, seconds_spent=req.seconds_spent, score=score))
+    
+    if not is_skip and score <= 5:
+        it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме."
+        await save(it)
+        return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], finished=True, rejected=True, reject_reason=it.reject_reason)
+        
+    answers_on_stage = sum(1 for t in it.turns if t.role == "user")
+    
+    # Смена стадий конечного автомата
+    if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
+        it.stage = 1
+    elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:
+        it.stage = 2
+    elif it.stage == 2 and answers_on_stage >= STAGE0_QUESTIONS + 2:
+        it.stage = 3
+    elif it.stage == 3 and answers_on_stage >= STAGE0_QUESTIONS + 3:
+        it.stage = 4
+    elif it.stage == 4 and answers_on_stage >= STAGE0_QUESTIONS + 4:
+        it.finished = True
+        await save(it)
+        return AnswerResponse(stage=4, stage_name=STAGE_NAMES[4], finished=True)
+
+    q_data = await _generate_pure_question(it.stage, it)
+    content_str = q_data["question"]
+    if q_data.get("code"): content_str += "\n\nКод:\n" + q_data["code"]
+    
+    it.turns.append(TurnData(role="assistant", content=content_str, seconds_spent=0, reference_data={"reference_answer": q_data.get("reference_answer", "")}))
+    await save(it)
+    return AnswerResponse(stage=it.stage, stage_name=STAGE_NAMES[it.stage], question=q_data["question"], code_snippet=q_data.get("code"))

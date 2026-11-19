@@ -35,9 +35,7 @@ class DBInterview(Base):
     reject_reason = Column(String, nullable=True)
     timecode_markers = Column(JSON, nullable=True)
     job_id = Column(String(50), nullable=True)
-    library_id = Column(
-        String(100), nullable=True
-    )  # массив [{time: "00:45", reason: "tab_switch"}]
+    library_id = Column(String(100), nullable=True)
     turns = relationship(
         "DBTurn",
         back_populates="interview",
@@ -54,6 +52,7 @@ class DBTurn(Base):
     content = Column(Text)
     seconds_spent = Column(Integer, default=0)
     score = Column(Integer, nullable=True)
+    reference_data = Column(JSON, nullable=True)  # Изолированный контейнер метаданных для ИИ
     interview = relationship("DBInterview", back_populates="turns")
 
 
@@ -63,6 +62,7 @@ class TurnData:
     content: str
     seconds_spent: int = 0
     score: Optional[int] = None
+    reference_data: Optional[dict] = None
 
 
 @dataclass
@@ -117,7 +117,6 @@ async def get(interview_id: str) -> Optional[Interview]:
         if not db_it:
             return None
 
-        # Загружаем turns
         turns_result = await db.execute(
             select(DBTurn)
             .where(DBTurn.interview_id == interview_id)
@@ -131,6 +130,7 @@ async def get(interview_id: str) -> Optional[Interview]:
                 content=t.content,
                 seconds_spent=t.seconds_spent,
                 score=getattr(t, "score", None),
+                reference_data=getattr(t, "reference_data", None),
             )
             for t in turns_db
         ]
@@ -175,6 +175,7 @@ async def save(interview: Interview):
                         content=t.content,
                         seconds_spent=t.seconds_spent,
                         score=getattr(t, "score", None),
+                        reference_data=getattr(t, "reference_data", None),
                     )
                 )
             await db.commit()
