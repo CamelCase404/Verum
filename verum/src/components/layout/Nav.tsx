@@ -58,7 +58,13 @@ export function Nav() {
             if (setTheme) setTheme(newTheme);
         };
 
-        if (!document.startViewTransition || !e) {
+        // Firefox заявляет поддержку startViewTransition, но не умеет в псевдоэлементы анимации.
+        // Проверяем, поддерживает ли браузер новые селекторы переходов. Если нет — меняем тему мгновенно.
+        const isViewTransitionSupported = 
+            document.startViewTransition && 
+            CSS.supports("selector(::view-transition-new(root))");
+
+        if (!isViewTransitionSupported || !e) {
             applyTheme();
             isAnimatingRef.current = false;
             return;
