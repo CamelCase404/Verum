@@ -98,3 +98,11 @@
     animation: none;
     mix-blend-mode: normal;
 }
+
+/* Убеждаемся, что старый слой лежит снизу, а новый сверху */
+::view-transition-old(root) {
+    z-index: 1;
+}
+::view-transition-new(root) {
+    z-index: 9999;
+}
