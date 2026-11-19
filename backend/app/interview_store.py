@@ -52,7 +52,7 @@ class DBTurn(Base):
     content = Column(Text)
     seconds_spent = Column(Integer, default=0)
     score = Column(Integer, nullable=True)
-    reference_data = Column(JSON, nullable=True)  # Изолированный контейнер метаданных для ИИ
+    reference_data = Column(JSON, nullable=True)
     interview = relationship("DBInterview", back_populates="turns")
 
 
@@ -151,7 +151,7 @@ async def get(interview_id: str) -> Optional[Interview]:
 
 
 async def save(interview: Interview):
-    from sqlalchemy import delete, select
+    from sqlalchemy import select
 
     async with SessionLocal() as db:
         result = await db.execute(
@@ -166,16 +166,23 @@ async def save(interview: Interview):
             db_it.job_id = interview.job_id
             db_it.library_id = interview.library_id
 
-            await db.execute(delete(DBTurn).where(DBTurn.interview_id == interview.id))
-            for t in interview.turns:
-                db.add(
-                    DBTurn(
-                        interview_id=interview.id,
-                        role=t.role,
-                        content=t.content,
-                        seconds_spent=t.seconds_spent,
-                        score=getattr(t, "score", None),
-                        reference_data=getattr(t, "reference_data", None),
+            # Инкрементальное Append-Only сохранение, защищающее историю
+            existing_result = await db.execute(
+                select(DBTurn).where(DBTurn.interview_id == interview.id).order_by(DBTurn.id)
+            )
+            existing_turns = existing_result.scalars().all()
+            existing_count = len(existing_turns)
+
+            for i, t in enumerate(interview.turns):
+                if i >= existing_count:
+                    db.add(
+                        DBTurn(
+                            interview_id=interview.id,
+                            role=t.role,
+                            content=t.content,
+                            seconds_spent=t.seconds_spent,
+                            score=getattr(t, "score", None),
+                            reference_data=getattr(t, "reference_data", None),
+                        )
                     )
-                )
             await db.commit()

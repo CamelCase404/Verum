@@ -96,7 +96,7 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
     
-    # Смена стадий конечного автомата
+    # Корректный конечный автомат переключения 5 стадий сессии
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
     elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + 1:

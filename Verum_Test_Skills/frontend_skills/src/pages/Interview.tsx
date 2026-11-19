@@ -66,7 +66,6 @@ export default function Interview({
     const [cameraError, setCameraError] = useState<string | null>(null);
     const [isCameraReady, setIsCameraReady] = useState(false);
     const chunksRef = useRef<Blob[]>([]);
-
     // ---------- Камера ----------
     useEffect(() => {
         let active = true;
@@ -148,131 +147,6 @@ export default function Interview({
         }, 1000);
         return () => window.clearInterval(timer);
     }, [msgs.length, finished, failed, isCameraReady, showSkipModal]);
-
-    // ---------- Провал интервью ----------
-    const failInterview = async (_reason: string) => {
-        if (isFailingRef.current || finished || failed) return;
-        isFailingRef.current = true;
-        isRejectedRef.current = true;
-        setFailed(true);
-        setBusy(true);
-        try {
-            await api.answer(
-                payload.interviewId,
-                "___TAB_SWITCH_FAIL___",
-                answerSeconds,
-            );
-            if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                mediaRecorder.stop();
-            }
-            setTimeout(
-                () => onFinished(payload.interviewId, payload.level),
-                2000,
-            );
-        } catch (e) {
-            setError(String(e));
-        }
-    };
-
-    // ---------- Защита: Надежная проверка фокуса ----------
-    useEffect(() => {
-        if (finished || failed || !isCameraReady) return;
-
-        let blurStartedAt: number | null = null;
-
-        const checkInterval = window.setInterval(() => {
-            if (showSkipModal) {
-                blurStartedAt = null;
-                return;
-            }
-
-            if (!document.hasFocus()) {
-                if (blurStartedAt === null) {
-                    blurStartedAt = Date.now();
-                } else if (Date.now() - blurStartedAt > 500) {
-                    blurStartedAt = null;
-                    window.clearInterval(checkInterval);
-                    failInterview(
-                        "Окно браузера потеряло фокус. Не переключайтесь на другие приложения.",
-                    );
-                }
-            } else {
-                blurStartedAt = null;
-            }
-        }, 250);
-
-        return () => window.clearInterval(checkInterval);
-    }, [finished, failed, isCameraReady, showSkipModal]);
-
-    // ---------- Блокировка выхода и клавиш ----------
-    useEffect(() => {
-        if (finished || failed || !isCameraReady) return;
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            e.preventDefault();
-            e.returnValue =
-                "Интервью будет прервано, если вы закроете страницу.";
-            return e.returnValue;
-        };
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        return () =>
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, [finished, failed, isCameraReady]);
-
-    useEffect(() => {
-        const blockKeys = (e: KeyboardEvent) => {
-            if (e.key === "F12") {
-                e.preventDefault();
-                return false;
-            }
-            if (
-                e.ctrlKey &&
-                e.shiftKey &&
-                ["I", "J", "C"].includes(e.key.toUpperCase())
-            ) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.key.toUpperCase() === "U") {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.key.toUpperCase() === "S") {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.key.toUpperCase() === "P") {
-                e.preventDefault();
-                return false;
-            }
-            if (e.shiftKey && e.key === "Insert") {
-                e.preventDefault();
-                return false;
-            }
-        };
-        document.addEventListener("keydown", blockKeys);
-        return () => document.removeEventListener("keydown", blockKeys);
-    }, []);
-
-    useEffect(() => {
-        const block = (e: Event) => e.preventDefault();
-        document.addEventListener("copy", block);
-        document.addEventListener("contextmenu", block);
-        document.addEventListener("cut", block);
-        return () => {
-            document.removeEventListener("copy", block);
-            document.removeEventListener("contextmenu", block);
-            document.removeEventListener("cut", block);
-        };
-    }, []);
-
-    const scrollDown = () =>
-        queueMicrotask(() =>
-            scroller.current?.scrollTo({
-                top: scroller.current.scrollHeight,
-                behavior: "smooth",
-            }),
-        );
-
     const send = async (isSkip = false) => {
         const text = isSkip ? "___SKIP___" : answer.trim();
         if ((!text && !isSkip) || busy || finished || failed) return;
@@ -335,7 +209,7 @@ export default function Interview({
                     },
                 ]);
 
-                // Ждем полной остановки и загрузки видео перед переходом
+                // Остановка записи и триггер фоновой асинхронной отгрузки WebM-файла
                 if (mediaRecorder && mediaRecorder.state !== "inactive") {
                     mediaRecorder.stop();
                     mediaRecorder.addEventListener("stop", () => {
@@ -350,7 +224,7 @@ export default function Interview({
                             formData.append("file", blob, "interview.webm");
                             const apiBase =
                                 import.meta.env.VITE_API_URL ||
-                                "https://api.verumskills.ru";
+                                "https://verumskills.ru";
                             const uploadUrl = `${apiBase}/api/media/upload?interview_id=${encodeURIComponent(payload.interviewId)}`;
                             const __token = localStorage.getItem("verum_token");
 
@@ -393,7 +267,7 @@ export default function Interview({
                     /```/.test(res.question)
                 ) {
                     const m = res.question.match(
-                        /```[a-zA-Z0-9+#.-]*\n([\s\S]*?)```/,
+                        /```[a-zA-Z0-9+#.-]*\n([\s\(\S\)]*?)```/,
                     );
 
                     if (m && m[1].trim()) {
@@ -437,7 +311,6 @@ export default function Interview({
             setBusy(false);
         }
     };
-
     const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -482,7 +355,6 @@ export default function Interview({
                 </p>
             </div>
         );
-
     return (
         <div className="max-w-6xl w-full overflow-hidden mx-auto px-4 py-10 select-none relative">
             {showSkipModal && (
@@ -540,7 +412,6 @@ export default function Interview({
                         </div>
                     </div>
                 </div>
-
                 <div className="lg:col-span-2">
                     <div className="bg-card rounded-[22px] shadow-card p-3 md:p-6 flex flex-col h-[65vh] md:h-[80vh]">
                         <div className="flex items-center justify-between gap-3 shrink-0">

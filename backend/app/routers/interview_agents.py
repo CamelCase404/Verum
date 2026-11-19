@@ -5,7 +5,16 @@ from ...gigachat_client import ask_chat
 from ...prompts import STAGE_DESCRIPTIONS, SYSTEM_GENERATOR, SYSTEM_EVALUATOR
 
 def _get_history(it) -> list[dict]:
-    return [{"role": t.role, "content": t.content} for t in it.turns]
+    # Для генератора важно видеть не только текст, но и оценку за этот текст
+    history = []
+    for t in it.turns:
+        if t.role == "user":
+            # Подмешиваем балл за ответ прямо в историю, чтобы генератор видел успехи
+            score_info = f" [Оценка ответа системой: {t.score if t.score is not None else 0}/100 баллов]"
+            history.append({"role": "user", "content": t.content + score_info})
+        else:
+            history.append({"role": "assistant", "content": t.content})
+    return history
 
 def _parse_json(content: str) -> dict:
     content = content.strip()
@@ -29,16 +38,21 @@ async def _generate_pure_question(stage: int, it) -> dict:
     )
 
     history = _get_history(it)
-    prompt = f"Сгенерируй новое уникальное задание для стадии {stage}. Ответ верни строго в формате JSON."
+    prompt = (
+        f"Сгенерируй новое уникальное задание для стадии {stage}. "
+        f"ВНИМАТЕЛЬНО проанализируй оценки за прошлые ответы кандидата в истории диалога. "
+        f"Если оценки высокие (>70) — повышай сложность текущего вопроса. Если низкие (<40) — плавно снижай. "
+        f"Ответ верни строго в формате JSON."
+    )
     
-    raw = (await ask_chat(sys_prompt, history, prompt, temperature=0.4)).strip()
+    raw = (await ask_chat(sys_prompt, history, prompt, temperature=0.6)).strip()
     parsed = _parse_json(raw)
     
     if not parsed or "question" not in parsed:
         return {
-            "question": f"Опишите особенности управления памятью, а также жизненный цикл объектов/компонентов в контексте {it.language_id}.", 
+            "question": f"Опишите, как спроектировать отказоустойчивую архитектуру компонента на {it.language_id} с использованием паттернов {it.stack_id}.", 
             "code": "", 
-            "reference_answer": "Ожидается описание работы с кучей/стеком, сборщиком мусора или ARC."
+            "reference_answer": "Ожидается глубокое понимание паттернов декомпозиции и обработки ошибок."
         }
     return parsed
 
@@ -62,8 +76,9 @@ async def _evaluate_answer(stage: int, it, question: str, answer: str, is_skip: 
         f"<candidate_answer>\n{answer}\n</candidate_answer>"
     )
     
-    history = _get_history(it)
-    raw = (await ask_chat(sys_prompt, history, prompt, temperature=0.0)).strip()
+    # Оценщик использует чистую историю без подмешивания баллов, чтобы не путаться
+    clean_history = [{"role": t.role, "content": t.content} for t in it.turns]
+    raw = (await ask_chat(sys_prompt, clean_history, prompt, temperature=0.0)).strip()
     
     parsed = _parse_json(raw)
     if parsed and "total_score" in parsed:
