@@ -91,7 +91,7 @@ export default function Landing({ activeSession, onStarted, onAbandon }: Props) 
                     if (data.languages) {
                         const LANG_MAP: Record<string, string> = {
                             "react": "react", "vue": "vue", "svelte": "svelte", "typescript": "ts", "javascript": "js", "html": "html", "css": "css",
-                            "python": "python", "fastapi": "fastapi", "django": "django", "go": "go", "node.js": "node", "node": "node", "java": "java", "c#": "csharp", "next.js": "next", "next": "next",
+                            "python": "python", "fastapi": "fastapi", "django": "django", "go": "go", "node.js": "node", "node": "node", "java": "java", "c#": "csharp", "csharp": "csharp", "next.js": "next", "next": "next",
                             "swift": "swift", "objective-c": "objc", "objc": "objc", "swiftui": "swiftui", "uikit": "uikit", "combine": "combine",
                             "kotlin": "kotlin", "jetpack compose": "compose", "compose": "compose", "coroutines": "coroutines",
                             "unity (c#)": "unity", "unity": "unity", "unreal (c++)": "unreal", "unreal": "unreal", "godot (gdscript)": "godot", "godot": "godot",

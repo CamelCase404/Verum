@@ -43,6 +43,7 @@ export interface StageScore {
 }
 export type Recommendation = "hire" | "no_hire" | "insufficient_evidence";
 export interface ReportResponse {
+    library_id?: string | null;
     interview_id: string;
     level: LevelApi;
     stack_id: string;
