@@ -80,6 +80,7 @@ export function Nav() {
             ) * 1.05;
 
         try {
+            document.documentElement.classList.add("theme-transitioning");
             const transition = document.startViewTransition(() => {
                 applyTheme();
             });
@@ -109,6 +110,7 @@ export function Nav() {
                 });
 
             transition.finished.finally(() => {
+                document.documentElement.classList.remove("theme-transitioning");
                 isAnimatingRef.current = false;
             });
         } catch {
