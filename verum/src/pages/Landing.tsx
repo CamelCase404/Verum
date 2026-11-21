@@ -97,10 +97,10 @@ const STEPS = [
 ];
 
 const COMPETENCIES = [
-    { icon: Layers, title: "Архитектурное мышление", desc: "Умение проектировать системы, выбирать паттерны и обосновывать trade-offs." },
-    { icon: Code, title: "Понимание кода", desc: "Чтение и рефакторинг чужого кода, поиск багов и узких мест." },
-    { icon: Sparkles, title: "Работа с ИИ", desc: "Умение формулировать промпты и использовать ИИ-ассистентов в работе." },
-    { icon: Target, title: "Adaptability", desc: "Скорость адаптации к новым задачам и продакшен-инцидентам." },
+    { icon: Sparkles, title: "Работа с ИИ (Prompting)", desc: "Умение формулировать промпты, задавать контекст и управлять ИИ-генерацией." },
+    { icon: Layers, title: "Архитектура", desc: "Проектирование систем, выбор паттернов и обоснование trade-offs." },
+    { icon: Code, title: "Понимание кода", desc: "Аудит AI-кода, поиск галлюцинаций и скрытых багов." },
+    { icon: Target, title: "Adaptability", desc: "Скорость реакции на инциденты и работа под давлением." },
     { icon: MessageSquare, title: "Soft skills", desc: "Ясность изложения, умение объяснять сложное простыми словами." },
 ];
 
@@ -138,11 +138,10 @@ const COMPARISON = [
 ];
 
 const TEST_STAGES = [
-    { num: "01", title: "Общие знания", desc: "8 вопросов по стеку и грейду", time: "15 мин", icon: Brain },
-    { num: "02", title: "Code Review", desc: "Поиск багов в реальном коде", time: "10 мин", icon: Code },
-    { num: "03", title: "Продакшен-инцидент", desc: "Как починить сломанный код", time: "10 мин", icon: AlertCircle },
-    { num: "04", title: "Code Review 2", desc: "Другие баги и уязвимости", time: "10 мин", icon: Code },
-    { num: "05", title: "Вторая проблема", desc: "Новая ситуация из продакшена", time: "10 мин", icon: AlertCircle },
+    { num: "01", title: "AI-Driven Prompting", desc: "Написание ТЗ для ИИ-копилота под Highload", time: "15 мин", icon: Brain },
+    { num: "02", title: "ИИ-Западня", desc: "Поиск скрытого бага в коде от нейросети", time: "10 мин", icon: Code },
+    { num: "03", title: "Стресс-тест", desc: "Диагностика аварии по логам и отказ от плохого совета ИИ", time: "10 мин", icon: AlertCircle },
+    { num: "04", title: "Reverse Engineering", desc: "Промпт для рефакторинга легаси-кода", time: "10 мин", icon: Code },
 ];
 
 const TEST_RESULTS = [

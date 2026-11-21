@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ScoreRow } from "@/components/ui/ScoreRow";
+import { SkillRadar } from "@/components/SkillRadar";
 import {
     ShieldCheck,
     Github,
@@ -761,6 +762,12 @@ export function DeveloperDashboard({
 
                                 {skills.summary && (
                                     <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4">
+                                        {skills.ai_resume && (
+                                            <div className="bg-accent/5 border border-accent/20 p-3 rounded-lg mb-4">
+                                                <h4 className="text-[13px] font-bold uppercase tracking-wider text-accent mb-1 flex items-center gap-2"><Sparkles size={16}/> ИИ-Резюме для профиля</h4>
+                                                <p className="text-[13px] leading-relaxed text-ink-2">{skills.ai_resume}</p>
+                                            </div>
+                                        )}
                                         <div>
                                             <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2">
                                                 <Brain size={16} /> Вердикт ИИ

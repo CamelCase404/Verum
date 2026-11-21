@@ -9,36 +9,11 @@ import {
     Terminal,
     Layers,
     ExternalLink,
+    Sparkles,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import type { ReportResponse } from "../types";
-
-function StatBar({
-    label,
-    score,
-    icon: Icon,
-}: {
-    label: string;
-    score?: number | null;
-    icon: any;
-}) {
-    if (score === undefined || score === null) return null;
-    return (
-        <div className="mb-5">
-            <div className="flex justify-between items-center text-[14px] mb-1.5">
-                <span className="font-medium text-ink flex items-center gap-2">
-                    <Icon size={16} className="text-ink-3" /> {label}
-                </span>
-                <span className="font-bold text-ink">{score} / 100</span>
-            </div>
-            <div className="h-2.5 w-full bg-page rounded-full overflow-hidden">
-                <div
-                    className="h-full bg-accent transition-all duration-1000 ease-out"
-                    style={{ width: `${score}%` }}
-                />
-            </div>
-        </div>
-    );
-}
+import { SkillRadar } from "../components/SkillRadar";
 
 export default function Report({
     report,
@@ -47,15 +22,13 @@ export default function Report({
     report: ReportResponse;
     onRestart?: () => void;
 }) {
-    void onRestart;
-    void onRestart;
     const goToDashboard = () => {
-        window.location.href = "https://verumskills.ru/dashboard";
+        window.location.href = "http://localhost:5173/dashboard";
     };
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-10 animate-in fade-in duration-500">
-            <div className="bg-card border border-divider rounded-[22px] shadow-card p-8 space-y-8">
+            <div className="bg-card border border-divider rounded-[22px] shadow-card p-6 sm:p-8 space-y-8">
                 <header className="text-center border-b border-divider pb-6">
                     <h1 className="text-[28px] font-bold text-ink">Результат интервью</h1>
                     <p className="text-ink-3 text-[14px] mt-1">
@@ -64,28 +37,28 @@ export default function Report({
                     </p>
                 </header>
 
+                {/* ГРЕЙД */}
                 {!report.rejected && report.final_grade && (
                     <div className="flex flex-col items-center justify-center py-8 bg-page rounded-[22px] border border-divider">
                         <span className="text-[14px] text-ink-3 uppercase tracking-widest mb-2">
-                            Ваш итоговый уровень
+                            Итоговый уровень
                         </span>
                         <span className="text-[56px] font-black leading-none text-accent">
                             {report.final_grade}
                         </span>
-                        {report.total_score_100 !== undefined &&
-                            report.total_score_100 !== null && (
-                                <div className="mt-4 flex flex-col items-center w-full max-w-xs">
-                                    <span className="text-[16px] font-bold text-ink mb-2">
-                                        Общий балл: {report.total_score_100} / 100
-                                    </span>
-                                    <div className="w-full h-2.5 bg-surface-2 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-accent"
-                                            style={{ width: `${report.total_score_100}%` }}
-                                        />
-                                    </div>
+                        {report.total_score_100 != null && (
+                            <div className="mt-4 flex flex-col items-center w-full max-w-xs">
+                                <span className="text-[16px] font-bold text-ink mb-2">
+                                    Общий балл: {report.total_score_100} / 100
+                                </span>
+                                <div className="w-full h-2.5 bg-surface-2 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-accent"
+                                        style={{ width: `${report.total_score_100}%` }}
+                                    />
                                 </div>
-                            )}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -101,45 +74,65 @@ export default function Report({
 
                 {!report.rejected && (
                     <>
+                        {/* ПАУТИНА НАВЫКОВ + КОММЕНТАРИИ */}
                         <section className="bg-card p-6 rounded-[22px] border border-divider shadow-sm">
                             <h2 className="text-[18px] font-bold text-ink mb-6 flex items-center gap-2">
-                                <BarChart3 size={20} className="text-accent" /> Статистика навыков
+                                <BarChart3 size={20} className="text-accent" /> Паутина навыков
                             </h2>
-                            <div className="space-y-2">
-                                <StatBar label="Понимание архитектуры" score={report.competency_architecture} icon={Layers} />
-                                <StatBar label="Понимание кода (Code Review)" score={report.competency_code_understanding} icon={Code2} />
-                                <StatBar label="Навык промптинга (Работа с ИИ)" score={report.competency_prompting} icon={MessageSquare} />
-                                <StatBar label="Адаптивность к нагрузке" score={report.competency_adaptability} icon={Terminal} />
-                                <StatBar label="Soft Skills (Коммуникация)" score={report.competency_soft_skills} icon={Brain} />
+                            <div className="flex flex-col md:flex-row items-center gap-8">
+                                <div className="flex-1 flex justify-center">
+                                    <SkillRadar skills={report.skill_comments || []} />
+                                </div>
+                                <div className="flex-1 w-full space-y-4">
+                                    {(report.skill_comments || []).map((sc, idx) => {
+                                        const color = sc.verdict === "strong" ? "text-accent" : sc.verdict === "weak" ? "text-red-500" : "text-amber-500";
+                                        const Icon = sc.verdict === "strong" ? CheckCircle2 : sc.verdict === "weak" ? XCircle : AlertTriangle;
+                                        return (
+                                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + idx * 0.1 }} key={sc.skill} className="bg-page p-3 rounded-xl border border-divider">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className={`text-[13px] font-bold ${color} flex items-center gap-1.5`}>
+                                                        <Icon size={14} /> {sc.skill.replace("_", " ").toUpperCase()}
+                                                    </span>
+                                                    <span className="text-[13px] font-bold text-ink">{sc.score}/100</span>
+                                                </div>
+                                                <p className="text-[12px] text-ink-2 leading-relaxed">{sc.comment}</p>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </section>
 
-                        <section>
-                            <h2 className="text-[16px] font-bold mb-3 text-ink">Резюме интервью</h2>
-                            <p className="text-[15px] leading-relaxed whitespace-pre-line text-ink/80 bg-page p-5 rounded-[22px] border border-divider">
-                                {report.summary}
-                            </p>
-                        </section>
+                        {/* ИИ-РЕЗЮМЕ */}
+                        {report.ai_resume && (
+                            <section className="bg-accent-soft/30 p-6 rounded-[22px] border border-accent/20 relative overflow-hidden">
+                                <Sparkles className="absolute -top-4 -right-4 text-accent/10 w-24 h-24" />
+                                <h2 className="text-[16px] font-bold text-accent mb-3 flex items-center gap-2 relative z-10">
+                                    <Brain size={18} /> ИИ-Резюме
+                                </h2>
+                                <p className="text-[14px] leading-relaxed text-ink/90 relative z-10 whitespace-pre-line">
+                                    {report.ai_resume}
+                                </p>
+                            </section>
+                        )}
 
                         <div className="grid md:grid-cols-2 gap-6 pt-2">
                             <div className="bg-accent-soft/50 rounded-[22px] p-5 border border-accent/10">
                                 <h2 className="text-[15px] font-bold text-accent mb-3 flex items-center gap-2">
-                                    <CheckCircle2 size={18} /> Плюсы
+                                    <CheckCircle2 size={18} /> Что знаете хорошо
                                 </h2>
                                 <ul className="list-disc pl-5 text-[14px] space-y-1.5 text-ink/80">
-                                    {report.strengths.length > 0
-                                        ? report.strengths.map((s, i) => <li key={i}>{s}</li>)
-                                        : <li>Не выявлены</li>}
+                                    {(report.top_strengths?.length ? report.top_strengths : report.strengths).map((s, i) => <li key={i}>{s}</li>)}
+                                    {!report.top_strengths?.length && !report.strengths.length && <li>Не выявлены</li>}
                                 </ul>
                             </div>
                             <div className="bg-warn-soft/20 rounded-[22px] p-5 border border-warn/20">
                                 <h2 className="text-[15px] font-bold text-warn mb-3 flex items-center gap-2">
-                                    <AlertTriangle size={18} /> Минусы
+                                    <AlertTriangle size={18} /> Что подтянуть
                                 </h2>
                                 <ul className="list-disc pl-5 text-[14px] space-y-1.5 text-ink/80">
-                                    {report.gaps.length > 0
-                                        ? report.gaps.map((s, i) => <li key={i}>{s}</li>)
-                                        : <li>Не выявлены</li>}
+                                    {(report.top_gaps?.length ? report.top_gaps : report.gaps).map((s, i) => <li key={i}>{s}</li>)}
+                                    {!report.top_gaps?.length && !report.gaps.length && <li>Не выявлены</li>}
                                 </ul>
                             </div>
                         </div>
@@ -147,10 +140,7 @@ export default function Report({
                 )}
 
                 <div className="flex justify-center pt-6 border-t border-divider">
-                    <button
-                        onClick={goToDashboard}
-                        className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-10 py-3.5 font-medium hover:brightness-110 transition-all duration-200 min-w-[240px]"
-                    >
+                    <button onClick={goToDashboard} className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-10 py-3.5 font-medium hover:brightness-110 transition-all duration-200 min-w-[240px]">
                         <ExternalLink size={18} /> Вернуться в профиль
                     </button>
                 </div>

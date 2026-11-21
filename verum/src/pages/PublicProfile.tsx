@@ -6,6 +6,7 @@ import { ViewJobModal } from "@/components/modals/ViewJobModal";
 import { Modal } from "@/components/ui/Modal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
 import { useAppStore } from "@/store/useAppStore";
+import { SkillRadar } from "@/components/SkillRadar";
 
 const LANG_COLORS = ["bg-[#3178c6]", "bg-[#e34c26]", "bg-[#178600]", "bg-[#3572A5]", "bg-[#f1e05a]", "bg-[#89e051]"];
 
@@ -232,16 +233,31 @@ export function PublicProfile() {
 
               {isTested ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                    <SkillBar label="Архитектурное мышление" score={skills.competency_architecture || 0} />
-                    <SkillBar label="Ревью кода ИИ" score={skills.competency_code_understanding || 0} />
-                    <SkillBar label="Работа с ИИ" score={skills.competency_prompting || 0} />
-                    <SkillBar label="Адаптация" score={skills.competency_adaptability || 0} />
-                    <SkillBar label="Soft Skills" score={skills.competency_soft_skills || 0} />
+                  <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-full md:w-1/2 flex justify-center">
+                        <SkillRadar skills={skills.skill_comments || []} />
+                    </div>
+                    <div className="w-full md:w-1/2 space-y-3">
+                        {(skills.skill_comments || []).map((sc: any, idx: number) => (
+                            <div key={idx} className="bg-surface-2 border border-line p-2.5 rounded-lg">
+                                <div className="flex justify-between text-[12px] font-bold mb-1">
+                                    <span className="text-ink capitalize">{sc.skill.replace('_', ' ')}</span>
+                                    <span className={sc.verdict === 'strong' ? 'text-accent' : sc.verdict === 'weak' ? 'text-red-500' : 'text-amber-500'}>{sc.score}/100</span>
+                                </div>
+                                <p className="text-[11px] text-ink-3 leading-tight">{sc.comment}</p>
+                            </div>
+                        ))}
+                    </div>
                   </div>
 
                   {skills.summary && (
                     <div className="bg-surface-2 border border-line p-4 rounded-xl space-y-4 mt-6">
+                      {skills.ai_resume && (
+                        <div className="bg-accent/5 border border-accent/20 p-3 rounded-lg">
+                          <h4 className="text-[13px] font-bold uppercase tracking-wider text-accent mb-1 flex items-center gap-2"><Sparkles size={16}/> ИИ-Резюме</h4>
+                          <p className="text-[13px] leading-relaxed text-ink-2">{skills.ai_resume}</p>
+                        </div>
+                      )}
                       <div>
                         <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-3 mb-2 flex items-center gap-2"><Brain size={16}/> Вердикт ИИ</h4>
                         <p className="text-[14px] leading-relaxed text-ink-2">{skills.summary}</p>

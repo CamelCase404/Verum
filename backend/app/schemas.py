@@ -56,12 +56,25 @@ class AnswerResponse(BaseModel):
     rejected: bool = False
     reject_reason: Optional[str] = None
 
+    # ── Паутина навыков + ИИ-резюме (новая модель собеседования v2) ──
+    skill_comments: list[SkillComment] = Field(default_factory=list)
+    top_strengths: list[str] = Field(default_factory=list)
+    top_gaps: list[str] = Field(default_factory=list)
+    ai_resume: Optional[str] = None
+
 class StageScore(BaseModel):
     stage: int
     stage_name: str
     score: int = Field(ge=0, le=100)
     evidence: list[str]
     gaps: list[str]
+
+class SkillComment(BaseModel):
+    skill: str
+    score: int = Field(ge=0, le=100)
+    comment: str
+    verdict: Literal["strong", "ok", "weak"]
+
 
 class ReportResponse(BaseModel):
     interview_id: str

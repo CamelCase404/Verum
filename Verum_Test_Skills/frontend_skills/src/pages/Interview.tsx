@@ -13,6 +13,7 @@ import {
     SkipForward,
 } from "lucide-react";
 import { api, ApiError } from "../api";
+import { CodeBlock } from "../components/CodeBlock";
 import type { StartPayload, Msg } from "../App";
 import type { LevelId } from "../types";
 
@@ -23,7 +24,7 @@ interface Props {
     onAbort: () => void;
 }
 
-const TOTAL_STAGES = 5;
+const TOTAL_STAGES = 4;
 const TOTAL_QUESTIONS = 12;
 
 export default function Interview({
@@ -280,12 +281,9 @@ export default function Interview({
 
                 if (res.stage !== prevStage) {
                     let stageTitle = "";
-                    if (res.stage === 1) stageTitle = "Этап 2: Code Review";
-                    if (res.stage === 2) stageTitle = "Этап 3: Нагрузка";
-                    if (res.stage === 3)
-                        stageTitle = "Этап 4: Code Review (Повторный)";
-                    if (res.stage === 4)
-                        stageTitle = "Этап 5: Нагрузка (Повторный)";
+                    if (res.stage === 1) stageTitle = "Этап 2: ИИ-Западня";
+                    if (res.stage === 2) stageTitle = "Этап 3: Стресс-тест";
+                    if (res.stage === 3) stageTitle = "Этап 4: Рефакторинг";
 
                     if (stageTitle) {
                         const stageNotice: Msg = {
@@ -482,9 +480,7 @@ export default function Interview({
                                                     <div className="whitespace-pre-wrap mb-3">
                                                         {textPart}
                                                     </div>
-                                                    <pre className="bg-[#1e1e1e] text-[#d4d4d4] p-3 md:p-4 rounded-xl overflow-x-auto text-[10px] md:text-[12px] font-mono whitespace-pre border border-line">
-                                                        <code>{codePart}</code>
-                                                    </pre>
+                                                    <CodeBlock code={codePart} />
                                                 </>
                                             ) : (
                                                 <div className="whitespace-pre-wrap">
@@ -523,7 +519,7 @@ export default function Interview({
                                         onKeyDown={onKeyDown}
                                         onPaste={(e) => e.preventDefault()}
                                         placeholder="Ваш ответ… (Enter — отправить, Shift+Enter — перенос)"
-                                        rows={2}
+                                        rows={currentStage === 0 || currentStage === 3 ? 6 : 2}
                                         className="flex-1 bg-page text-ink rounded-[22px] border border-line px-3 py-2 text-sm md:text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none placeholder:text-muted/50"
                                     />
                                     <button
