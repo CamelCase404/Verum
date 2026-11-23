@@ -23,17 +23,21 @@ export default function Report({
     onRestart?: () => void;
 }) {
     const goToDashboard = () => {
-        window.location.href = "http://localhost:5173/dashboard";
+        window.location.href = "http://verumskills.ru";
     };
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-10 animate-in fade-in duration-500">
             <div className="bg-card border border-divider rounded-[22px] shadow-card p-6 sm:p-8 space-y-8">
                 <header className="text-center border-b border-divider pb-6">
-                    <h1 className="text-[28px] font-bold text-ink">Результат интервью</h1>
+                    <h1 className="text-[28px] font-bold text-ink">
+                        Результат интервью
+                    </h1>
                     <p className="text-ink-3 text-[14px] mt-1">
-                        Уровень: {report.level} · Стек: {report.stack_id} · Язык: {report.language_id}
-                        {report.library_id && ` · Библиотека: ${report.library_id}`}
+                        Уровень: {report.level} · Стек: {report.stack_id} ·
+                        Язык: {report.language_id}
+                        {report.library_id &&
+                            ` · Библиотека: ${report.library_id}`}
                     </p>
                 </header>
 
@@ -54,7 +58,9 @@ export default function Report({
                                 <div className="w-full h-2.5 bg-surface-2 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-accent"
-                                        style={{ width: `${report.total_score_100}%` }}
+                                        style={{
+                                            width: `${report.total_score_100}%`,
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -66,8 +72,12 @@ export default function Report({
                     <div className="rounded-[22px] border border-warn-soft bg-warn-soft/20 px-6 py-5 flex items-start gap-4">
                         <XCircle className="text-warn mt-0.5" size={24} />
                         <div>
-                            <div className="font-bold text-warn text-[16px]">Интервью прервано</div>
-                            <div className="text-[14px] text-warn/80 mt-1">{report.reject_reason}</div>
+                            <div className="font-bold text-warn text-[16px]">
+                                Интервью прервано
+                            </div>
+                            <div className="text-[14px] text-warn/80 mt-1">
+                                {report.reject_reason}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -77,28 +87,69 @@ export default function Report({
                         {/* ПАУТИНА НАВЫКОВ + КОММЕНТАРИИ */}
                         <section className="bg-card p-6 rounded-[22px] border border-divider shadow-sm">
                             <h2 className="text-[18px] font-bold text-ink mb-6 flex items-center gap-2">
-                                <BarChart3 size={20} className="text-accent" /> Паутина навыков
+                                <BarChart3 size={20} className="text-accent" />{" "}
+                                Паутина навыков
                             </h2>
                             <div className="flex flex-col md:flex-row items-center gap-8">
                                 <div className="flex-1 flex justify-center">
-                                    <SkillRadar skills={report.skill_comments || []} />
+                                    <SkillRadar
+                                        skills={report.skill_comments || []}
+                                    />
                                 </div>
                                 <div className="flex-1 w-full space-y-4">
-                                    {(report.skill_comments || []).map((sc, idx) => {
-                                        const color = sc.verdict === "strong" ? "text-accent" : sc.verdict === "weak" ? "text-red-500" : "text-amber-500";
-                                        const Icon = sc.verdict === "strong" ? CheckCircle2 : sc.verdict === "weak" ? XCircle : AlertTriangle;
-                                        return (
-                                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + idx * 0.1 }} key={sc.skill} className="bg-page p-3 rounded-xl border border-divider">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <span className={`text-[13px] font-bold ${color} flex items-center gap-1.5`}>
-                                                        <Icon size={14} /> {sc.skill.replace("_", " ").toUpperCase()}
-                                                    </span>
-                                                    <span className="text-[13px] font-bold text-ink">{sc.score}/100</span>
-                                                </div>
-                                                <p className="text-[12px] text-ink-2 leading-relaxed">{sc.comment}</p>
-                                            </motion.div>
-                                        );
-                                    })}
+                                    {(report.skill_comments || []).map(
+                                        (sc, idx) => {
+                                            const color =
+                                                sc.verdict === "strong"
+                                                    ? "text-accent"
+                                                    : sc.verdict === "weak"
+                                                      ? "text-red-500"
+                                                      : "text-amber-500";
+                                            const Icon =
+                                                sc.verdict === "strong"
+                                                    ? CheckCircle2
+                                                    : sc.verdict === "weak"
+                                                      ? XCircle
+                                                      : AlertTriangle;
+                                            return (
+                                                <motion.div
+                                                    initial={{
+                                                        opacity: 0,
+                                                        x: 20,
+                                                    }}
+                                                    animate={{
+                                                        opacity: 1,
+                                                        x: 0,
+                                                    }}
+                                                    transition={{
+                                                        delay: 0.3 + idx * 0.1,
+                                                    }}
+                                                    key={sc.skill}
+                                                    className="bg-page p-3 rounded-xl border border-divider"
+                                                >
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span
+                                                            className={`text-[13px] font-bold ${color} flex items-center gap-1.5`}
+                                                        >
+                                                            <Icon size={14} />{" "}
+                                                            {sc.skill
+                                                                .replace(
+                                                                    "_",
+                                                                    " ",
+                                                                )
+                                                                .toUpperCase()}
+                                                        </span>
+                                                        <span className="text-[13px] font-bold text-ink">
+                                                            {sc.score}/100
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[12px] text-ink-2 leading-relaxed">
+                                                        {sc.comment}
+                                                    </p>
+                                                </motion.div>
+                                            );
+                                        },
+                                    )}
                                 </div>
                             </div>
                         </section>
@@ -122,8 +173,16 @@ export default function Report({
                                     <CheckCircle2 size={18} /> Что знаете хорошо
                                 </h2>
                                 <ul className="list-disc pl-5 text-[14px] space-y-1.5 text-ink/80">
-                                    {(report.top_strengths?.length ? report.top_strengths : report.strengths).map((s, i) => <li key={i}>{s}</li>)}
-                                    {!report.top_strengths?.length && !report.strengths.length && <li>Не выявлены</li>}
+                                    {(report.top_strengths?.length
+                                        ? report.top_strengths
+                                        : report.strengths
+                                    ).map((s, i) => (
+                                        <li key={i}>{s}</li>
+                                    ))}
+                                    {!report.top_strengths?.length &&
+                                        !report.strengths.length && (
+                                            <li>Не выявлены</li>
+                                        )}
                                 </ul>
                             </div>
                             <div className="bg-warn-soft/20 rounded-[22px] p-5 border border-warn/20">
@@ -131,8 +190,16 @@ export default function Report({
                                     <AlertTriangle size={18} /> Что подтянуть
                                 </h2>
                                 <ul className="list-disc pl-5 text-[14px] space-y-1.5 text-ink/80">
-                                    {(report.top_gaps?.length ? report.top_gaps : report.gaps).map((s, i) => <li key={i}>{s}</li>)}
-                                    {!report.top_gaps?.length && !report.gaps.length && <li>Не выявлены</li>}
+                                    {(report.top_gaps?.length
+                                        ? report.top_gaps
+                                        : report.gaps
+                                    ).map((s, i) => (
+                                        <li key={i}>{s}</li>
+                                    ))}
+                                    {!report.top_gaps?.length &&
+                                        !report.gaps.length && (
+                                            <li>Не выявлены</li>
+                                        )}
                                 </ul>
                             </div>
                         </div>
@@ -140,7 +207,10 @@ export default function Report({
                 )}
 
                 <div className="flex justify-center pt-6 border-t border-divider">
-                    <button onClick={goToDashboard} className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-10 py-3.5 font-medium hover:brightness-110 transition-all duration-200 min-w-[240px]">
+                    <button
+                        onClick={goToDashboard}
+                        className="inline-flex items-center justify-center gap-2 rounded-[22px] bg-accent text-white px-10 py-3.5 font-medium hover:brightness-110 transition-all duration-200 min-w-[240px]"
+                    >
                         <ExternalLink size={18} /> Вернуться в профиль
                     </button>
                 </div>
