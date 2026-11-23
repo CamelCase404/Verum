@@ -542,6 +542,16 @@ export function DeveloperDashboard({
                                         </div>
                                     </div>
 
+                                    {/* Опыт работы */}
+                                    <div className="flex justify-between items-center pb-3 border-b border-line">
+                                        <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
+                                            <Briefcase size={14} className="text-accent" /> Опыт работы
+                                        </div>
+                                        <div className="text-[15px] font-bold text-ink">
+                                            {backendUser?.experience_years || 0} лет
+                                        </div>
+                                    </div>
+
                                     {/* Зарплата (для найма) */}
                                     <div className="flex justify-between items-center pb-3 border-b border-line">
                                         <div>

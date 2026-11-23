@@ -290,7 +290,7 @@ export default function Interview({
 
                 if (res.stage !== prevStage) {
                     let stageTitle = "";
-                    if (res.stage === 1) stageTitle = "Этап 2: ИИ-Западня";
+                    if (res.stage === 1) stageTitle = "Этап 2: Ревью ИИ-кода";
                     if (res.stage === 2) stageTitle = "Этап 3: Стресс-тест";
                     if (res.stage === 3) stageTitle = "Этап 4: Рефакторинг";
 

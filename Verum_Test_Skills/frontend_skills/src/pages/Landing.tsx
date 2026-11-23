@@ -194,7 +194,11 @@ export default function Landing({
         () => catalog?.stacks.find((s) => s.id === stackId),
         [catalog, stackId],
     );
-    const canStart = Boolean(stackId && languageIds.length > 0) && !loading;
+    const hasLibraries = Boolean(stack && languageIds.some(id => {
+    const lang = stack.languages.find(l => l.id === id);
+    return lang && lang.libraries && lang.libraries.length > 0;
+}));
+    const canStart = Boolean(stackId && languageIds.length > 0 && (!hasLibraries || libraryId)) && !loading;
 
     const toggleLanguage = (id: string) => {
         if (languageIds.includes(id))

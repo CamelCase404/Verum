@@ -6,7 +6,7 @@ from __future__ import annotations
 
 STAGE_NAMES = {
     0: "AI-Driven Prompting",
-    1: "ИИ-Западня",
+    1: "Ревью ИИ-кода",
     2: "Стресс-тест",
     3: "Рефакторинг",
 }

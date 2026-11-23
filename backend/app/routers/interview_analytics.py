@@ -165,7 +165,7 @@ async def report(
         ),
         StageScore(
             stage=1,
-            stage_name="ИИ-Западня",
+            stage_name="Ревью ИИ-кода",
             score=max(0, avg_s1),
             evidence=["Ответы зафиксированы."],
             gaps=[],

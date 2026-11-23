@@ -139,7 +139,7 @@ const COMPARISON = [
 
 const TEST_STAGES = [
     { num: "01", title: "AI-Driven Prompting", desc: "Написание ТЗ для ИИ-копилота под Highload", time: "15 мин", icon: Brain },
-    { num: "02", title: "ИИ-Западня", desc: "Поиск скрытого бага в коде от нейросети", time: "10 мин", icon: Code },
+    { num: "02", title: "Ревью ИИ-кода", desc: "Поиск скрытого бага в коде от нейросети", time: "10 мин", icon: Code },
     { num: "03", title: "Стресс-тест", desc: "Диагностика аварии по логам и отказ от плохого совета ИИ", time: "10 мин", icon: AlertCircle },
     { num: "04", title: "Reverse Engineering", desc: "Промпт для рефакторинга легаси-кода", time: "10 мин", icon: Code },
 ];
