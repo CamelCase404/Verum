@@ -6,12 +6,16 @@ import { useAppStore } from "@/store/useAppStore";
 import { toast } from "@/components/layout/ToastContainer";
 
 export function InterviewModal({
- onClose, jobId }: { onClose: () => void, jobId?: string | null }) {
+    onClose,
+    jobId,
+}: {
+    onClose: () => void;
+    jobId?: string | null;
+}) {
+    const { updateProfile, theme } = useAppStore();
+    const [step, setStep] = useState<"start" | "loading">("start");
 
-  const { updateProfile, theme } = useAppStore();
-  const [step, setStep] = useState<"start" | "loading">("start");
-
-  const startTest = () => {
+    const startTest = () => {
         const backendUser = useAppStore.getState().backendUser;
         if (backendUser?.role !== "developer") {
             toast("Собеседование доступно только для разработчиков");
@@ -28,38 +32,54 @@ export function InterviewModal({
         } else {
             localStorage.removeItem("verum_test_job_id");
         }
-        
+
         // Перекидываем на боевой домен (или на localhost, если мы в режиме разработки)
-        const testAppUrl = import.meta.env.VITE_TEST_APP_URL || "https://test.verumskills.ru";
+        const testAppUrl =
+            import.meta.env.VITE_TEST_APP_URL || "http://localhost:5174";
         const jid = jobId ? `&job_id=${encodeURIComponent(jobId)}` : "";
         window.location.href = `${testAppUrl}/?token=${token}&theme=${theme}${jid}`;
     };
 
-  return (
-    <Modal onClose={onClose}>
-      <div className="p-8 text-center">
-        {step === "start" ? (
-          <>
-            <div className="w-16 h-16 bg-accent-soft text-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Play size={28} />
+    return (
+        <Modal onClose={onClose}>
+            <div className="p-8 text-center">
+                {step === "start" ? (
+                    <>
+                        <div className="w-16 h-16 bg-accent-soft text-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <Play size={28} />
+                        </div>
+                        <h2 className="text-2xl font-semibold mb-3">
+                            Пройти собеседование
+                        </h2>
+                        <p className="text-ink-2 text-sm leading-relaxed mb-8">
+                            Искусственный интеллект проверит ваше архитектурное
+                            мышление, навыки ревью кода и способность
+                            адаптироваться. Это займет около 20 минут.
+                        </p>
+                        <div className="flex gap-3 justify-center">
+                            <Button variant="ghost" onClick={onClose}>
+                                Отмена
+                            </Button>
+                            <Button variant="accent" onClick={startTest}>
+                                Начать тест
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="py-10">
+                        <Loader2
+                            size={48}
+                            className="animate-spin text-accent mx-auto mb-6"
+                        />
+                        <h3 className="text-xl font-medium mb-2">
+                            Анализируем ваши ответы...
+                        </h3>
+                        <p className="text-ink-3 text-sm">
+                            Пожалуйста, подождите
+                        </p>
+                    </div>
+                )}
             </div>
-            <h2 className="text-2xl font-semibold mb-3">Пройти собеседование</h2>
-            <p className="text-ink-2 text-sm leading-relaxed mb-8">
-              Искусственный интеллект проверит ваше архитектурное мышление, навыки ревью кода и способность адаптироваться. Это займет около 20 минут.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button variant="ghost" onClick={onClose}>Отмена</Button>
-              <Button variant="accent" onClick={startTest}>Начать тест</Button>
-            </div>
-          </>
-        ) : (
-          <div className="py-10">
-            <Loader2 size={48} className="animate-spin text-accent mx-auto mb-6" />
-            <h3 className="text-xl font-medium mb-2">Анализируем ваши ответы...</h3>
-            <p className="text-ink-3 text-sm">Пожалуйста, подождите</p>
-          </div>
-        )}
-      </div>
-    </Modal>
-  );
+        </Modal>
+    );
 }

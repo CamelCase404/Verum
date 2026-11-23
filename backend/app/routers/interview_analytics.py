@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
 from ..auth import UserDB, get_current_user
+from ..gigachat_client import ask_chat
 from ..interview_store import get
 from ..prompts import SYSTEM_REPORT, SYSTEM_SKILL_REPORT
-from ..gigachat_client import ask_chat
 from ..schemas import ReportResponse, SkillComment, StageScore
 from .interview_agents import _get_history, _parse_json
 from .interview_constants import STAGE0_QUESTIONS
@@ -54,24 +55,35 @@ def _turn_stage(turns: list, user_turn_index: int) -> int:
 
 
 @router_analytics.get("/{interview_id}/report", response_model=ReportResponse)
-async def report(interview_id: str, user: UserDB = Depends(get_current_user)) -> ReportResponse:
+async def report(
+    interview_id: str, user: UserDB = Depends(get_current_user)
+) -> ReportResponse:
     it = await get(interview_id)
-    if not it:
+    if not it or (it.user_id is not None and it.user_id != user.id):
         raise HTTPException(404, "interview not found")
-    if it.user_id is not None and it.user_id != user.id:
-        raise HTTPException(403, "Это интервью принадлежит другому пользователю")
     if not it.finished:
         raise HTTPException(409, "interview is not finished")
 
-    # Ранний выход: интервью было прервано
     if it.rejected:
         return ReportResponse(
-            interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
-            summary="Интервью было прервано.", stages=[], strengths=[], gaps=[it.reject_reason or "Нарушение"],
+            interview_id=it.id,
+            level=it.level,
+            stack_id=it.stack_id,
+            language_id=it.language_id,
+            summary="Интервью было прервано или кандидат дисквалифицирован.",
+            stages=[],
+            strengths=[],
+            gaps=[it.reject_reason or "Нарушение правил платформы"],
             recommendation="no_hire",
-            competency_architecture=0, competency_code_understanding=0, competency_prompting=0,
-            competency_adaptability=0, competency_soft_skills=0, total_score_100=0, final_grade="Reject",
-            rejected=True, reject_reason=it.reject_reason,
+            competency_architecture=0,
+            competency_code_understanding=0,
+            competency_prompting=0,
+            competency_adaptability=0,
+            competency_soft_skills=0,
+            total_score_100=0,
+            final_grade="Reject",
+            rejected=True,
+            reject_reason=it.reject_reason,
         )
 
     user_turns = [t for t in it.turns if t.role == "user"]
@@ -80,7 +92,11 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
 
     all_scores = [getattr(t, "score", None) for t in user_turns]
     valid_scores = [sc for sc in all_scores if sc is not None]
-    avg_score = sum([sc if sc is not None else 0 for sc in all_scores]) / len(all_scores) if valid_scores else 0
+    avg_score = (
+        sum([sc if sc is not None else 0 for sc in all_scores]) / len(all_scores)
+        if valid_scores
+        else 0
+    )
 
     def stage_avg(stages: list[int]) -> int:
         stage_scores = [
@@ -88,68 +104,164 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
             for i, t in enumerate(it.turns)
             if t.role == "user" and _turn_stage(it.turns, i) in stages
         ]
-        return int(sum(stage_scores) / len(stage_scores)) if stage_scores else 0
+        return int(sum(stage_scores) / len(stage_scores)) if stage_scores else -1
 
-    # Ранний выход: пропущено >= 50%
+    # Получаем средние значения по стадиям (-1 означает, что стадия не была начата)
+    avg_s0 = stage_avg([0])
+    avg_s1 = stage_avg([1])
+    avg_s2 = stage_avg([2])
+    avg_s3 = stage_avg([3])
+
+    total = int(round(avg_score))
+    soft = total
+
+    # ФИКС АНОМАЛИИ: Корректный динамический расчет весов компетенций только по пройденным этапам
+    arch_components = [v for f, v in [(0, avg_s0), (2, avg_s2), (3, avg_s3)] if v != -1]
+    arch = int(sum(arch_components) / len(arch_components)) if arch_components else 0
+
+    code = avg_s1 if avg_s1 != -1 else 0
+
+    prompt_components = [v for f, v in [(0, avg_s0), (3, avg_s3)] if v != -1]
+    prompting = (
+        int(sum(prompt_components) / len(prompt_components)) if prompt_components else 0
+    )
+
+    adapt = avg_s2 if avg_s2 != -1 else 0
+
     if total_answers > 0 and (skips == total_answers or (skips / total_answers) >= 0.5):
-        reason = "Все вопросы пропущены." if skips == total_answers else f"Пропущено {skips} из {total_answers} вопросов."
+        reason = (
+            "Все вопросы пропущены."
+            if skips == total_answers
+            else f"Пропущено {skips} из {total_answers} вопросов."
+        )
         return ReportResponse(
-            interview_id=it.id, level=it.level, stack_id=it.stack_id, language_id=it.language_id,
-            summary=reason, stages=[], strengths=[], gaps=["Кандидат не отвечал на вопросы."],
+            interview_id=it.id,
+            level=it.level,
+            stack_id=it.stack_id,
+            language_id=it.language_id,
+            summary=reason,
+            stages=[],
+            strengths=[],
+            gaps=["Кандидат пропустил критическую часть вопросов."],
             recommendation="no_hire",
-            competency_architecture=0, competency_code_understanding=0, competency_prompting=0,
-            competency_adaptability=0, competency_soft_skills=0, total_score_100=0, final_grade="Reject",
-            rejected=True, reject_reason=reason,
+            competency_architecture=0,
+            competency_code_understanding=0,
+            competency_prompting=0,
+            competency_adaptability=0,
+            competency_soft_skills=0,
+            total_score_100=0,
+            final_grade="Reject",
+            rejected=True,
+            reject_reason=reason,
         )
 
-    history = _get_history(it)
+    fallback_stages = [
+        StageScore(
+            stage=0,
+            stage_name="AI-Driven Prompting",
+            score=max(0, avg_s0),
+            evidence=["Ответы зафиксированы."],
+            gaps=[],
+        ),
+        StageScore(
+            stage=1,
+            stage_name="ИИ-Западня",
+            score=max(0, avg_s1),
+            evidence=["Ответы зафиксированы."],
+            gaps=[],
+        ),
+        StageScore(
+            stage=2,
+            stage_name="Стресс-тест",
+            score=max(0, avg_s2),
+            evidence=["Ответы зафиксированы."],
+            gaps=[],
+        ),
+        StageScore(
+            stage=3,
+            stage_name="Рефакторинг",
+            score=max(0, avg_s3),
+            evidence=["Ответы зафиксированы."],
+            gaps=[],
+        ),
+    ]
 
-    # === 1. Основной отчёт ===
+    history = _get_history(it)
     ai_user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."
+
     try:
         raw = await ask_chat(SYSTEM_REPORT, history, ai_user)
         parsed = _Report.model_validate(_parse_json(raw))
+        if not parsed.stages:
+            parsed.stages = fallback_stages
     except Exception:
         parsed = _Report(
-            summary="Отчёт сформирован на основе ваших ответов. ИИ не смог сгенерировать вердикт из-за сбоя.",
-            stages=[], strengths=["Ответы зафиксированы."], gaps=["Детальный ИИ-анализ временно недоступен."],
+            summary="Отчёт сформирован автоматически на основе математических оценок. Детальный ИИ-анализ временно недоступен.",
+            stages=fallback_stages,
+            strengths=["Ответы зафиксированы в системе."],
+            gaps=["Текстовая ИИ-аналитика недоступна."],
             recommendation="insufficient_evidence",
         )
 
-    total = int(round(avg_score))
     initial_level = it.level.lower()
-    grade = "Reject" if total < 15 else "Junior" if total <= 50 else "Middle" if total <= 75 else "Senior"
-
-    # Кап по initial_level: junior не может стать Middle/Senior, middle — Senior
+    grade = (
+        "Reject"
+        if total < 15
+        else "Junior" if total <= 50 else "Middle" if total <= 75 else "Senior"
+    )
     if initial_level == "junior" and grade in ("Middle", "Senior"):
         grade = "Junior"
     elif initial_level == "middle" and grade == "Senior":
         grade = "Middle"
-
-    # === 2. Паутина навыков + ИИ-резюме ===
-    arch = stage_avg([0, 3])
-    code = stage_avg([1])
-    prompting = stage_avg([0, 3])
-    adapt = stage_avg([2])
-    soft = total  # fallback
 
     try:
         skill_user = (
             f"Уровень: {it.level}. Итоговый балл: {total}/100. Грейд: {grade}.\n"
             f"Покомпонентные оценки: architecture={arch}, code_understanding={code}, "
             f"prompting={prompting}, adaptability={adapt}, soft_skills={soft}.\n"
-            f"Сформируй skill_comments, top_strengths, top_gaps, ai_resume строго по JSON-схеме."
+            f"Сформируй skill_comments строго по JSON-схеме."
         )
         raw_skill = await ask_chat(SYSTEM_SKILL_REPORT, history, skill_user)
         skill_parsed = _SkillReport.model_validate(_parse_json(raw_skill))
     except Exception:
         skill_parsed = _SkillReport(
             skill_comments=[
-                SkillComment(skill="architecture", score=arch, comment="Оценка по ответам.", verdict="strong" if arch >= 75 else "ok" if arch >= 40 else "weak"),
-                SkillComment(skill="code_understanding", score=code, comment="Оценка по ответам.", verdict="strong" if code >= 75 else "ok" if code >= 40 else "weak"),
-                SkillComment(skill="prompting", score=prompting, comment="Оценка по ответам.", verdict="strong" if prompting >= 75 else "ok" if prompting >= 40 else "weak"),
-                SkillComment(skill="adaptability", score=adapt, comment="Оценка по ответам.", verdict="strong" if adapt >= 75 else "ok" if adapt >= 40 else "weak"),
-                SkillComment(skill="soft_skills", score=soft, comment="Оценка по ответам.", verdict="strong" if soft >= 75 else "ok" if soft >= 40 else "weak"),
+                SkillComment(
+                    skill="architecture",
+                    score=arch,
+                    comment="Оценка по ответам.",
+                    verdict="strong" if arch >= 75 else "ok" if arch >= 40 else "weak",
+                ),
+                SkillComment(
+                    skill="code_understanding",
+                    score=code,
+                    comment="Оценка по ответам.",
+                    verdict="strong" if code >= 75 else "ok" if code >= 40 else "weak",
+                ),
+                SkillComment(
+                    skill="prompting",
+                    score=prompting,
+                    comment="Оценка по ответам.",
+                    verdict=(
+                        "strong"
+                        if prompting >= 75
+                        else "ok" if prompting >= 40 else "weak"
+                    ),
+                ),
+                SkillComment(
+                    skill="adaptability",
+                    score=adapt,
+                    comment="Оценка по ответам.",
+                    verdict=(
+                        "strong" if adapt >= 75 else "ok" if adapt >= 40 else "weak"
+                    ),
+                ),
+                SkillComment(
+                    skill="soft_skills",
+                    score=soft,
+                    comment="Оценка по ответам.",
+                    verdict="strong" if soft >= 75 else "ok" if soft >= 40 else "weak",
+                ),
             ],
             top_strengths=parsed.strengths[:2],
             top_gaps=parsed.gaps[:2],
@@ -157,19 +269,33 @@ async def report(interview_id: str, user: UserDB = Depends(get_current_user)) ->
         )
 
     return ReportResponse(
-        interview_id=it.id, level=it.level, stack_id=it.stack_id,
-        language_id=it.language_id, library_id=it.library_id,
-        summary=parsed.summary, stages=parsed.stages,
-        strengths=parsed.strengths, gaps=parsed.gaps,
-        recommendation=parsed.recommendation if parsed.recommendation in ("hire", "no_hire", "insufficient_evidence") else "insufficient_evidence",
+        interview_id=it.id,
+        level=it.level,
+        stack_id=it.stack_id,
+        language_id=it.language_id,
+        library_id=it.library_id,
+        summary=parsed.summary,
+        stages=parsed.stages,
+        strengths=parsed.strengths,
+        gaps=parsed.gaps,
+        recommendation=(
+            parsed.recommendation
+            if parsed.recommendation in ("hire", "no_hire", "insufficient_evidence")
+            else "insufficient_evidence"
+        ),
         competency_architecture=arch,
         competency_code_understanding=code,
         competency_adaptability=adapt,
         competency_prompting=prompting,
-        competency_soft_skills=max(0, min(100, int(parsed.competency_soft_skills))) if parsed.competency_soft_skills is not None else soft,
+        competency_soft_skills=(
+            max(0, min(100, int(parsed.competency_soft_skills)))
+            if parsed.competency_soft_skills is not None
+            else soft
+        ),
         total_score_100=total,
         final_grade=grade,
-        rejected=False, reject_reason=None,
+        rejected=False,
+        reject_reason=None,
         skill_comments=skill_parsed.skill_comments,
         top_strengths=skill_parsed.top_strengths,
         top_gaps=skill_parsed.top_gaps,

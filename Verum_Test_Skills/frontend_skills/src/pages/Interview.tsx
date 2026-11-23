@@ -148,6 +148,15 @@ export default function Interview({
         }, 1000);
         return () => window.clearInterval(timer);
     }, [msgs.length, finished, failed, isCameraReady, showSkipModal]);
+
+    const scrollDown = () => {
+        setTimeout(() => {
+            if (scroller.current) {
+                scroller.current.scrollTop = scroller.current.scrollHeight;
+            }
+        }, 100);
+    };
+
     const send = async (isSkip = false) => {
         const text = isSkip ? "___SKIP___" : answer.trim();
         if ((!text && !isSkip) || busy || finished || failed) return;
@@ -253,8 +262,8 @@ export default function Interview({
                     stageName: res.stage_name,
                 };
                 if (res.code_snippet) {
-                    newMsg.text =
-                        res.question + "\n\n__CODE__" + res.code_snippet;
+                    let cleanCode = res.code_snippet.replace(/^```[a-zA-Z]*\n/, '').replace(/\n```$/, '');
+                    newMsg.text = res.question + "\n\n__CODE__" + cleanCode;
                 } else if (
                     typeof res.question === "string" &&
                     /\n\s*Код:\s*\n/.test(res.question)

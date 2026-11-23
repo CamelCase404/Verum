@@ -236,7 +236,7 @@ export default function Landing({
         <div className="min-h-screen flex items-center justify-center p-4 sm:p-8 relative">
             {/* Ссылка возврата на основной портал */}
             <a
-                href="https://verumskills.ru"
+                href="http://localhost:5173"
                 className="absolute top-6 left-6 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-divider text-sm font-medium text-ink-2 hover:text-accent hover:bg-surface-2 transition-colors shadow-sm"
             >
                 <ArrowLeft size={16} />{" "}

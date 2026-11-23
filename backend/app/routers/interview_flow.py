@@ -3,19 +3,25 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from ..auth import UserDB, get_current_user, get_db, utcnow_naive
-from ..interview_store import create, get, save, TurnData
-from ..schemas import AnswerRequest, AnswerResponse, StartInterviewRequest, StartInterviewResponse
-from .interview_agents import _generate_pure_question, _evaluate_answer
+from ..interview_store import TurnData, create, get, save
+from ..schemas import (
+    AnswerRequest,
+    AnswerResponse,
+    StartInterviewRequest,
+    StartInterviewResponse,
+)
+from .interview_agents import _evaluate_answer, _generate_pure_question
 
 router_flow = APIRouter()
 
 from .interview_constants import (
-    STAGE_NAMES,
     STAGE0_QUESTIONS,
     STAGE1_QUESTIONS,
     STAGE2_QUESTIONS,
     STAGE3_QUESTIONS,
+    STAGE_NAMES,
     TOTAL_QUESTIONS,
 )
 
@@ -23,14 +29,34 @@ from .interview_constants import (
 def _normalize_lang(lang: str) -> str:
     lang = lang.strip().lower()
     mapping = {
-        "javascript": "js", "js": "js", "typescript": "ts", "ts": "ts",
-        "html5": "html", "html": "html", "css3": "css", "css": "css",
-        "reactjs": "react", "react": "react", "vuejs": "vue", "vue": "vue",
-        "c#": "csharp", "cs": "csharp", "csharp": "csharp",
-        "node.js": "node", "nodejs": "node", "node": "node",
-        "next.js": "next", "nextjs": "next", "next": "next",
-        "fastapi": "fastapi", "django": "django", "go": "go", "golang": "go",
-        "python": "python", "java": "java", "sql": "sql"
+        "javascript": "js",
+        "js": "js",
+        "typescript": "ts",
+        "ts": "ts",
+        "html5": "html",
+        "html": "html",
+        "css3": "css",
+        "css": "css",
+        "reactjs": "react",
+        "react": "react",
+        "vuejs": "vue",
+        "vue": "vue",
+        "c#": "csharp",
+        "cs": "csharp",
+        "csharp": "csharp",
+        "node.js": "node",
+        "nodejs": "node",
+        "node": "node",
+        "next.js": "next",
+        "nextjs": "next",
+        "next": "next",
+        "fastapi": "fastapi",
+        "django": "django",
+        "go": "go",
+        "golang": "go",
+        "python": "python",
+        "java": "java",
+        "sql": "sql",
     }
     return mapping.get(lang, lang)
 
@@ -47,7 +73,9 @@ async def start(
 
     if is_job_test:
         comp_res = await db.execute(
-            select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None))
+            select(UserDB).where(
+                UserDB.role == "company", UserDB.job_postings.isnot(None)
+            )
         )
         target_job = None
         for comp in comp_res.scalars().all():
@@ -85,7 +113,11 @@ async def start(
         raise HTTPException(409, "У вас уже есть собеседование на модерации.")
 
     now = utcnow_naive()
-    if not is_job_test and user.blocked_until and user.blocked_until.replace(tzinfo=None) > now:
+    if (
+        not is_job_test
+        and user.blocked_until
+        and user.blocked_until.replace(tzinfo=None) > now
+    ):
         raise HTTPException(403, "Доступ временно заблокирован.")
 
     user.interview_video_url = None
@@ -93,8 +125,12 @@ async def start(
     await db.commit()
 
     it = await create(
-        req.level, req.stack_id, ", ".join(req.language_ids),
-        user_id=user.id, job_id=req.job_id, library_id=req.library_id,
+        req.level,
+        req.stack_id,
+        ", ".join(req.language_ids),
+        user_id=user.id,
+        job_id=req.job_id,
+        library_id=req.library_id,
     )
     q_data = await _generate_pure_question(0, it)
 
@@ -102,24 +138,31 @@ async def start(
     if q_data.get("code"):
         content_str += "\n\nКод:\n" + q_data["code"]
 
-    it.turns.append(TurnData(
-        role="assistant",
-        content=content_str,
-        seconds_spent=0,
-        reference_data={"reference_answer": q_data.get("reference_answer", "")},
-    ))
+    it.turns.append(
+        TurnData(
+            role="assistant",
+            content=content_str,
+            seconds_spent=0,
+            reference_data={
+                "reference_answer": q_data.get("reference_answer", ""),
+                "chosen_domain": q_data.get("chosen_domain", ""),
+            },
+        )
+    )
     await save(it)
     return StartInterviewResponse(
         interview_id=it.id,
         stage=0,
-        stage_name=STAGE_NAMES[0],
+        stage_name=STAGE_NAMES[0],  # ИСПРАВЛЕНО
         question=q_data["question"],
         code_snippet=q_data.get("code"),
     )
 
 
 @router_flow.post("/answer", response_model=AnswerResponse)
-async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -> AnswerResponse:
+async def answer(
+    req: AnswerRequest, user: UserDB = Depends(get_current_user)
+) -> AnswerResponse:
     it = await get(req.interview_id)
     if not it:
         raise HTTPException(404, "interview not found")
@@ -130,8 +173,11 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         it.finished, it.rejected, it.reject_reason = True, True, "Выход из окна."
         await save(it)
         return AnswerResponse(
-            stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, "—"),
-            finished=True, rejected=True, reject_reason=it.reject_reason,
+            stage=it.stage,
+            stage_name=STAGE_NAMES.get(it.stage, "—"),
+            finished=True,
+            rejected=True,
+            reject_reason=it.reject_reason,
         )
 
     is_skip = req.answer == "___SKIP___"
@@ -142,36 +188,53 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
     last_question = past_questions[-1] if past_questions else ""
 
     score = await _evaluate_answer(it.stage, it, last_question, req.answer, is_skip)
-    it.turns.append(TurnData(
-        role="user", content=req.answer,
-        seconds_spent=req.seconds_spent, score=score,
-    ))
+    it.turns.append(
+        TurnData(
+            role="user",
+            content=req.answer,
+            seconds_spent=req.seconds_spent,
+            score=score,
+        )
+    )
 
     if not is_skip and score <= 5:
         it.finished, it.rejected, it.reject_reason = True, True, "Ответ не по теме."
         await save(it)
         return AnswerResponse(
-            stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, "—"),
-            finished=True, rejected=True, reject_reason=it.reject_reason,
+            stage=it.stage,
+            stage_name=STAGE_NAMES.get(it.stage, "—"),
+            finished=True,
+            rejected=True,
+            reject_reason=it.reject_reason,
         )
 
     answers_on_stage = sum(1 for t in it.turns if t.role == "user")
 
-    # Переходы между стадиями
     if it.stage == 0 and answers_on_stage >= STAGE0_QUESTIONS:
         it.stage = 1
         q_data = await _generate_pure_question(1, it)
         content_str = q_data["question"]
         if q_data.get("code"):
             content_str += "\n\nКод:\n" + q_data["code"]
-        it.turns.append(TurnData(
-            role="assistant", content=content_str, seconds_spent=0,
-            reference_data={"reference_answer": q_data.get("reference_answer", "")},
-        ))
+        it.turns.append(
+            TurnData(
+                role="assistant",
+                content=content_str,
+                seconds_spent=0,
+                reference_data={
+                    "reference_answer": q_data.get("reference_answer", ""),
+                    "chosen_domain": q_data.get(
+                        "chosen_domain", ""
+                    ),  # ФИКС: Сохраняем домен
+                },
+            )
+        )
         await save(it)
         return AnswerResponse(
-            stage=1, stage_name=STAGE_NAMES[1],
-            question=q_data["question"], code_snippet=q_data.get("code"),
+            stage=1,
+            stage_name=STAGE_NAMES[1],
+            question=q_data["question"],
+            code_snippet=q_data.get("code"),
         )
 
     elif it.stage == 1 and answers_on_stage >= STAGE0_QUESTIONS + STAGE1_QUESTIONS:
@@ -180,50 +243,82 @@ async def answer(req: AnswerRequest, user: UserDB = Depends(get_current_user)) -
         content_str = q_data["question"]
         if q_data.get("code"):
             content_str += "\n\nКод:\n" + q_data["code"]
-        it.turns.append(TurnData(
-            role="assistant", content=content_str, seconds_spent=0,
-            reference_data={"reference_answer": q_data.get("reference_answer", "")},
-        ))
+        it.turns.append(
+            TurnData(
+                role="assistant",
+                content=content_str,
+                seconds_spent=0,
+                reference_data={
+                    "reference_answer": q_data.get("reference_answer", ""),
+                    "chosen_domain": q_data.get(
+                        "chosen_domain", ""
+                    ),  # ФИКС: Сохраняем домен
+                },
+            )
+        )
         await save(it)
         return AnswerResponse(
-            stage=2, stage_name=STAGE_NAMES[2],
-            question=q_data["question"], code_snippet=q_data.get("code"),
+            stage=2,
+            stage_name=STAGE_NAMES[2],
+            question=q_data["question"],
+            code_snippet=q_data.get("code"),
         )
 
-    elif it.stage == 2 and answers_on_stage >= STAGE0_QUESTIONS + STAGE1_QUESTIONS + STAGE2_QUESTIONS:
+    elif (
+        it.stage == 2
+        and answers_on_stage >= STAGE0_QUESTIONS + STAGE1_QUESTIONS + STAGE2_QUESTIONS
+    ):
         it.stage = 3
         q_data = await _generate_pure_question(3, it)
         content_str = q_data["question"]
         if q_data.get("code"):
             content_str += "\n\nКод:\n" + q_data["code"]
-        it.turns.append(TurnData(
-            role="assistant", content=content_str, seconds_spent=0,
-            reference_data={"reference_answer": q_data.get("reference_answer", "")},
-        ))
+        it.turns.append(
+            TurnData(
+                role="assistant",
+                content=content_str,
+                seconds_spent=0,
+                reference_data={
+                    "reference_answer": q_data.get("reference_answer", ""),
+                    "chosen_domain": q_data.get(
+                        "chosen_domain", ""
+                    ),  # ФИКС: Сохраняем домен
+                },
+            )
+        )
         await save(it)
         return AnswerResponse(
-            stage=3, stage_name=STAGE_NAMES[3],
-            question=q_data["question"], code_snippet=q_data.get("code"),
+            stage=3,
+            stage_name=STAGE_NAMES[3],
+            question=q_data["question"],
+            code_snippet=q_data.get("code"),
         )
 
     elif it.stage == 3 and answers_on_stage >= TOTAL_QUESTIONS:
         it.finished = True
         await save(it)
-        return AnswerResponse(
-            stage=3, stage_name=STAGE_NAMES[3], finished=True,
-        )
+        return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], finished=True)
 
     q_data = await _generate_pure_question(it.stage, it)
     content_str = q_data["question"]
     if q_data.get("code"):
         content_str += "\n\nКод:\n" + q_data["code"]
 
-    it.turns.append(TurnData(
-        role="assistant", content=content_str, seconds_spent=0,
-        reference_data={"reference_answer": q_data.get("reference_answer", "")},
-    ))
+    it.turns.append(
+        TurnData(
+            role="assistant",
+            content=content_str,
+            seconds_spent=0,
+            reference_data={
+                "reference_answer": q_data.get("reference_answer", ""),
+                "chosen_domain": q_data.get("chosen_domain", ""),
+            },
+        )
+    )
     await save(it)
     return AnswerResponse(
-        stage=it.stage, stage_name=STAGE_NAMES.get(it.stage, "—"),
-        question=q_data["question"], code_snippet=q_data.get("code"),
+        stage=it.stage,
+        stage_name=STAGE_NAMES.get(it.stage, "—"),
+        question=q_data["question"],
+        code_snippet=q_data.get("code"),
     )
