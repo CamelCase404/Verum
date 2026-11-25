@@ -229,21 +229,6 @@ export function PublicProfile() {
               </div>
             </div>
           )}
-                {skills.language_id && (
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                      <Code2 size={12} /> Языки
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {skills.language_id.split(',').map((lang: string) => (
-                        <span key={lang} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-surface border border-line rounded text-[10px] font-medium text-ink-2 uppercase">
-                          {(() => { const LIcon = LANG_ICONS[lang.trim().toLowerCase()] || Code2; return <LIcon size={10} className="text-ink-3" />; })()}
-                          {lang.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
