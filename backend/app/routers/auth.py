@@ -234,7 +234,7 @@ async def search_candidates(
             ]
             if req.language.lower() not in cand_langs:
                 match = False
-                
+
         # Библиотека
         if req.library:
             cand_lib = data.get("library_id", "").lower()
@@ -472,29 +472,36 @@ async def save_skills(
         _company_id = user.id  # для обычного теста
         if _job_id:
             _comp_res = await db.execute(
-                select(UserDB).where(UserDB.role == "company", UserDB.job_postings.isnot(None))
+                select(UserDB).where(
+                    UserDB.role == "company", UserDB.job_postings.isnot(None)
+                )
             )
             for _c in _comp_res.scalars().all():
-                if any(str(_j.get("id")) == str(_job_id) for _j in (_c.job_postings or [])):
+                if any(
+                    str(_j.get("id")) == str(_job_id) for _j in (_c.job_postings or [])
+                ):
                     _company_id = _c.id
                     break
 
             # Создаем VacancyApplication со статусом pending
             from ..auth import VacancyApplication
+
             _ex_app = await db.execute(
                 select(VacancyApplication).where(
                     VacancyApplication.job_id == _job_id,
-                    VacancyApplication.developer_id == user.id
+                    VacancyApplication.developer_id == user.id,
                 )
             )
             if not _ex_app.scalars().first():
-                db.add(VacancyApplication(
-                    job_id=_job_id,
-                    company_id=_company_id,
-                    developer_id=user.id,
-                    interview_id=report.interview_id,
-                    status="pending"
-                ))
+                db.add(
+                    VacancyApplication(
+                        job_id=_job_id,
+                        company_id=_company_id,
+                        developer_id=user.id,
+                        interview_id=report.interview_id,
+                        status="pending",
+                    )
+                )
                 print(f"  ✅ Создан VacancyApplication (pending) для job_id={_job_id}")
 
         _existing = await db.execute(
@@ -504,12 +511,16 @@ async def save_skills(
             )
         )
         if not _existing.scalars().first():
-            db.add(VerificationRequest(
-                company_id=_company_id,
-                developer_id=user.id,
-                status="pending",
-            ))
-            print(f"  ✅ Создан VerificationRequest для user_id={user.id} (company_id={_company_id})")
+            db.add(
+                VerificationRequest(
+                    company_id=_company_id,
+                    developer_id=user.id,
+                    status="pending",
+                )
+            )
+            print(
+                f"  ✅ Создан VerificationRequest для user_id={user.id} (company_id={_company_id})"
+            )
 
     # Ищем видео по ID собеседования
     if report.interview_id:
@@ -527,16 +538,27 @@ async def delete_account(
 ):
     """Полное удаление аккаунта и всех связанных данных."""
     from sqlalchemy import delete, or_
-    from ..auth import Conversation, Message, VacancyApplication, VerificationRequest, UsageLog
+
+    from ..auth import (
+        Conversation,
+        Message,
+        UsageLog,
+        VacancyApplication,
+        VerificationRequest,
+    )
     from ..interview_store import DBInterview, DBTurn
     from ..interview_store import SessionLocal as InterviewSession
 
     # 1. Сначала удаляем сообщения (чтобы не нарушать внешние ключи)
     await db.execute(delete(Message).where(Message.sender_id == user.id))
-    
+
     # Находим все чаты пользователя и удаляем их
     user_conv_res = await db.execute(
-        select(Conversation.id).where(or_(Conversation.company_id == user.id, Conversation.developer_id == user.id))
+        select(Conversation.id).where(
+            or_(
+                Conversation.company_id == user.id, Conversation.developer_id == user.id
+            )
+        )
     )
     conv_ids = [r[0] for r in user_conv_res.fetchall()]
     if conv_ids:
@@ -544,13 +566,29 @@ async def delete_account(
         await db.execute(delete(Conversation).where(Conversation.id.in_(conv_ids)))
 
     # 2. Удаляем отклики на вакансии, запросы на проверку и логи
-    await db.execute(delete(VacancyApplication).where(or_(VacancyApplication.company_id == user.id, VacancyApplication.developer_id == user.id)))
-    await db.execute(delete(VerificationRequest).where(or_(VerificationRequest.company_id == user.id, VerificationRequest.developer_id == user.id)))
+    await db.execute(
+        delete(VacancyApplication).where(
+            or_(
+                VacancyApplication.company_id == user.id,
+                VacancyApplication.developer_id == user.id,
+            )
+        )
+    )
+    await db.execute(
+        delete(VerificationRequest).where(
+            or_(
+                VerificationRequest.company_id == user.id,
+                VerificationRequest.developer_id == user.id,
+            )
+        )
+    )
     await db.execute(delete(UsageLog).where(UsageLog.company_id == user.id))
 
     # 3. Удаляем интервью и ответы (они в другой БД-сессии)
     async with InterviewSession() as idb:
-        res = await idb.execute(select(DBInterview.id).where(DBInterview.user_id == user.id))
+        res = await idb.execute(
+            select(DBInterview.id).where(DBInterview.user_id == user.id)
+        )
         it_ids = [r[0] for r in res.fetchall()]
         if it_ids:
             await idb.execute(delete(DBTurn).where(DBTurn.interview_id.in_(it_ids)))
@@ -584,6 +622,8 @@ async def update_profile(
         user.expected_salary = data.expected_salary
     if data.website is not None:
         user.website = data.website
+    if data.experience_years is not None:
+        user.experience_years = data.experience_years
     await db.commit()
     return {"status": "ok"}
 
@@ -705,7 +745,10 @@ async def search_jobs(
                 )
 
     # ─── Фильтр: только вакансии, созданные за последние 24 часа ───
-    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    from datetime import datetime as _dt
+    from datetime import timedelta as _td
+    from datetime import timezone as _tz
+
     _cutoff = _dt.now(_tz.utc) - _td(hours=24)
 
     def _is_fresh(j: dict) -> bool:
@@ -713,7 +756,11 @@ async def search_jobs(
         if not ca:
             return False
         try:
-            s = ca.replace("Z", "+00:00") if isinstance(ca, str) and ca.endswith("Z") else ca
+            s = (
+                ca.replace("Z", "+00:00")
+                if isinstance(ca, str) and ca.endswith("Z")
+                else ca
+            )
             dt = _dt.fromisoformat(s)
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=_tz.utc)
@@ -866,11 +913,21 @@ def send_email(to_email: str, subject: str, text_body: str, html_body: str = Non
 
         # Поддержка как 465 (SSL), так и 587 (STARTTLS) портов
         if settings.SMTP_PORT == 465:
-            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10, local_hostname="mail.verumskills.ru") as server:
+            with smtplib.SMTP_SSL(
+                settings.SMTP_HOST,
+                settings.SMTP_PORT,
+                timeout=10,
+                local_hostname="mail.verumskills.ru",
+            ) as server:
                 server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
                 server.send_message(msg)
         else:
-            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10, local_hostname="mail.verumskills.ru") as server:
+            with smtplib.SMTP(
+                settings.SMTP_HOST,
+                settings.SMTP_PORT,
+                timeout=10,
+                local_hostname="mail.verumskills.ru",
+            ) as server:
                 server.starttls()  # Обязательно для 587 порта
                 server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
                 server.send_message(msg)
@@ -918,7 +975,9 @@ async def send_verify_email(
     </div>
     """
 
-    if not send_email(user.email, "Подтверждение почты на платформе Верум", body, html_body):
+    if not send_email(
+        user.email, "Подтверждение почты на платформе Верум", body, html_body
+    ):
         raise HTTPException(500, "Не удалось отправить письмо. Проверьте логи сервера.")
     return {"status": "ok"}
 

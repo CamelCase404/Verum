@@ -4,13 +4,21 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pwdlib import PasswordHash  # <-- НОВЫЙ ИМПОРТ
-from sqlalchemy import select, JSON, Column, Integer, String, Boolean, DateTime, ForeignKey
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    select,
+)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
 
-from .schemas import UserRole
-
 from .config import settings
+from .schemas import UserRole
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
@@ -20,10 +28,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 дней
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 from typing import Optional
-oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl="/api/auth/login", auto_error=False
+)
 
 import os
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://verum_user:verum_password_secure_change_me@db:5432/verum_db")
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://verum_user:verum_password_secure_change_me@db:5432/verum_db",
+)
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -56,7 +71,7 @@ class UserDB(Base):
     profile_views = Column(Integer, default=0)
     project_rate = Column(Integer, nullable=True)
     expected_salary = Column(Integer, nullable=True)
-
+    experience_years = Column(Integer, nullable=True)
     # ── SaaS-модель (Блок 2.0) ──
     plan = Column(String(20), nullable=True)  # 'start' / 'pro' / 'enterprise' / NULL
     verifications_left = Column(Integer, default=0, nullable=True)
@@ -68,7 +83,6 @@ class UserDB(Base):
     token_expires_at = Column(DateTime, nullable=True)
 
 
-
 class Conversation(Base):
     __tablename__ = "conversations"
     id = Column(Integer, primary_key=True, index=True)
@@ -77,6 +91,7 @@ class Conversation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     tokens_spent = Column(Integer, default=0)
     refund_deadline = Column(DateTime, nullable=True)
+
 
 class Message(Base):
     __tablename__ = "messages"
@@ -91,24 +106,33 @@ class Message(Base):
 
 # ── SaaS-модель (Блок 2.0) ──
 
+
 class Subscription(Base):
     __tablename__ = "subscriptions"
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    company_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     plan = Column(String(20), nullable=False)  # 'start' / 'pro' / 'enterprise'
     started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     expires_at = Column(DateTime, nullable=True)
-    status = Column(String(20), default="active", nullable=False)  # 'active' / 'cancelled' / 'expired'
+    status = Column(
+        String(20), default="active", nullable=False
+    )  # 'active' / 'cancelled' / 'expired'
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
 class Invoice(Base):
     __tablename__ = "invoices"
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    company_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     amount = Column(Integer, nullable=False)  # в рублях
     description = Column(String(255), nullable=True)
-    status = Column(String(20), default="pending", nullable=False)  # 'pending' / 'paid' / 'cancelled' / 'failed'
+    status = Column(
+        String(20), default="pending", nullable=False
+    )  # 'pending' / 'paid' / 'cancelled' / 'failed'
     payment_id = Column(String(255), nullable=True)  # id от ЮKassa/CloudPayments
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     paid_at = Column(DateTime, nullable=True)
@@ -117,11 +141,21 @@ class Invoice(Base):
 class UsageLog(Base):
     __tablename__ = "usage_logs"
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    action = Column(String(50), nullable=False)  # 'interview_start' / 'unlock_contacts' / 'overage_test' / 'overage_unlock'
-    candidate_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    interview_id = Column(String(36), nullable=True)  # UUID интервью (без FK — другая таблица)
-    cost = Column(Integer, default=0, nullable=False)  # 0 = из пула; 1500/5000 = overage
+    company_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    action = Column(
+        String(50), nullable=False
+    )  # 'interview_start' / 'unlock_contacts' / 'overage_test' / 'overage_unlock'
+    candidate_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    interview_id = Column(
+        String(36), nullable=True
+    )  # UUID интервью (без FK — другая таблица)
+    cost = Column(
+        Integer, default=0, nullable=False
+    )  # 0 = из пула; 1500/5000 = overage
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
@@ -129,8 +163,12 @@ class VacancyApplication(Base):
     __tablename__ = "vacancy_applications"
     id = Column(Integer, primary_key=True, index=True)
     job_id = Column(String(50), nullable=False)
-    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    developer_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    company_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    developer_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     interview_id = Column(String(36), nullable=False)
     status = Column(String(20), default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -139,15 +177,24 @@ class VacancyApplication(Base):
 class VerificationRequest(Base):
     __tablename__ = "verification_requests"
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    developer_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    status = Column(String(20), default="pending", nullable=False)  # 'pending' / 'approved' / 'rejected' / 'expired' / 'cancelled'
-    reserved_credit = Column(Boolean, default=True, nullable=False)  # true = кредит зарезервирован, но не списан
-    moderated_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    company_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    developer_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    status = Column(
+        String(20), default="pending", nullable=False
+    )  # 'pending' / 'approved' / 'rejected' / 'expired' / 'cancelled'
+    reserved_credit = Column(
+        Boolean, default=True, nullable=False
+    )  # true = кредит зарезервирован, но не списан
+    moderated_by = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     moderated_at = Column(DateTime, nullable=True)
     rejection_reason = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
 
 
 async def get_db():
@@ -179,8 +226,10 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-
-async def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: AsyncSession = Depends(get_db)):
+async def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: AsyncSession = Depends(get_db),
+):
     if not token:
         return None
     try:
@@ -194,8 +243,12 @@ async def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme
     result = await db.execute(select(UserDB).where(UserDB.email == email))
     return result.scalars().first()
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+):
     from sqlalchemy import select
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

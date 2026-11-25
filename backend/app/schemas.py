@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
 from typing import Literal, Optional
-from pydantic import BaseModel, Field, EmailStr
+
+from pydantic import BaseModel, EmailStr, Field
 
 Level = Literal["Junior", "Middle", "Senior"]
+
 
 class CatalogOption(BaseModel):
     id: str
@@ -12,15 +15,19 @@ class CatalogOption(BaseModel):
     icon: str
     description: str
 
+
 class LanguageOption(CatalogOption):
     libraries: list["CatalogOption"] = []
+
 
 class StackOption(CatalogOption):
     languages: list[LanguageOption]
 
+
 class CatalogResponse(BaseModel):
     levels: list[CatalogOption]
     stacks: list[StackOption]
+
 
 class StartInterviewRequest(BaseModel):
     level: Level
@@ -29,11 +36,13 @@ class StartInterviewRequest(BaseModel):
     library_id: str | None = None
     job_id: str | None = None
 
+
 class Turn(BaseModel):
     role: Literal["assistant", "user"]
     content: str
     seconds_spent: int = 0
     score: Optional[int] = None
+
 
 class StartInterviewResponse(BaseModel):
     interview_id: str
@@ -42,10 +51,12 @@ class StartInterviewResponse(BaseModel):
     question: str
     code_snippet: Optional[str] = None
 
+
 class AnswerRequest(BaseModel):
     interview_id: str
     answer: str
     seconds_spent: int = 0
+
 
 class AnswerResponse(BaseModel):
     stage: int
@@ -62,12 +73,14 @@ class AnswerResponse(BaseModel):
     top_gaps: list[str] = Field(default_factory=list)
     ai_resume: Optional[str] = None
 
+
 class StageScore(BaseModel):
     stage: int
     stage_name: str
     score: int = Field(ge=0, le=100)
     evidence: list[str]
     gaps: list[str]
+
 
 class SkillComment(BaseModel):
     skill: str
@@ -100,10 +113,12 @@ class ReportResponse(BaseModel):
     rejected: bool = False
     reject_reason: Optional[str] = None
 
+
 class UserRole(str, Enum):
     DEVELOPER = "developer"
     COMPANY = "company"
     ADMIN = "admin"
+
 
 class UserRegister(BaseModel):
     email: EmailStr
@@ -111,13 +126,16 @@ class UserRegister(BaseModel):
     role: UserRole
     full_name: str = Field(..., max_length=30)
 
+
 class UserLogin(BaseModel):
     email: str
     password: str
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class UserProfile(BaseModel):
     id: int
@@ -154,6 +172,7 @@ class UserProfile(BaseModel):
 
 # ── Billing-схемы ──
 
+
 class PlanInfo(BaseModel):
     id: str
     name: str
@@ -162,16 +181,20 @@ class PlanInfo(BaseModel):
     tokens_per_month: int | None
     features: list[str] = Field(default_factory=list)
 
+
 class PlansResponse(BaseModel):
     plans: list[PlanInfo]
 
+
 class SubscribeReq(BaseModel):
     plan: str
+
 
 class TopupReq(BaseModel):
     verifications: int = 0
     tokens: int = 0
     amount: int | None = None
+
 
 class UsageItem(BaseModel):
     id: int
@@ -181,12 +204,14 @@ class UsageItem(BaseModel):
     interview_id: str | None = None
     created_at: datetime
 
+
 class UsageResponse(BaseModel):
     items: list[UsageItem]
     total_spent: int
     verifications_left: int | None
     plan: str | None
     subscription_until: datetime | None
+
 
 class UpdateProfileReq(BaseModel):
     full_name: str | None = Field(None, max_length=30)
@@ -198,3 +223,4 @@ class UpdateProfileReq(BaseModel):
     expected_salary: int | None = None
     is_unlocked: bool = False
     website: str | None = None
+    experience_years: int | None = 0
