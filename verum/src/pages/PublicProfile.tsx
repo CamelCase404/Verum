@@ -25,7 +25,7 @@ export function PublicProfile() {
   const formatSalaryText = (val: string) => {
       if (!val) return "";
       if (val.toLowerCase().includes("договоренности")) return val;
-      
+
       const numbers = val.match(/\d+/g);
       if (numbers && numbers.length >= 2) {
           return `${parseInt(numbers[0]).toLocaleString('ru-RU')} — ${parseInt(numbers[1]).toLocaleString('ru-RU')} ₽`;
@@ -66,7 +66,7 @@ export function PublicProfile() {
         alert("Чат с разработчиком может открыть только компания.");
         return;
     }
-    
+
     // Если уже оплачен — сразу в чат
     if (user.is_unlocked) {
         try {
@@ -460,6 +460,9 @@ export function PublicProfile() {
                     {showAllRepos ? "Скрыть" : `Показать все (${githubData.projects.length})`}
                   </button>
                 )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
