@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { authApi, chatApi } from "@/api";
-import { ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
+import { Target, ArrowLeft, Github, ShieldCheck, Star, GitFork, GitCommit, Image as ImageIcon, Globe, Briefcase, AlertCircle, X, MessageSquare, Brain, CheckCircle2, Banknote, Layers, Code2, Monitor, Server, Smartphone, Cloud, Database, Atom, Hexagon, Braces, Palette, Terminal, Rabbit, Coffee, Hash, AlignLeft, FileCode2 } from "lucide-react";
 import { ViewJobModal } from "@/components/modals/ViewJobModal";
 import { Modal } from "@/components/ui/Modal";
 import { HireConfirmModal } from "@/components/modals/HireConfirmModal";
@@ -164,40 +164,71 @@ export function PublicProfile() {
 
           {isTested && (
             <div className="bg-surface-2 border border-line rounded-xl overflow-hidden shadow-sm mb-6">
-              <div className="border-b border-line">
-                <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
-                    <div className="p-3 flex flex-col justify-center">
-                      <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                        <ShieldCheck size={12} className="text-accent" /> Уровень
-                      </div>
-                      <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
-                    </div>
-                    <div className="p-3 flex flex-col justify-center">
-                      <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                        <Banknote size={12} className="text-accent" /> Зарплата
-                      </div>
-                      <div className="text-[15px] font-bold text-ink">~ {displaySalary.toLocaleString('ru-RU')} <span className="text-[11px] text-ink-3 font-normal">₽</span></div>
-                    </div>
+              <div className="p-4 space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-line">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-accent" /> Уровень
+                  </div>
+                  <div className="text-xl font-bold text-accent">{skills.final_grade}</div>
                 </div>
-                <div className="p-3 flex flex-col justify-center bg-surface-2/30">
-                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                      <Briefcase size={12} className="text-accent" /> Стоимость кейса
-                    </div>
-                    <div className="text-[15px] font-bold text-ink">~ {displayCasePrice.toLocaleString('ru-RU')} <span className="text-[11px] text-ink-3 font-normal">₽</span></div>
+
+                <div className="flex justify-between items-center pb-3 border-b border-line">
+                  <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
+                    <Briefcase size={14} className="text-accent" /> Опыт работы
+                  </div>
+                  <div className="text-[15px] font-bold text-ink">{user.experience_years || 0} лет</div>
                 </div>
-              </div>
-              <div className="p-3 space-y-3">
-                {skills.stack_id && (
+
+                <div className="flex justify-between items-center pb-3 border-b border-line">
                   <div>
-                    <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
-                      <Layers size={12} /> Стек
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5 mb-1">
+                      <Banknote size={14} className="text-accent" /> Зарплата
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[15px] font-bold text-ink">~ {displaySalary.toLocaleString('ru-RU')} ₽</div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pb-3 border-b border-line">
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5 mb-1">
+                      <ImageIcon size={14} className="text-accent" /> Стоимость кейса
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[15px] font-bold text-ink">~ {displayCasePrice.toLocaleString('ru-RU')} ₽</div>
+                  </div>
+                </div>
+
+                {skills.stack_id && (
+                  <div className="flex justify-between items-center pb-3 border-b border-line">
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold flex items-center gap-1.5">
+                      <Layers size={14} /> Стек
                     </div>
                     <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-surface border border-line rounded text-[12px] font-medium text-ink capitalize">
-                      {(() => { const Icon = STACK_ICONS[skills.stack_id.toLowerCase()] || Layers; return <Icon size={12} className="text-accent" />; })()}
                       {skills.stack_id}
                     </div>
                   </div>
                 )}
+
+                {skills.language_id && (
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold mb-2 flex items-center gap-1.5">
+                      <Code2 size={14} /> Языки
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {skills.language_id.split(',').map((lang: string) => (
+                        <span key={lang} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-surface border border-line rounded text-[10px] font-medium text-ink-2 uppercase">
+                          {lang.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
                 {skills.language_id && (
                   <div>
                     <div className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold mb-1 flex items-center gap-1">
@@ -224,6 +255,44 @@ export function PublicProfile() {
 
         {/* ПРАВАЯ КОЛОНКА */}
         <div className="space-y-6">
+          {/* БЛОК МЭТЧИНГА ДЛЯ HR */}
+          {user.match_details && user.match_details.length > 0 && currentUser?.role === "company" && (
+            <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
+              <h2 className="font-semibold flex items-center gap-2 mb-5 text-accent">
+                <Target size={18} /> Совпадение с вашей вакансией
+              </h2>
+              <div className="space-y-5">
+                {user.match_details.map((m: any, i: number) => {
+                  const isFullMatch = m.score >= 100;
+                  return (
+                    <div key={i}>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[14px] font-semibold text-ink">{m.name}</span>
+                          {/* Если не 100%, показываем пояснение (серый бейдж, не мелкий и не красный) */}
+                          {!isFullMatch && (
+                            <span className="text-[13px] font-medium text-ink-2 bg-surface-2 px-2 py-0.5 rounded border border-line">
+                              {m.desc}
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-bold text-ink">{m.score}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-surface-2 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${m.score}%` }}
+                          transition={{ duration: 1.2, delay: i * 0.1, ease: "easeOut" }}
+                          className={`h-full ${m.score >= 80 ? 'bg-accent' : m.score >= 50 ? 'bg-amber-500' : 'bg-ink-3'}`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {user.role === "developer" && (
             <div className="bg-surface border border-line rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">

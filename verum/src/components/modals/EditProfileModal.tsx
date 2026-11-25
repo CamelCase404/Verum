@@ -12,6 +12,7 @@ export function EditProfileModal({
   const [avatarPreview, setAvatarPreview] = useState(backendUser?.avatar_url || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
+  const [experienceYears, setExperienceYears] = useState(backendUser?.experience_years?.toString() || "0");
   const [expectedSalary, setExpectedSalary] = useState(
     backendUser?.expected_salary ? backendUser.expected_salary.toLocaleString("ru-RU") : ""
   );
@@ -84,7 +85,8 @@ export function EditProfileModal({
         bio, 
         avatar_url: finalAvatarUrl,
         expected_salary: valSalary,
-        project_rate: valRate
+        project_rate: valRate,
+        experience_years: parseInt(experienceYears) || 0
       });
       
       toast("Профиль обновлен", "success");
@@ -130,6 +132,19 @@ export function EditProfileModal({
             <label className="text-sm font-medium mb-1 block">О себе</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-ink-4" placeholder="Расскажите о своем опыте..." />
           </div>
+
+          {backendUser?.skills?.final_grade && backendUser.skills.final_grade !== "Reject" && (
+            <div className="mb-4">
+              <label className="text-sm font-medium mb-1 block text-ink-2">Опыт работы (лет)</label>
+              <input 
+                type="number" 
+                value={experienceYears} 
+                onChange={(e) => setExperienceYears(e.target.value)} 
+                className="w-full bg-bg-2 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-accent/30" 
+                placeholder="Например: 3"
+              />
+            </div>
+          )}
 
           {/* Цены (только если есть навыки) */}
           {backendUser?.skills?.final_grade && backendUser.skills.final_grade !== "Reject" && (

@@ -82,9 +82,9 @@ export function SkillRadar({ skills }: { skills: SkillData[] }) {
 
                 {/* 3. Заливка (Полигон) */}
                 <motion.polygon
-                    initial={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.2 }}
                     points={points}
                     fill="var(--accent, #10b981)"
                     fillOpacity={0.2}
@@ -101,7 +101,7 @@ export function SkillRadar({ skills }: { skills: SkillData[] }) {
                             key={i}
                             initial={{ r: 0 }}
                             animate={{ r: 4 }}
-                            transition={{ duration: 0.4, delay: 0.6 + i * 0.1 }}
+                            transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.6 + i * 0.1 }}
                             cx={x}
                             cy={y}
                             fill="var(--accent, #10b981)"
