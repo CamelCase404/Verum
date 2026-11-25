@@ -229,9 +229,6 @@ export function PublicProfile() {
               </div>
             </div>
           )}
-              </div>
-            </div>
-          )}
 
           <button onClick={handleStartChat} className={`w-full mt-2 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 ${user.is_unlocked ? "bg-surface-2 border border-line-2 text-ink-3 hover:text-ink hover:bg-surface-3" : "bg-accent text-white hover:bg-accent-2"}`}>
             <MessageSquare size={16} /> {user.is_unlocked ? "Перейти в чат" : "Написать сообщение"}
@@ -463,9 +460,6 @@ export function PublicProfile() {
                     {showAllRepos ? "Скрыть" : `Показать все (${githubData.projects.length})`}
                   </button>
                 )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
