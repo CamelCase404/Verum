@@ -8,6 +8,7 @@ import os
 import shutil
 import magic
 import uuid
+from pathlib import Path
 
 from ..config import settings
 from ..auth import get_db, get_current_user, UserDB, Conversation, Message, SECRET_KEY, ALGORITHM, SessionLocal
@@ -151,7 +152,8 @@ async def upload_chat_image(conv_id: int, file: UploadFile = File(...), user: Us
     if not conv or (conv.company_id != user.id and conv.developer_id != user.id):
         raise HTTPException(status_code=403, detail="Access denied")
     
-    ext = file.filename.split('.')[-1].lower() if file.filename else ""
+    _safe_name = Path(file.filename).name if file.filename else ""
+    ext = _safe_name.split('.')[-1].lower() if '.' in _safe_name else ""
     if ext not in {"jpg", "jpeg", "png", "webp", "gif"}: 
         raise HTTPException(400, "Только изображения")
         

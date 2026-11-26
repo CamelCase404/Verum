@@ -5,6 +5,7 @@ import secrets
 import shutil
 import smtplib
 import uuid
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from email.utils import make_msgid
@@ -144,6 +145,7 @@ async def me(
         top_rank=rank,
         project_rate=user.project_rate,
         expected_salary=user.expected_salary,
+        experience_years=user.experience_years or 0,
         plan=user.plan,
         verifications_left=user.verifications_left,
         tokens=user.tokens,
@@ -634,7 +636,8 @@ async def upload_avatar(
     user: UserDB = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    ext = file.filename.split(".")[-1].lower() if file.filename else ""
+    _safe_name = Path(file.filename).name if file.filename else ""
+    ext = _safe_name.split(".")[-1].lower() if "." in _safe_name else ""
     if ext not in {"jpg", "jpeg", "png", "webp", "gif"}:
         raise HTTPException(400, "Только изображения (jpg, png, webp, gif)")
     file_head = await file.read(2048)
@@ -655,7 +658,8 @@ async def upload_avatar(
 async def upload_image(
     file: UploadFile = File(...), user: UserDB = Depends(get_current_user)
 ):
-    ext = file.filename.split(".")[-1].lower() if file.filename else ""
+    _safe_name = Path(file.filename).name if file.filename else ""
+    ext = _safe_name.split(".")[-1].lower() if "." in _safe_name else ""
     if ext not in {"jpg", "jpeg", "png", "webp", "gif"}:
         raise HTTPException(400, "Только изображения")
 
@@ -878,6 +882,7 @@ async def get_public_profile(
         top_rank=rank,
         project_rate=user.project_rate,
         expected_salary=user.expected_salary,
+        experience_years=user.experience_years or 0,
         plan=user.plan,
         verifications_left=user.verifications_left,
         tokens=user.tokens,

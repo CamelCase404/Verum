@@ -24,8 +24,8 @@ interface Props {
     onAbort: () => void;
 }
 
-const TOTAL_STAGES = 4;
-const TOTAL_QUESTIONS = 12;
+const TOTAL_STAGES = 3;
+const TOTAL_QUESTIONS = 10;
 
 export default function Interview({
     payload,
@@ -292,7 +292,7 @@ export default function Interview({
                     let stageTitle = "";
                     if (res.stage === 1) stageTitle = "Этап 2: Ревью ИИ-кода";
                     if (res.stage === 2) stageTitle = "Этап 3: Стресс-тест";
-                    if (res.stage === 3) stageTitle = "Этап 4: Рефакторинг";
+                    
 
                     if (stageTitle) {
                         const stageNotice: Msg = {
@@ -528,7 +528,7 @@ export default function Interview({
                                         onKeyDown={onKeyDown}
                                         onPaste={(e) => e.preventDefault()}
                                         placeholder="Ваш ответ… (Enter — отправить, Shift+Enter — перенос)"
-                                        rows={currentStage === 0 || currentStage === 3 ? 6 : 2}
+                                        rows={currentStage === 0 ? 6 : 2}
                                         className="flex-1 bg-page text-ink rounded-[22px] border border-line px-3 py-2 text-sm md:text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none placeholder:text-muted/50"
                                     />
                                     <button

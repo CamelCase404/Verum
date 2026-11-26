@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import UserDB, get_current_user, get_db, utcnow_naive
+from .auth import limiter
 from ..interview_store import TurnData, create, get, save
 from ..schemas import (
     AnswerRequest,
@@ -20,7 +21,6 @@ from .interview_constants import (
     STAGE0_QUESTIONS,
     STAGE1_QUESTIONS,
     STAGE2_QUESTIONS,
-    STAGE3_QUESTIONS,
     STAGE_NAMES,
     TOTAL_QUESTIONS,
 )
@@ -145,7 +145,7 @@ async def start(
             seconds_spent=0,
             reference_data={
                 "reference_answer": q_data.get("reference_answer", ""),
-                "chosen_domain": q_data.get("chosen_domain", ""),
+                "chosen_domain": q_data.get("topic", ""),  # было chosen_domain
             },
         )
     )
@@ -160,6 +160,7 @@ async def start(
 
 
 @router_flow.post("/answer", response_model=AnswerResponse)
+@limiter.limit("10/minute")
 async def answer(
     req: AnswerRequest, user: UserDB = Depends(get_current_user)
 ) -> AnswerResponse:
@@ -223,9 +224,7 @@ async def answer(
                 seconds_spent=0,
                 reference_data={
                     "reference_answer": q_data.get("reference_answer", ""),
-                    "chosen_domain": q_data.get(
-                        "chosen_domain", ""
-                    ),  # ФИКС: Сохраняем домен
+                    "chosen_domain": q_data.get("topic", ""),  # ФИКС: Сохраняем домен
                 },
             )
         )
@@ -250,9 +249,7 @@ async def answer(
                 seconds_spent=0,
                 reference_data={
                     "reference_answer": q_data.get("reference_answer", ""),
-                    "chosen_domain": q_data.get(
-                        "chosen_domain", ""
-                    ),  # ФИКС: Сохраняем домен
+                    "chosen_domain": q_data.get("topic", ""),  # ФИКС: Сохраняем домен
                 },
             )
         )
@@ -264,40 +261,10 @@ async def answer(
             code_snippet=q_data.get("code"),
         )
 
-    elif (
-        it.stage == 2
-        and answers_on_stage >= STAGE0_QUESTIONS + STAGE1_QUESTIONS + STAGE2_QUESTIONS
-    ):
-        it.stage = 3
-        q_data = await _generate_pure_question(3, it)
-        content_str = q_data["question"]
-        if q_data.get("code"):
-            content_str += "\n\nКод:\n" + q_data["code"]
-        it.turns.append(
-            TurnData(
-                role="assistant",
-                content=content_str,
-                seconds_spent=0,
-                reference_data={
-                    "reference_answer": q_data.get("reference_answer", ""),
-                    "chosen_domain": q_data.get(
-                        "chosen_domain", ""
-                    ),  # ФИКС: Сохраняем домен
-                },
-            )
-        )
-        await save(it)
-        return AnswerResponse(
-            stage=3,
-            stage_name=STAGE_NAMES[3],
-            question=q_data["question"],
-            code_snippet=q_data.get("code"),
-        )
-
-    elif it.stage == 3 and answers_on_stage >= TOTAL_QUESTIONS:
+    elif it.stage == 2 and answers_on_stage >= TOTAL_QUESTIONS:
         it.finished = True
         await save(it)
-        return AnswerResponse(stage=3, stage_name=STAGE_NAMES[3], finished=True)
+        return AnswerResponse(stage=2, stage_name=STAGE_NAMES[2], finished=True)
 
     q_data = await _generate_pure_question(it.stage, it)
     content_str = q_data["question"]
@@ -311,7 +278,7 @@ async def answer(
             seconds_spent=0,
             reference_data={
                 "reference_answer": q_data.get("reference_answer", ""),
-                "chosen_domain": q_data.get("chosen_domain", ""),
+                "chosen_domain": q_data.get("topic", ""),
             },
         )
     )

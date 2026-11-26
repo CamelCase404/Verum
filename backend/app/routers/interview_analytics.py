@@ -49,8 +49,6 @@ def _turn_stage(turns: list, user_turn_index: int) -> int:
                 stage = 1
             if user_count > STAGE0_QUESTIONS + 2:
                 stage = 2
-            if user_count > STAGE0_QUESTIONS + 4:
-                stage = 3
     return stage
 
 
@@ -110,18 +108,17 @@ async def report(
     avg_s0 = stage_avg([0])
     avg_s1 = stage_avg([1])
     avg_s2 = stage_avg([2])
-    avg_s3 = stage_avg([3])
 
     total = int(round(avg_score))
     soft = total
 
     # ФИКС АНОМАЛИИ: Корректный динамический расчет весов компетенций только по пройденным этапам
-    arch_components = [v for f, v in [(0, avg_s0), (2, avg_s2), (3, avg_s3)] if v != -1]
+    arch_components = [v for f, v in [(0, avg_s0), (2, avg_s2)] if v != -1]
     arch = int(sum(arch_components) / len(arch_components)) if arch_components else 0
 
     code = avg_s1 if avg_s1 != -1 else 0
 
-    prompt_components = [v for f, v in [(0, avg_s0), (3, avg_s3)] if v != -1]
+    prompt_components = [v for f, v in [(0, avg_s0)] if v != -1]
     prompting = (
         int(sum(prompt_components) / len(prompt_components)) if prompt_components else 0
     )
@@ -177,14 +174,7 @@ async def report(
             evidence=["Ответы зафиксированы."],
             gaps=[],
         ),
-        StageScore(
-            stage=3,
-            stage_name="Рефакторинг",
-            score=max(0, avg_s3),
-            evidence=["Ответы зафиксированы."],
-            gaps=[],
-        ),
-    ]
+]
 
     history = _get_history(it)
     ai_user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."

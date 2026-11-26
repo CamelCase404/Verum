@@ -42,7 +42,8 @@ async def upload_video(interview_id: str, file: UploadFile = File(...), user: Us
     if it.rejected:
         return {"status": "ignored", "message": "Interview rejected. Video discarded."}
 
-    ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename and "." in file.filename else "webm"
+    _safe_name = Path(file.filename).name if file.filename else "video.webm"
+    ext = _safe_name.rsplit(".", 1)[-1].lower() if "." in _safe_name else "webm"
     if ext not in ALLOWED_VIDEO_EXT:
         raise HTTPException(400, "Недопустимый формат видео. Разрешены: webm, mp4.")
     filename = f"{interview_id}_{uuid.uuid4().hex[:8]}.{ext}"
