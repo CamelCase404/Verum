@@ -1,6 +1,5 @@
-from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -162,6 +161,7 @@ async def start(
 @router_flow.post("/answer", response_model=AnswerResponse)
 @limiter.limit("10/minute")
 async def answer(
+    request: Request,
     req: AnswerRequest, user: UserDB = Depends(get_current_user)
 ) -> AnswerResponse:
     it = await get(req.interview_id)
