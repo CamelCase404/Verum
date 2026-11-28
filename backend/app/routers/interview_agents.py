@@ -65,6 +65,42 @@ def _code_uses_lib(code: str, lib: str) -> bool:
     return any(len(p) >= 4 and p in flat for p in parts)
 
 
+_HINT_WORDS = (
+    "bug", "error", "fixme", "todo", "hack", "xxx",
+    "баг", "ошибк", "проблем", "неверн", "возможн", "гипотетическ",
+    "некорректн", "неправильн", "подсказ", "заглушк", "внимание",
+)
+
+
+def _strip_hint_comments(code: str) -> str:
+    """Убирает комментарии-подсказки, оставляя сам код."""
+    import re as _re
+    out = []
+    for line in (code or "").splitlines():
+        m = _re.search(r'(?<!:)(//|#|--|/\*)', line)
+        if m:
+            head, tail = line[:m.start()], line[m.start():]
+            if any(w in tail.lower() for w in _HINT_WORDS):
+                line = head.rstrip()
+                if not line.strip():
+                    continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def _has_ai_advice(q: str) -> bool:
+    import re as _re
+    s = (q or "").lower()
+    if any(w in s for w in ("ассистент", "копилот", "copilot", "chatgpt")):
+        return True
+    return bool(_re.search(r"\bии\b", s))
+
+
+def _is_review_task(q: str) -> bool:
+    s = (q or "").lower()
+    return any(w in s for w in ("найд", "дефект", "ошибк", "баг", "причин", "не так", "ревью", "аудит", "нарушен"))
+
+
 async def _generate_pure_question(stage: int, it) -> dict:
     stage_desc = STAGE_DESCRIPTIONS[stage].format(
         langs=it.language_id,
@@ -118,10 +154,17 @@ async def _generate_pure_question(stage: int, it) -> dict:
     ]
     past_q_text = "\n- ".join(past_questions) if past_questions else "Пока нет"
 
+    covered = [
+        (getattr(t, "reference_data", None) or {}).get("chosen_domain", "")
+        for t in it.turns if t.role == "assistant"
+    ]
+    covered = [c for c in covered if c]
+    covered_text = "; ".join(dict.fromkeys(covered)) if covered else "пока ничего"
     prompt = (
         f"Сгенерируй новое уникальное техническое задание для стадии {stage} "
         f"({STAGE_NAMES.get(stage, '—')}).\n\n"
         f"КРИТИЧЕСКОЕ ТРЕБОВАНИЕ: {stage_hints}\n\n"
+        f"УЖЕ ПРОВЕРЕНО, повторять запрещено: {covered_text}\n\n"
         f"ПРЕДЫДУЩИЕ ВОПРОСЫ (не повторяй темы!):\n- {past_q_text}\n\n"
         f"ВАЖНО: Придумай принципиально новую ситуацию. Верни ТОЛЬКО валидный JSON."
     )
@@ -132,13 +175,19 @@ async def _generate_pure_question(stage: int, it) -> dict:
             parsed = _parse_json(raw)
             if parsed and "question" in parsed:
                 if "code" in parsed:
-                    parsed["code"] = _clean_code(parsed["code"])
+                    parsed["code"] = _strip_hint_comments(_clean_code(parsed["code"]))
                 # Обратная совместимость: маппим topic -> reference_data
                 parsed["reference_answer"] = parsed.get("reference_answer", "")
                 parsed["chosen_domain"] = parsed.get("topic", "")
-                if stage == 1 and it.library_id and attempt < 2:
-                    if not _code_uses_lib(parsed.get("code") or "", it.library_id):
-                        print(f"⚠️ attempt {attempt+1}: код без API {it.library_id} — перегенерация")
+                if attempt < 2:
+                    if stage == 1 and it.library_id and not _code_uses_lib(parsed.get("code") or "", it.library_id):
+                        print(f"⚠️ attempt {attempt+1}: код без API {it.library_id}")
+                        continue
+                    if stage == 1 and not _is_review_task(parsed.get("question") or ""):
+                        print(f"⚠️ attempt {attempt+1}: stage 1 не задание на поиск дефекта")
+                        continue
+                    if stage == 2 and not _has_ai_advice(parsed.get("question") or ""):
+                        print(f"⚠️ attempt {attempt+1}: stage 2 без совета ИИ")
                         continue
                 return parsed
         except Exception as e:
