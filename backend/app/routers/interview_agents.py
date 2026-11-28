@@ -52,6 +52,19 @@ def _clean_code(code: str) -> str:
     return code.strip()
 
 
+def _code_uses_lib(code: str, lib: str) -> bool:
+    """Проверяет наличие API библиотеки в коде без ложных срабатываний
+    на составных названиях (Jetpack Compose, ASP.NET Core, Spring Boot)."""
+    import re as _re
+    flat = _re.sub(r"[^a-z0-9]", "", (code or "").lower())
+    parts = [p for p in _re.split(r"[^a-z0-9]+", (lib or "").lower()) if p]
+    if not parts:
+        return True
+    if "".join(parts) in flat:
+        return True
+    return any(len(p) >= 4 and p in flat for p in parts)
+
+
 async def _generate_pure_question(stage: int, it) -> dict:
     stage_desc = STAGE_DESCRIPTIONS[stage].format(
         langs=it.language_id,
@@ -59,10 +72,24 @@ async def _generate_pure_question(stage: int, it) -> dict:
         stack=it.stack_id,
         libs=it.library_id or "стандартная библиотека",
     )
+    _libs = it.library_id or "стандартная библиотека"
     stage_hint = {
-        0: "Enterprise бизнес-задача. Поле code — пустая строка.",
-        1: f"Production-код на {it.language_id} с одной логической ошибкой (15-40 строк) в поле code.",
-        2: "Блок системных логов/stacktrace до 20 строк в поле code.",
+        0: (
+            f"ОДИН механизм {_libs} ({it.language_id}, стек {it.stack_id}, уровень {it.level}). "
+            f"Механизм выбери сам из API {_libs}. Кандидат пишет промпт для ИИ. "
+            f"НЕ приложение и НЕ сервис целиком. Поле code — пустая строка."
+        ),
+        1: (
+            f"Код 20-40 строк на {it.language_id} с реальными импортами и вызовами API {_libs} "
+            f"(стек {it.stack_id}, уровень {it.level}). Какие API взять — реши сам. "
+            f"Ровно один скрытый баг в способе использования {_libs}, а не в синтаксисе языка. "
+            f"Код в поле code, без комментариев-подсказок."
+        ),
+        2: (
+            f"Авария внутри механики {_libs} ({it.language_id}, стек {it.stack_id}). "
+            f"Механику выбери сам. Логи 12-20 строк с именами модулей {_libs} в поле code. "
+            f"В question — вредный совет ИИ, который надо опровергнуть."
+        ),
     }
     stage_hints = stage_hint.get(stage, "")
 
@@ -109,6 +136,10 @@ async def _generate_pure_question(stage: int, it) -> dict:
                 # Обратная совместимость: маппим topic -> reference_data
                 parsed["reference_answer"] = parsed.get("reference_answer", "")
                 parsed["chosen_domain"] = parsed.get("topic", "")
+                if stage == 1 and it.library_id and attempt < 2:
+                    if not _code_uses_lib(parsed.get("code") or "", it.library_id):
+                        print(f"⚠️ attempt {attempt+1}: код без API {it.library_id} — перегенерация")
+                        continue
                 return parsed
         except Exception as e:
             print(f"⚠️ Generator attempt {attempt+1} error: {e}")

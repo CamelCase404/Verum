@@ -9,7 +9,7 @@ from ..interview_store import get
 from ..prompts import SYSTEM_REPORT, SYSTEM_SKILL_REPORT
 from ..schemas import ReportResponse, SkillComment, StageScore
 from .interview_agents import _get_history, _parse_json
-from .interview_constants import STAGE0_QUESTIONS
+from .interview_constants import STAGE0_QUESTIONS, STAGE1_QUESTIONS
 
 router_analytics = APIRouter()
 
@@ -37,7 +37,7 @@ class _SkillReport(BaseModel):
 
 
 def _turn_stage(turns: list, user_turn_index: int) -> int:
-    """Восстанавливает стадию по индексу user-turn'а (4 стадии, 6/2/2/2)."""
+    """Восстанавливает стадию по индексу user-turn'а (3 стадии, 6/2/2)."""
     stage = 0
     user_count = 0
     for i, t in enumerate(turns):
@@ -47,7 +47,7 @@ def _turn_stage(turns: list, user_turn_index: int) -> int:
             user_count += 1
             if user_count > STAGE0_QUESTIONS:
                 stage = 1
-            if user_count > STAGE0_QUESTIONS + 2:
+            if user_count > STAGE0_QUESTIONS + STAGE1_QUESTIONS:
                 stage = 2
     return stage
 
@@ -180,7 +180,7 @@ async def report(
     ai_user = f"Уровень: {it.level}. Стек: {it.stack_id}. Языки: {it.language_id}.\nСформируй отчёт строго по схеме JSON."
 
     try:
-        raw = await ask_chat(SYSTEM_REPORT, history, ai_user)
+        raw = await ask_chat(SYSTEM_REPORT.replace("{level}", str(it.level)), history, ai_user)
         parsed = _Report.model_validate(_parse_json(raw))
         if not parsed.stages:
             parsed.stages = fallback_stages
