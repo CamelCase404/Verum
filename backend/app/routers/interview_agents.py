@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from app.prompts import (
     STAGE_DESCRIPTIONS,
@@ -24,81 +25,119 @@ def _get_history(it) -> list[dict]:
     return history
 
 
+_LIB_ALIASES = {
+    "pytorch": ("torch", "pytorch"),
+    "tensorflow": ("tensorflow", "keras"),
+    "aspnet": ("aspnetcore", "aspnet"),
+    "compose": ("compose", "androidx"),
+    "rn": ("reactnative", "react"),
+    "spring": ("springframework", "spring"),
+    "unreal": ("unreal", "coreuobject"),
+    "unity": ("unityengine", "unity"),
+    "tidyverse": ("tidyverse", "dplyr", "ggplot2"),
+    "nestjs": ("nestjs",),
+    "gin": ("gingonic", "gin"),
+    "fiber": ("gofiber", "fiber"),
+    "next": ("next",),
+}
+
+_JSON_KEYS = ("question", "code", "reference_answer", "topic",
+              "chosen_domain", "total_score", "feedback", "rubric")
+
+
+def _escape_ctrl_in_strings(text: str) -> str:
+    # Экранирует реальные переносы строк внутри JSON-строк
+    out, in_str, esc = [], False, False
+    for ch in text:
+        if in_str:
+            if esc:
+                out.append(ch); esc = False; continue
+            if ch == "\\":
+                out.append(ch); esc = True; continue
+            if ch == '"':
+                out.append(ch); in_str = False; continue
+            if ch == "\n": out.append("\\n"); continue
+            if ch == "\r": out.append("\\r"); continue
+            if ch == "\t": out.append("\\t"); continue
+            out.append(ch)
+        else:
+            if ch == '"':
+                in_str = True
+            out.append(ch)
+    return "".join(out)
+
+
+def _extract_json_fields(text: str) -> dict:
+    # Достаёт поля вручную, если JSON сломан полностью
+    pos = []
+    for k in _JSON_KEYS:
+        for m in re.finditer(r'"' + k + r'"\s*:\s*"', text):
+            pos.append((m.start(), m.end(), k))
+    pos.sort()
+    out = {}
+    for i, (s, e, k) in enumerate(pos):
+        end = pos[i + 1][0] if i + 1 < len(pos) else len(text)
+        chunk = text[e:end].rstrip()
+        chunk = re.sub(r'"\s*[,}]?\s*$', '', chunk)
+        chunk = chunk.replace("\\n", "\n").replace("\\t", "\t")
+        chunk = chunk.replace('\\"', '"').replace("\\\\", "\\")
+        out[k] = chunk.strip()
+    if "total_score" in out:
+        m = re.search(r"\d+", str(out["total_score"]))
+        out["total_score"] = int(m.group()) if m else 0
+    return out
+
+
 def _parse_json(content: str) -> dict:
-    content = content.strip()
-    if content.startswith("```json"):
-        content = content[7:]
-    elif content.startswith("```"):
-        content = content[3:]
-    if content.endswith("```"):
-        content = content[:-3]
-    s, e = content.find("{"), content.rfind("}")
-    if s != -1 and e != -1 and e > s:
-        content = content[s : e + 1]
+    if not content:
+        return {}
+    text = content.strip()
+    text = re.sub(r"^```[a-zA-Z]*\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+    s, e = text.find("{"), text.rfind("}")
+    if s != -1 and e > s:
+        text = text[s:e + 1]
     try:
-        return json.loads(content)
+        obj = json.loads(text)
+        if isinstance(obj, dict):
+            return obj
     except Exception:
         pass
+    try:
+        obj = json.loads(_escape_ctrl_in_strings(text))
+        if isinstance(obj, dict):
+            print("ℹ️ JSON восстановлен: экранированы переносы строк")
+            return obj
+    except Exception:
+        pass
+    obj = _extract_json_fields(text)
+    if obj.get("question") or obj.get("total_score") is not None:
+        print("ℹ️ JSON восстановлен: поля извлечены вручную")
+        return obj
+    print(f"❌ JSON не распарсен. preview={content[:300]!r}")
     return {}
 
 
-def _clean_code(code: str) -> str:
-    if not code:
-        return ""
-    import re
-
-    code = re.sub(r"^```[a-zA-Z]*\n", "", code.strip())
-    code = re.sub(r"\n```$", "", code)
-    return code.strip()
-
-
 def _code_uses_lib(code: str, lib: str) -> bool:
-    """Проверяет наличие API библиотеки в коде без ложных срабатываний
-    на составных названиях (Jetpack Compose, ASP.NET Core, Spring Boot)."""
-    import re as _re
-    flat = _re.sub(r"[^a-z0-9]", "", (code or "").lower())
-    parts = [p for p in _re.split(r"[^a-z0-9]+", (lib or "").lower()) if p]
-    if not parts:
+    flat = re.sub(r"[^a-z0-9]", "", (code or "").lower())
+    key = re.sub(r"[^a-z0-9]", "", (lib or "").lower())
+    if not key:
         return True
+    for alias in _LIB_ALIASES.get(key, ()):
+        if re.sub(r"[^a-z0-9]", "", alias) in flat:
+            return True
+    parts = [p for p in re.split(r"[^a-z0-9]+", (lib or "").lower()) if p]
     if "".join(parts) in flat:
         return True
     return any(len(p) >= 4 and p in flat for p in parts)
 
 
-_HINT_WORDS = (
-    "bug", "error", "fixme", "todo", "hack", "xxx",
-    "баг", "ошибк", "проблем", "неверн", "возможн", "гипотетическ",
-    "некорректн", "неправильн", "подсказ", "заглушк", "внимание",
-)
-
-
-def _strip_hint_comments(code: str) -> str:
-    """Убирает комментарии-подсказки, оставляя сам код."""
-    import re as _re
-    out = []
-    for line in (code or "").splitlines():
-        m = _re.search(r'(?<!:)(//|#|--|/\*)', line)
-        if m:
-            head, tail = line[:m.start()], line[m.start():]
-            if any(w in tail.lower() for w in _HINT_WORDS):
-                line = head.rstrip()
-                if not line.strip():
-                    continue
-        out.append(line)
-    return "\n".join(out)
-
-
-def _has_ai_advice(q: str) -> bool:
-    import re as _re
-    s = (q or "").lower()
-    if any(w in s for w in ("ассистент", "копилот", "copilot", "chatgpt")):
-        return True
-    return bool(_re.search(r"\bии\b", s))
-
-
-def _is_review_task(q: str) -> bool:
-    s = (q or "").lower()
-    return any(w in s for w in ("найд", "дефект", "ошибк", "баг", "причин", "не так", "ревью", "аудит", "нарушен"))
+def _clean_code(code: str) -> str:
+    if not code:
+        return ""
+    code = re.sub(r"^```[a-zA-Z]*\n", "", code.strip())
+    code = re.sub(r"\n```$", "", code)
+    return code.strip()
 
 
 async def _generate_pure_question(stage: int, it) -> dict:
@@ -214,6 +253,7 @@ async def _generate_pure_question(stage: int, it) -> dict:
             "chosen_domain": "Свободная тема",
         },
     }
+    print(f"❌ FALLBACK stage={stage} lib={it.library_id} level={it.level} — генерация не удалась")
     return fallback_by_stage.get(stage, fallback_by_stage[0])
 
 
