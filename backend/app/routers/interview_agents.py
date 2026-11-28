@@ -140,6 +140,46 @@ def _clean_code(code: str) -> str:
     return code.strip()
 
 
+
+_HINT_WORDS = (
+    "bug", "error", "fixme", "todo", "hack", "xxx",
+    "баг", "ошибк", "проблем", "неверн", "возможн", "гипотетическ",
+    "некорректн", "неправильн", "подсказ", "заглушк", "внимание",
+)
+
+
+def _strip_hint_comments(code: str) -> str:
+    """Удаляет из кода комментарии, содержащие подсказки о баге."""
+    out = []
+    for line in (code or "").splitlines():
+        m = re.search(r"(?<!:)(//|#|--|/\*)", line)
+        if m:
+            head, tail = line[:m.start()], line[m.start():]
+            if any(w in tail.lower() for w in _HINT_WORDS):
+                line = head.rstrip()
+                if not line.strip():
+                    continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def _has_ai_advice(question: str) -> bool:
+    """Проверяет, есть ли в вопросе совет ИИ-ассистента (обязательно для stage 2)."""
+    s = (question or "").lower()
+    if any(w in s for w in ("ассистент", "копилот", "copilot", "chatgpt", "ии-ассистент")):
+        return True
+    return bool(re.search(r"\bии\b", s))
+
+
+def _is_review_task(question: str) -> bool:
+    """Проверяет, что stage 1 — именно поиск дефекта, а не реализация."""
+    s = (question or "").lower()
+    return any(w in s for w in (
+        "найд", "дефект", "ошибк", "баг", "причин",
+        "не так", "ревью", "аудит", "нарушен", "укажите",
+    ))
+
+
 async def _generate_pure_question(stage: int, it) -> dict:
     stage_desc = STAGE_DESCRIPTIONS[stage].format(
         langs=it.language_id,
