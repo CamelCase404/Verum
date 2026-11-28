@@ -56,6 +56,7 @@ export default function Interview({
     const questionStartTime = useRef<number>(Date.now());
 
     const scroller = useRef<HTMLDivElement>(null);
+    const answerRef = useRef<HTMLTextAreaElement>(null);
     const isFailingRef = useRef(false);
     const isRejectedRef = useRef(false);
 
@@ -148,6 +149,15 @@ export default function Interview({
         }, 1000);
         return () => window.clearInterval(timer);
     }, [msgs.length, finished, failed, isCameraReady, showSkipModal]);
+
+    // Поле ответа растёт вверх по мере ввода (max 240px),
+    // вместо фиксированных 6 строк на первом этапе
+    useEffect(() => {
+        const el = answerRef.current;
+        if (!el) return;
+        el.style.height = "auto";
+        el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
+    }, [answer, currentStage, finished]);
 
     const scrollDown = () => {
         setTimeout(() => {
@@ -519,7 +529,7 @@ export default function Interview({
 
                         {!finished ? (
                             <div className="mt-4 shrink-0 flex flex-col gap-2">
-                                <div className="flex gap-3 items-stretch">
+                                <div className="flex gap-3 items-end">
                                     <textarea
                                         value={answer}
                                         onChange={(e) =>
@@ -528,13 +538,14 @@ export default function Interview({
                                         onKeyDown={onKeyDown}
                                         onPaste={(e) => e.preventDefault()}
                                         placeholder="Ваш ответ… (Enter — отправить, Shift+Enter — перенос)"
-                                        rows={currentStage === 0 ? 6 : 2}
-                                        className="flex-1 bg-page text-ink rounded-[22px] border border-line px-3 py-2 text-sm md:text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none placeholder:text-muted/50"
+                                        ref={answerRef}
+                                        rows={1}
+                                        className="flex-1 bg-page text-ink rounded-[22px] border border-line px-3 py-2 text-sm md:text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-[14px] resize-none overflow-y-auto placeholder:text-muted/50"
                                     />
                                     <button
                                         onClick={() => send(false)}
                                         disabled={busy || !answer.trim()}
-                                        className="rounded-[22px] bg-accent text-white px-3 md:px-4 h-full font-medium disabled:opacity-40 flex items-center justify-center min-w-[50px] md:min-w-[60px]"
+                                        className="rounded-[22px] bg-accent text-white px-3 md:px-4 self-end h-[46px] font-medium disabled:opacity-40 flex items-center justify-center min-w-[50px] md:min-w-[60px]"
                                     >
                                         {busy ? (
                                             <RotateCcw
